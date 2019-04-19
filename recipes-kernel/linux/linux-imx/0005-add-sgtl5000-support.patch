@@ -1,0 +1,759 @@
+From 2bcdee0cff127eec0975f181403ab30b00a8ef30 Mon Sep 17 00:00:00 2001
+From: Matteo Lisi <matteo.lisi@engicam.com>
+Date: Wed, 13 Feb 2019 09:48:02 +0100
+Subject: [PATCH 2/3] add sgtl5000 support
+
+---
+ .../boot/dts/engicam/icore-imx8mm-laird.dtsi  |  53 +++
+ .../dts/engicam/icore-imx8mm-sgtl5000.dtsi    |  91 +++++
+ arch/arm64/boot/dts/engicam/icore-imx8mm.dts  | 364 ++++--------------
+ sound/soc/codecs/sgtl5000.c                   |  17 +-
+ 4 files changed, 232 insertions(+), 293 deletions(-)
+ create mode 100644 arch/arm64/boot/dts/engicam/icore-imx8mm-laird.dtsi
+ create mode 100644 arch/arm64/boot/dts/engicam/icore-imx8mm-sgtl5000.dtsi
+
+diff --git a/arch/arm64/boot/dts/engicam/icore-imx8mm-laird.dtsi b/arch/arm64/boot/dts/engicam/icore-imx8mm-laird.dtsi
+new file mode 100644
+index 000000000..b09981eee
+--- /dev/null
++++ b/arch/arm64/boot/dts/engicam/icore-imx8mm-laird.dtsi
+@@ -0,0 +1,53 @@
++/ {
++    regulators {
++    wlreg_on: fixedregulator@100 {
++        compatible = "regulator-fixed";
++        regulator-name = "wlreg_on";
++        regulator-min-microvolt = <3300000>;
++        regulator-max-microvolt = <3300000>;
++        gpio = <&gpio3 22 GPIO_ACTIVE_HIGH>;
++        startup-delay-us = <100>;
++        enable-active-high;
++        };
++
++    btreg_on: fixedregulator@200 {
++        compatible = "regulator-fixed";
++        regulator-name = "btreg_on";
++        regulator-min-microvolt = <3300000>;
++        regulator-max-microvolt = <3300000>;
++        gpio = <&gpio3 23 GPIO_ACTIVE_HIGH>;
++        startup-delay-us = <100>;
++        enable-active-high;
++        };
++    };
++
++};
++
++&usdhc2 {
++	pinctrl-names = "default";//, "state_100mhz", "state_200mhz";
++	pinctrl-0 = <&pinctrl_usdhc2>, <&pinctrl_laird>;
++	//pinctrl-1 = <&pinctrl_usdhc2_100mhz>;
++	//pinctrl-2 = <&pinctrl_usdhc2_200mhz>;
++	bus-width = <4>;   
++	// max-frequency	= <1000000>;
++    no-1-8-v;
++    non-removable;
++    enable-sdio-wakeup;
++    vmmc-supply = <&wlreg_on>, <&btreg_on>;
++    wifi-host;
++    status = "okay";
++};
++
++&iomuxc {
++    	icore-imx8mm {  
++        pinctrl_laird: lairdgrp {
++            fsl,pins = <
++                MX8MM_IOMUXC_SAI5_RXD1_GPIO3_IO22        0x19
++				MX8MM_IOMUXC_SAI5_RXD2_GPIO3_IO23		 0x19
++            >;
++        };
++        
++    };
++};        
++
++
+diff --git a/arch/arm64/boot/dts/engicam/icore-imx8mm-sgtl5000.dtsi b/arch/arm64/boot/dts/engicam/icore-imx8mm-sgtl5000.dtsi
+new file mode 100644
+index 000000000..cf2aad587
+--- /dev/null
++++ b/arch/arm64/boot/dts/engicam/icore-imx8mm-sgtl5000.dtsi
+@@ -0,0 +1,91 @@
++
++#include <dt-bindings/clock/imx8mm-clock.h>
++#include <dt-bindings/pinctrl/pins-imx8mm.h>
++
++/ {
++
++	regulators {
++		compatible = "simple-bus";
++		#address-cells = <1>;
++		#size-cells = <0>;
++
++		reg_3v3_avdd_sgtl: reg_3v3_avdd_regulator {
++			compatible = "regulator-fixed";
++			regulator-name = "3v3_avdd_sgtl";
++			regulator-min-microvolt = <3300000>;
++			regulator-max-microvolt = <3300000>;
++			always-on;
++		};
++
++		reg_3v3_sgtl: reg_3v3_sgtl_regulator {
++			compatible = "regulator-fixed";
++			regulator-name = "3v3_sgtl";
++			regulator-min-microvolt = <3300000>;
++			regulator-max-microvolt = <3300000>;
++			always-on;
++		};
++
++		reg_1v8_sgtl: reg_1v8_sgtl_regulator {
++			compatible = "regulator-fixed";
++			regulator-name = "1v8_sgtl";
++			regulator-min-microvolt = <1800000>;
++			regulator-max-microvolt = <1800000>;
++			always-on;
++		};
++	};
++
++    sound {
++        compatible = "simple-audio-card";
++        simple-audio-card,name = "imx8mm-sgtl5000";
++        simple-audio-card,format = "i2s";
++        simple-audio-card,bitclock-master = <&dailink_master>;
++        simple-audio-card,frame-master = <&dailink_master>;
++        /*simple-audio-card,mclk-fs = <1>;*/
++        simple-audio-card,cpu {
++                sound-dai = <&sai3>;
++        };
++
++        dailink_master: simple-audio-card,codec {
++            sound-dai = <&sgtl5000>;
++            clocks = <&clk IMX8MM_CLK_SAI3_DIV>;
++        };   
++    };
++};
++
++
++
++
++&i2c2 {
++        sgtl5000: codec@a {
++                compatible = "fsl,sgtl5000";
++                status = "okay";
++                #sound-dai-cells = <0>;
++//                pinctrl-names = "default";
++//                pinctrl-0 = <&pinctrl_sgtl5000>;
++                reg = <0x0a>;
++                clocks = <&clk IMX8MM_CLK_SAI3_DIV>;
++                clock-names = "mclk";
++                assigned-clock-rates = <24576000>, <24576000>;                
++                VDDA-supply = <&reg_3v3_avdd_sgtl>;
++                VDDIO-supply = <&reg_3v3_sgtl>;
++                VDDD-supply = <&reg_1v8_sgtl>;
++        };
++};
++
++&sai3 {
++	#sound-dai-cells = <0>;
++	pinctrl-names = "default";
++	pinctrl-0 = <&pinctrl_sai3>;
++	assigned-clocks = <&clk IMX8MM_CLK_SAI3_SRC>,
++			<&clk IMX8MM_CLK_SAI3_DIV>;
++	assigned-clock-parents = <&clk IMX8MM_AUDIO_PLL1_OUT>;
++	assigned-clock-rates = <0>, <24576000>;
++	clocks = <&clk IMX8MM_CLK_SAI3_IPG>, <&clk IMX8MM_CLK_SAI3_ROOT>,
++		<&clk IMX8MM_CLK_SAI3_ROOT>, <&clk IMX8MM_CLK_DUMMY>,
++		<&clk IMX8MM_CLK_DUMMY>, <&clk IMX8MM_AUDIO_PLL1_OUT>,
++		<&clk IMX8MM_AUDIO_PLL2_OUT>;
++	clock-names = "bus", "mclk0", "mclk1", "mclk2", "mclk3", "pll8k", "pll11k";
++	status = "okay";
++};
++
++
+diff --git a/arch/arm64/boot/dts/engicam/icore-imx8mm.dts b/arch/arm64/boot/dts/engicam/icore-imx8mm.dts
+index 8f6099d95..e0e8e83a6 100755
+--- a/arch/arm64/boot/dts/engicam/icore-imx8mm.dts
++++ b/arch/arm64/boot/dts/engicam/icore-imx8mm.dts
+@@ -16,6 +16,8 @@
+ /dts-v1/;
+ 
+ #include "../freescale/fsl-imx8mm.dtsi"
++#include "icore-imx8mm-sgtl5000.dtsi"
++#include "icore-imx8mm-laird.dtsi"
+ 
+ / {
+ 	model = "Engicam i.Core MX8MM module";
+@@ -56,6 +58,14 @@
+ 		#reset-cells = <0>;
+ 	};
+ 
++	usb_hub_reset: usb-hub-reset {
++		compatible = "gpio-reset";
++		reset-gpios = <&gpio1 9 GPIO_ACTIVE_LOW>;
++		reset-delay-us = <2000>;
++		reset-post-delay-ms = <40>;
++		#reset-cells = <0>;
++	};
++
+ 	regulators {
+ 		compatible = "simple-bus";
+ 		#address-cells = <1>;
+@@ -89,64 +99,9 @@
+ 			regulator-max-microvolt = <3300000>;
+ 			enable-active-high;
+ 			startup-delay-us = <300000>;
+-			gpio = <&pca6416 1 GPIO_ACTIVE_HIGH>;
+ 		};
+ 	};
+ 
+-	wm8524: wm8524 {
+-		compatible = "wlf,wm8524";
+-		clocks = <&clk IMX8MM_CLK_SAI3_ROOT>;
+-		clock-names = "mclk";
+-		wlf,mute-gpios = <&gpio5 21 GPIO_ACTIVE_LOW>;
+-	};
+-
+-	sound-wm8524 {
+-		compatible = "fsl,imx-audio-wm8524";
+-		model = "wm8524-audio";
+-		audio-cpu = <&sai3>;
+-		audio-codec = <&wm8524>;
+-		audio-routing =
+-			"Line Out Jack", "LINEVOUTL",
+-			"Line Out Jack", "LINEVOUTR";
+-	};
+-
+-	sound-ak4458 {
+-		compatible = "fsl,imx-audio-ak4458";
+-		model = "ak4458-audio";
+-		audio-cpu = <&sai1>;
+-		audio-codec = <&ak4458_1>, <&ak4458_2>;
+-		ak4458,pdn-gpio = <&pca6416 4 GPIO_ACTIVE_HIGH>;
+-	};
+-
+-	sound-ak5558 {
+-		compatible = "fsl,imx-audio-ak5558";
+-		model = "ak5558-audio";
+-		audio-cpu = <&sai5>;
+-		audio-codec = <&ak5558>;
+-		status = "disabled";
+-	};
+-
+-	sound-ak4497 {
+-		compatible = "fsl,imx-audio-ak4497";
+-		model = "ak4497-audio";
+-		audio-cpu = <&sai1>;
+-		audio-codec = <&ak4497>;
+-		status = "disabled";
+-	};
+-
+-	sound-spdif {
+-		compatible = "fsl,imx-audio-spdif";
+-		model = "imx-spdif";
+-		spdif-controller = <&spdif1>;
+-		spdif-out;
+-		spdif-in;
+-	};
+-
+-	sound-micfil {
+-		compatible = "fsl,imx-audio-micfil";
+-		model = "imx-audio-micfil";
+-		cpu-dai = <&micfil>;
+-	};
+ };
+ 
+ &pwm1{
+@@ -163,7 +118,7 @@
+ &iomuxc {
+ 	pinctrl-names = "default";
+ 
+-	imx8mm-evk {
++	icore-imx8mm {
+         pinctrl_dsi_lvds_bridge: lvds_bridge_gpio {
+             fsl,pins = <
+                 MX8MM_IOMUXC_NAND_DATA03_GPIO3_IO9	0x19
+@@ -177,16 +132,21 @@
+             >;
+         };
+ 
++		pinctrl_reset_hub: pinctrl_reset_hub_grp {
++			fsl,pins = <
++				MX8MM_IOMUXC_GPIO1_IO09_GPIO1_IO9		0x19
++			>;
++		};
++
+ 		pinctrl_csi_pwn: csi_pwn_grp {
+ 			fsl,pins = <
+-				MX8MM_IOMUXC_GPIO1_IO07_GPIO1_IO7		0x19
++				MX8MM_IOMUXC_SAI2_RXC_GPIO4_IO22		0x19
+ 			>;
+ 		};
+ 
+ 		pinctrl_csi_rst: csi_rst_grp {
+ 			fsl,pins = <
+-				MX8MM_IOMUXC_GPIO1_IO06_GPIO1_IO6		0x19
+-				MX8MM_IOMUXC_GPIO1_IO14_CCMSRCGPCMIX_CLKO1	0x59
++				MX8MM_IOMUXC_GPIO1_IO12_GPIO1_IO12		0x19
+ 			>;
+ 		};
+ 
+@@ -218,22 +178,9 @@
+ 				MX8MM_IOMUXC_ENET_RXC_ENET1_RGMII_RXC	0x91
+ 				MX8MM_IOMUXC_ENET_RX_CTL_ENET1_RGMII_RX_CTL	0x91
+ 				MX8MM_IOMUXC_ENET_TX_CTL_ENET1_RGMII_TX_CTL	0x1f
+-				MX8MM_IOMUXC_SAI2_RXC_GPIO4_IO22	0x19
+-			>;
+-		};
+-
+-#ifdef TOLTA_MM
+-		pinctrl_flexspi0: flexspi0grp {
+-			fsl,pins = <
+-				MX8MM_IOMUXC_NAND_ALE_QSPI_A_SCLK		0x1c2
+-				MX8MM_IOMUXC_NAND_CE0_B_QSPI_A_SS0_B		0x82
+-				MX8MM_IOMUXC_NAND_DATA00_QSPI_A_DATA0		0x82
+-				MX8MM_IOMUXC_NAND_DATA01_QSPI_A_DATA1		0x82
+-				MX8MM_IOMUXC_NAND_DATA02_QSPI_A_DATA2		0x82
+-				MX8MM_IOMUXC_NAND_DATA03_QSPI_A_DATA3		0x82
++				MX8MM_IOMUXC_NAND_DATA01_GPIO3_IO7	0x19
+ 			>;
+ 		};
+-#endif
+ 
+ 		pinctrl_gpio_led: gpioledgrp {
+ 			fsl,pins = <
+@@ -271,9 +218,8 @@
+ 
+ 		pinctrl_pcie0: pcie0grp {
+ 			fsl,pins = <
+-// TBD				MX8MM_IOMUXC_I2C4_SCL_PCIE1_CLKREQ_B	0x61 /* open drain, pull up */
+-				MX8MM_IOMUXC_GPIO1_IO05_GPIO1_IO5	0x41
+-				MX8MM_IOMUXC_SAI2_RXFS_GPIO4_IO21	0x41
++				MX8MM_IOMUXC_SAI5_RXD3_GPIO3_IO24	0x41
++				MX8MM_IOMUXC_SAI2_TXC_GPIO4_IO25	0x41
+ 			>;
+ 		};
+ 
+@@ -335,19 +281,7 @@
+ 				MX8MM_IOMUXC_SAI3_TXC_SAI3_TX_BCLK      0xd6
+ 				MX8MM_IOMUXC_SAI3_MCLK_SAI3_MCLK        0xd6
+ 				MX8MM_IOMUXC_SAI3_TXD_SAI3_TX_DATA0     0xd6
+-// TBD				MX8MM_IOMUXC_I2C4_SDA_GPIO5_IO21        0xd6
+-			>;
+-		};
+-
+-		pinctrl_sai5: sai5grp {
+-			fsl,pins = <
+-				MX8MM_IOMUXC_SAI5_MCLK_SAI5_MCLK	0xd6
+-				MX8MM_IOMUXC_SAI5_RXC_SAI5_RX_BCLK	0xd6
+-				MX8MM_IOMUXC_SAI5_RXFS_SAI5_RX_SYNC	0xd6
+-				MX8MM_IOMUXC_SAI5_RXD0_SAI5_RX_DATA0	0xd6
+-				MX8MM_IOMUXC_SAI5_RXD1_SAI5_RX_DATA1    0xd6
+-				MX8MM_IOMUXC_SAI5_RXD2_SAI5_RX_DATA2    0xd6
+-				MX8MM_IOMUXC_SAI5_RXD3_SAI5_RX_DATA3    0xd6
++				MX8MM_IOMUXC_SAI3_RXD_SAI3_RX_DATA0		0xd6
+ 			>;
+ 		};
+ 
+@@ -374,9 +308,6 @@
+ 			fsl,pins = <
+ 				MX8MM_IOMUXC_UART1_RXD_UART1_DCE_RX	0x140
+ 				MX8MM_IOMUXC_UART1_TXD_UART1_DCE_TX	0x140
+-				MX8MM_IOMUXC_UART3_RXD_UART1_DCE_CTS_B	0x140
+-				MX8MM_IOMUXC_UART3_TXD_UART1_DCE_RTS_B	0x140
+-				MX8MM_IOMUXC_SD1_DATA4_GPIO2_IO6	0x19
+ 			>;
+ 		};
+ 
+@@ -389,13 +320,20 @@
+ 
+ 		pinctrl_uart3: uart3grp {
+ 			fsl,pins = <
+-				MX8MM_IOMUXC_ECSPI1_SCLK_UART3_DCE_RX		0x140
+-				MX8MM_IOMUXC_ECSPI1_MOSI_UART3_DCE_TX		0x140
++				MX8MM_IOMUXC_UART3_RXD_UART3_DCE_RX		0x140
++				MX8MM_IOMUXC_UART3_TXD_UART3_DCE_TX		0x140
+ 				MX8MM_IOMUXC_ECSPI1_SS0_UART3_DCE_RTS_B		0x140
+ 				MX8MM_IOMUXC_ECSPI1_MISO_UART3_DCE_CTS_B	0x140
+ 			>;
+ 		};
+ 
++		pinctrl_uart4: uart4grp {
++			fsl,pins = <
++				MX8MM_IOMUXC_UART4_RXD_UART4_DCE_RX	0x140
++				MX8MM_IOMUXC_UART4_TXD_UART4_DCE_TX	0x140
++			>;
++		};
++
+ 		pinctrl_usdhc1_gpio: usdhc1grpgpio {
+ 			fsl,pins = <
+ 				MX8MM_IOMUXC_SD1_RESET_B_GPIO2_IO10	0x41
+@@ -435,13 +373,6 @@
+ 			>;
+ 		};
+ 
+-		pinctrl_usdhc2_gpio: usdhc2grpgpio {
+-			fsl,pins = <
+-				MX8MM_IOMUXC_GPIO1_IO15_GPIO1_IO15	0x1c4
+-				MX8MM_IOMUXC_SD2_RESET_B_GPIO2_IO19	0x41
+-			>;
+-		};
+-
+ 		pinctrl_usdhc2: usdhc2grp {
+ 			fsl,pins = <
+ 				MX8MM_IOMUXC_SD2_CLK_USDHC2_CLK		0x190
+@@ -450,31 +381,6 @@
+ 				MX8MM_IOMUXC_SD2_DATA1_USDHC2_DATA1	0x1d0
+ 				MX8MM_IOMUXC_SD2_DATA2_USDHC2_DATA2	0x1d0
+ 				MX8MM_IOMUXC_SD2_DATA3_USDHC2_DATA3	0x1d0
+-				MX8MM_IOMUXC_GPIO1_IO04_USDHC2_VSELECT	0x1d0
+-			>;
+-		};
+-
+-		pinctrl_usdhc2_100mhz: usdhc2grp100mhz {
+-			fsl,pins = <
+-				MX8MM_IOMUXC_SD2_CLK_USDHC2_CLK		0x194
+-				MX8MM_IOMUXC_SD2_CMD_USDHC2_CMD		0x1d4
+-				MX8MM_IOMUXC_SD2_DATA0_USDHC2_DATA0	0x1d4
+-				MX8MM_IOMUXC_SD2_DATA1_USDHC2_DATA1	0x1d4
+-				MX8MM_IOMUXC_SD2_DATA2_USDHC2_DATA2	0x1d4
+-				MX8MM_IOMUXC_SD2_DATA3_USDHC2_DATA3	0x1d4
+-				MX8MM_IOMUXC_GPIO1_IO04_USDHC2_VSELECT	0x1d0
+-			>;
+-		};
+-
+-		pinctrl_usdhc2_200mhz: usdhc2grp200mhz {
+-			fsl,pins = <
+-				MX8MM_IOMUXC_SD2_CLK_USDHC2_CLK		0x196
+-				MX8MM_IOMUXC_SD2_CMD_USDHC2_CMD		0x1d6
+-				MX8MM_IOMUXC_SD2_DATA0_USDHC2_DATA0	0x1d6
+-				MX8MM_IOMUXC_SD2_DATA1_USDHC2_DATA1	0x1d6
+-				MX8MM_IOMUXC_SD2_DATA2_USDHC2_DATA2	0x1d6
+-				MX8MM_IOMUXC_SD2_DATA3_USDHC2_DATA3	0x1d6
+-				MX8MM_IOMUXC_GPIO1_IO04_USDHC2_VSELECT	0x1d0
+ 			>;
+ 		};
+ 
+@@ -544,23 +450,6 @@
+ 	};
+ };
+ 
+-#ifdef TOLTA_MM
+-&flexspi {
+-	pinctrl-names = "default";
+-	pinctrl-0 = <&pinctrl_flexspi0>;
+-	status = "okay";
+-
+-	flash0: mt25qu256aba@0 {
+-		reg = <0>;
+-		#address-cells = <1>;
+-		#size-cells = <1>;
+-		compatible = "micron,mt25qu256aba";
+-		spi-max-frequency = <29000000>;
+-		spi-nor,ddr-quad-read-dummy = <6>;
+-	};
+-};
+-#endif
+-
+ &i2c1 {
+ 	clock-frequency = <400000>;
+ 	pinctrl-names = "default";
+@@ -709,6 +598,34 @@
+ 	pinctrl-0 = <&pinctrl_i2c2>;
+ 	status = "okay";
+ 
++	pcf8563: rtc@51 {
++		compatible = "pcf8563";
++		reg = <0x51>;
++	};
++	
++	ov5640_mipi: ov5640_mipi@3c {
++		compatible = "ovti,ov5640_mipi";
++		reg = <0x3c>;
++		status = "okay";
++		pinctrl-names = "default";
++		pinctrl-0 = <&pinctrl_csi_pwn>, <&pinctrl_csi_rst>;
++		clocks = <&clk IMX8MM_CLK_CLKO1_DIV>;
++		clock-names = "csi_mclk";
++		assigned-clocks = <&clk IMX8MM_CLK_CLKO1_SRC>,
++				  <&clk IMX8MM_CLK_CLKO1_DIV>;
++		assigned-clock-parents = <&clk IMX8MM_CLK_24M>;
++		assigned-clock-rates = <0>, <24000000>;
++		csi_id = <0>;
++		pwn-gpios = <&gpio4 22 GPIO_ACTIVE_HIGH>;
++		mclk = <24000000>;
++		mclk_source = <0>;
++		port {
++			ov5640_mipi1_ep: endpoint {
++				remote-endpoint = <&mipi1_sensor_ep>;
++			};
++		};
++	};
++
+ };
+ 
+ 
+@@ -737,65 +654,7 @@
+ 	pinctrl-0 = <&pinctrl_i2c3>;
+ 	status = "okay";
+ 
+-	pca6416: gpio@20 {
+-		compatible = "ti,tca6416";
+-		reg = <0x20>;
+-		gpio-controller;
+-		#gpio-cells = <2>;
+-	};
+-
+-	ak4458_1: ak4458@10 {
+-		compatible = "asahi-kasei,ak4458";
+-		reg = <0x10>;
+-		AVDD-supply = <&reg_audio_board>;
+-		DVDD-supply = <&reg_audio_board>;
+-	};
+ 
+-	ak4458_2: ak4458@12 {
+-		compatible = "asahi-kasei,ak4458";
+-		reg = <0x12>;
+-		AVDD-supply = <&reg_audio_board>;
+-		DVDD-supply = <&reg_audio_board>;
+-	};
+-
+-	ak5558: ak5558@13 {
+-		compatible = "asahi-kasei,ak5558";
+-		reg = <0x13>;
+-		ak5558,pdn-gpio = <&pca6416 3 GPIO_ACTIVE_HIGH>;
+-		AVDD-supply = <&reg_audio_board>;
+-		DVDD-supply = <&reg_audio_board>;
+-	};
+-
+-	ak4497: ak4497@11 {
+-		compatible = "asahi-kasei,ak4497";
+-		reg = <0x11>;
+-		ak4497,pdn-gpio = <&pca6416 5 GPIO_ACTIVE_HIGH>;
+-		AVDD-supply = <&reg_audio_board>;
+-		DVDD-supply = <&reg_audio_board>;
+-	};
+-
+-	ov5640_mipi: ov5640_mipi@3c {
+-		compatible = "ovti,ov5640_mipi";
+-		reg = <0x3c>;
+-		status = "okay";
+-		pinctrl-names = "default";
+-		pinctrl-0 = <&pinctrl_csi_pwn>, <&pinctrl_csi_rst>;
+-		clocks = <&clk IMX8MM_CLK_CLKO1_DIV>;
+-		clock-names = "csi_mclk";
+-		assigned-clocks = <&clk IMX8MM_CLK_CLKO1_SRC>,
+-				  <&clk IMX8MM_CLK_CLKO1_DIV>;
+-		assigned-clock-parents = <&clk IMX8MM_CLK_24M>;
+-		assigned-clock-rates = <0>, <24000000>;
+-		csi_id = <0>;
+-		pwn-gpios = <&gpio1 7 GPIO_ACTIVE_HIGH>;
+-		mclk = <24000000>;
+-		mclk_source = <0>;
+-		port {
+-			ov5640_mipi1_ep: endpoint {
+-				remote-endpoint = <&mipi1_sensor_ep>;
+-			};
+-		};
+-	};
+ };
+ 
+ &i2c4 {
+@@ -873,75 +732,13 @@
+ 	status = "okay";
+ };
+ 
+-&sai1 {
+-	pinctrl-names = "default", "dsd";
+-	pinctrl-0 = <&pinctrl_sai1>;
+-	pinctrl-1 = <&pinctrl_sai1_dsd>;
+-	assigned-clocks = <&clk IMX8MM_CLK_SAI1_SRC>,
+-			<&clk IMX8MM_CLK_SAI1_DIV>;
+-	assigned-clock-parents = <&clk IMX8MM_AUDIO_PLL1_OUT>;
+-	assigned-clock-rates = <0>, <49152000>;
+-	clocks = <&clk IMX8MM_CLK_SAI1_IPG>, <&clk IMX8MM_CLK_DUMMY>,
+-		<&clk IMX8MM_CLK_SAI1_ROOT>, <&clk IMX8MM_CLK_DUMMY>,
+-		<&clk IMX8MM_CLK_DUMMY>, <&clk IMX8MM_AUDIO_PLL1_OUT>,
+-		<&clk IMX8MM_AUDIO_PLL2_OUT>;
+-	clock-names = "bus", "mclk0", "mclk1", "mclk2", "mclk3", "pll8k", "pll11k";
+-	fsl,sai-multi-lane;
+-	fsl,dataline,dsd = <0 0xff 0xff 2 0xff 0x11>;
+-	dmas = <&sdma2 0 26 0>, <&sdma2 1 26 0>;
+-	status = "okay";
+-};
+-
+-&sai3 {
+-	pinctrl-names = "default";
+-	pinctrl-0 = <&pinctrl_sai3>;
+-	assigned-clocks = <&clk IMX8MM_CLK_SAI3_SRC>,
+-			<&clk IMX8MM_CLK_SAI3_DIV>;
+-	assigned-clock-parents = <&clk IMX8MM_AUDIO_PLL1_OUT>;
+-	assigned-clock-rates = <0>, <24576000>;
+-	status = "okay";
+-};
+-
+-&sai5 {
+-	pinctrl-names = "default";
+-	pinctrl-0 = <&pinctrl_sai5>;
+-	assigned-clocks = <&clk IMX8MM_CLK_SAI5_SRC>,
+-			<&clk IMX8MM_CLK_SAI5_DIV>;
+-	assigned-clock-parents = <&clk IMX8MM_AUDIO_PLL1_OUT>;
+-	assigned-clock-rates = <0>, <49152000>;
+-	clocks = <&clk IMX8MM_CLK_SAI5_IPG>, <&clk IMX8MM_CLK_DUMMY>,
+-		<&clk IMX8MM_CLK_SAI5_ROOT>, <&clk IMX8MM_CLK_DUMMY>,
+-		<&clk IMX8MM_CLK_DUMMY>, <&clk IMX8MM_AUDIO_PLL1_OUT>,
+-		<&clk IMX8MM_AUDIO_PLL2_OUT>;
+-	clock-names = "bus", "mclk0", "mclk1", "mclk2", "mclk3", "pll8k", "pll11k";
+-	fsl,sai-asynchronous;
+-	status = "disabled";
+-};
+-
+-&spdif1 {
+-	pinctrl-names = "default";
+-	pinctrl-0 = <&pinctrl_spdif1>;
+-	assigned-clocks = <&clk IMX8MM_CLK_SPDIF1_SRC>,
+-			<&clk IMX8MM_CLK_SPDIF1_DIV>;
+-	assigned-clock-parents = <&clk IMX8MM_AUDIO_PLL1_OUT>;
+-	assigned-clock-rates = <0>, <24576000>;
+-	clocks = <&clk IMX8MM_CLK_AUDIO_AHB_DIV>, <&clk IMX8MM_CLK_24M>,
+-		<&clk IMX8MM_CLK_SPDIF1_DIV>, <&clk IMX8MM_CLK_DUMMY>,
+-		<&clk IMX8MM_CLK_DUMMY>, <&clk IMX8MM_CLK_DUMMY>,
+-		<&clk IMX8MM_CLK_AUDIO_AHB_DIV>, <&clk IMX8MM_CLK_DUMMY>,
+-		<&clk IMX8MM_CLK_DUMMY>, <&clk IMX8MM_CLK_DUMMY>,
+-		<&clk IMX8MM_AUDIO_PLL1_OUT>, <&clk IMX8MM_AUDIO_PLL2_OUT>;
+-	clock-names = "core", "rxtx0", "rxtx1", "rxtx2", "rxtx3",
+-		"rxtx4", "rxtx5", "rxtx6", "rxtx7", "spba", "pll8k", "pll11k";
+-	status = "okay";
+-};
+ 
+ &fec1 {
+ 	pinctrl-names = "default";
+ 	pinctrl-0 = <&pinctrl_fec1>;
+ 	phy-mode = "rgmii-id";
+ 	phy-handle = <&ethphy0>;
+-	fsl,magic-packet;
++//	fsl,magic-packet;
+ 	status = "okay";
+ 
+ 	mdio {
+@@ -949,11 +746,13 @@
+ 		#size-cells = <0>;
+ 
+ 		ethphy0: ethernet-phy@0 {
+-			compatible = "ethernet-phy-ieee802.3-c22";
+-			reg = <0>;
+-			at803x,led-act-blind-workaround;
+-			at803x,eee-okay;
+-			at803x,vddio-1p8v;
++            reg = <3>;
++            compatible = "ethernet-phy-ieee802.3-c22";
++            device_type = "ethernet-phy";
++            rxc-skew-ps = <3000>;
++            rxdv-skew-ps = <0>;
++            txc-skew-ps = <3000>;
++            txen-skew-ps = <0>;
+ 		};
+ 	};
+ };
+@@ -961,8 +760,8 @@
+ &pcie0{
+ 	pinctrl-names = "default";
+ 	pinctrl-0 = <&pinctrl_pcie0>;
+-	disable-gpio = <&gpio1 5 GPIO_ACTIVE_LOW>;
+-	reset-gpio = <&gpio4 21 GPIO_ACTIVE_LOW>;
++	disable-gpio = <&gpio4 25 GPIO_ACTIVE_LOW>;
++	reset-gpio = <&gpio3 24 GPIO_ACTIVE_LOW>;
+ 	ext_osc = <1>;
+ 	status = "okay";
+ };
+@@ -1001,11 +800,11 @@
+ };
+ 
+ &usbotg2 {
+-	dr_mode = "otg";
++	dr_mode = "host";
+ //	extcon = <0>, <&typec2_ptn5110>;
+ 	picophy,pre-emp-curr-control = <3>;
+ 	picophy,dc-vol-level-adjust = <7>;
+-	status = "disabled";
++	status = "okay";
+ };
+ 
+ &usdhc1 {
+@@ -1021,16 +820,6 @@
+ 	status = "okay";
+ };
+ 
+-&usdhc2 {
+-	pinctrl-names = "default", "state_100mhz", "state_200mhz";
+-	pinctrl-0 = <&pinctrl_usdhc2>, <&pinctrl_usdhc2_gpio>;
+-	pinctrl-1 = <&pinctrl_usdhc2_100mhz>, <&pinctrl_usdhc2_gpio>;
+-	pinctrl-2 = <&pinctrl_usdhc2_200mhz>, <&pinctrl_usdhc2_gpio>;
+-	cd-gpios = <&gpio1 15 GPIO_ACTIVE_LOW>;
+-	bus-width = <4>;
+-	vmmc-supply = <&reg_usdhc2_vmmc>;
+-	status = "okay";
+-};
+ 
+ &usdhc3 {
+ 	pinctrl-names = "default", "state_100mhz", "state_200mhz";
+@@ -1069,11 +858,4 @@
+ 	status = "okay";
+ };
+ 
+-&micfil {
+-	pinctrl-names = "default";
+-	pinctrl-0 = <&pinctrl_pdm>;
+-	assigned-clocks = <&clk IMX8MM_CLK_PDM_SRC>, <&clk IMX8MM_CLK_PDM_DIV>;
+-	assigned-clock-parents = <&clk IMX8MM_AUDIO_PLL1_OUT>;
+-	assigned-clock-rates = <0>, <196608000>;
+-	status = "okay";
+-};
++
+diff --git a/sound/soc/codecs/sgtl5000.c b/sound/soc/codecs/sgtl5000.c
+index f3ffa31b5..b4268d083 100644
+--- a/sound/soc/codecs/sgtl5000.c
++++ b/sound/soc/codecs/sgtl5000.c
+@@ -1314,6 +1314,8 @@ static void sgtl5000_fill_defaults(struct i2c_client *client)
+ 	}
+ }
+ 
++static int sgtl_wait = 1;
++
+ static int sgtl5000_i2c_probe(struct i2c_client *client,
+ 			      const struct i2c_device_id *id)
+ {
+@@ -1323,6 +1325,14 @@ static int sgtl5000_i2c_probe(struct i2c_client *client,
+ 	u32 value;
+ 	u16 ana_pwr;
+ 
++	if (sgtl_wait > 0)
++	{
++		dev_info(&client->dev, "sgtl5000 deferred probe %d\n", sgtl_wait);
++		sgtl_wait--;
++		ret = -EPROBE_DEFER;
++		return ret;
++	}
++
+ 	sgtl5000 = devm_kzalloc(&client->dev, sizeof(*sgtl5000), GFP_KERNEL);
+ 	if (!sgtl5000)
+ 		return -ENOMEM;
+@@ -1357,13 +1367,16 @@ static int sgtl5000_i2c_probe(struct i2c_client *client,
+ 	}
+ 
+ 	/* Need 8 clocks before I2C accesses */
+-	udelay(1);
++	mdelay(1);
+ 
+ 	/* read chip information */
+ 	ret = regmap_read(sgtl5000->regmap, SGTL5000_CHIP_ID, &reg);
+ 	if (ret) {
+ 		dev_err(&client->dev, "Error reading chip id %d\n", ret);
+-		goto disable_clk;
++		dev_err(&client->dev, "Deferred probe\n");
++		/* Defer the probe to see if the clk will be provided later */
++		ret = -EPROBE_DEFER;
++		goto disable_regs;
+ 	}
+ 
+ 	if (((reg & SGTL5000_PARTID_MASK) >> SGTL5000_PARTID_SHIFT) !=
+-- 
+2.17.1
+

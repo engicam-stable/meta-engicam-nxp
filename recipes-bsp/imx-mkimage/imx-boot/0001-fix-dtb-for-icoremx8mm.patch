@@ -1,0 +1,26 @@
+From feca35fe33ba01d62606b39ecaff45ba2705d73d Mon Sep 17 00:00:00 2001
+From: Matteo Lisi <matteo.lisi@engicam.com>
+Date: Wed, 6 Feb 2019 17:47:56 +0100
+Subject: [PATCH] fix-dtb-for-icoremx8mm
+
+---
+ iMX8M/soc.mak | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/iMX8M/soc.mak b/iMX8M/soc.mak
+index 1b6e357..25d114a 100644
+--- a/iMX8M/soc.mak
++++ b/iMX8M/soc.mak
+@@ -81,7 +81,8 @@ u-boot-atf-tee.bin: u-boot.bin bl31.bin tee.bin
+ clean:
+ 	@rm -f $(MKIMG) u-boot-atf.bin u-boot-atf-tee.bin u-boot-spl-ddr.bin u-boot.itb u-boot.its u-boot-ddr3l.itb u-boot-ddr3l.its u-boot-spl-ddr3l.bin u-boot-ddr4.itb u-boot-ddr4.its u-boot-spl-ddr4.bin u-boot-ddr4-evk.itb u-boot-ddr4-evk.its $(OUTIMG)
+ 
+-dtbs = fsl-$(PLAT)-evk.dtb
++dtbs = icore-imx8mm.dtb
++
+ u-boot.itb: $(dtbs)
+ 	./$(PAD_IMAGE) bl31.bin
+ 	TEE_LOAD_ADDR=$(TEE_LOAD_ADDR) ATF_LOAD_ADDR=$(ATF_LOAD_ADDR) ./mkimage_fit_atf.sh $(dtbs) > u-boot.its
+-- 
+2.17.1
+

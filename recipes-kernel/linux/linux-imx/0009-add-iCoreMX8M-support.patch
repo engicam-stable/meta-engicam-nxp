@@ -1,0 +1,194 @@
+From a7a6f3e717c6c57da3f08a835300c210f77df1d7 Mon Sep 17 00:00:00 2001
+From: Matteo Lisi <matteo.lisi@engicam.com>
+Date: Tue, 19 Feb 2019 09:58:06 +0100
+Subject: [PATCH] add iCoreMX8M support
+
+---
+ .../engicam/icoremx8m-lcdif-sn65dsi83.dtsi    | 31 +++++++++++--------
+ .../boot/dts/engicam/icoremx8m-sgtl5000.dtsi  |  4 +--
+ arch/arm64/boot/dts/engicam/icoremx8m.dts     | 13 ++++----
+ drivers/gpu/drm/drm_atomic_helper.c           |  2 +-
+ drivers/gpu/drm/mxsfb/mxsfb_out.c             |  2 +-
+ 5 files changed, 29 insertions(+), 23 deletions(-)
+
+diff --git a/arch/arm64/boot/dts/engicam/icoremx8m-lcdif-sn65dsi83.dtsi b/arch/arm64/boot/dts/engicam/icoremx8m-lcdif-sn65dsi83.dtsi
+index 978996e695b4..a6f46d5421cb 100644
+--- a/arch/arm64/boot/dts/engicam/icoremx8m-lcdif-sn65dsi83.dtsi
++++ b/arch/arm64/boot/dts/engicam/icoremx8m-lcdif-sn65dsi83.dtsi
+@@ -63,7 +63,7 @@
+     lvds_bridge: sn65dsi83@2c {
+         compatible = "ti,sn65dsi83";
+         reg = <0x2c>;
+-        ti,dsi-lanes = <4>;
++        ti,dsi-lanes = <2>;
+         ti,lvds-format = <2>;
+         ti,lvds-bpp = <24>;
+         ti,width-mm = <149>;
+@@ -75,18 +75,18 @@
+ 
+        display-timings {
+             lvds {
+-                clock-frequency = <62500000>;
+-                hactive = <1280>;
+-                vactive = <800>;
+-                hback-porch = <6>;
+-                hfront-porch = <5>;
+-                vback-porch = <2>;
+-                vfront-porch = <3>;
+-                hsync-len = <2>;
+-                vsync-len = <1>;
++                    clock-frequency = <76000000>;
++                    hactive = <1366>;
++                    vactive = <768>;
++                hback-porch = <100>;
++                hfront-porch = <94>;
++                vback-porch = <17>;
++                vfront-porch = <17>;
++                hsync-len = <10>;
++                vsync-len = <4>;
+                 hsync-active = <0>;
+                 vsync-active = <0>;
+-                de-active = <1>;
++                de-active = <0>; // TODO: forced on the sn65dsi83 driver
+                 pixelclk-active = <0>;
+             };
+         };
+@@ -102,11 +102,13 @@
+ 
+ &lcdif {
+ 	status = "okay";
++/*
+ 	assigned-clocks = <&clk IMX8MQ_CLK_LCDIF_PIXEL>,
+ 			  <&clk IMX8MQ_VIDEO_PLL1_REF_SEL>;
+ 	assigned-clock-parents = <&clk IMX8MQ_VIDEO_PLL1_OUT>,
+ 				 <&clk IMX8MQ_CLK_25M>;
+-	max-res = <1280>, <800>;
++*/	
++	max-res = <1366>, <768>;
+ 
+ 	port@0 {
+ 		lcdif_mipi_dsi: mipi-dsi-endpoint {
+@@ -123,6 +125,9 @@
+ &mipi_dsi {
+ 	status = "okay";
+ 	as_bridge;
++    sync-pol = <1>;
++    pwr-delay = <10>;
++/*
+ 	assigned-clocks = <&clk IMX8MQ_CLK_DSI_CORE>,
+ 			  <&clk IMX8MQ_CLK_DSI_PHY_REF>,
+ 			  <&clk IMX8MQ_VIDEO_PLL1_REF_SEL>;
+@@ -135,7 +140,7 @@
+ 		 <&clk IMX8MQ_CLK_DSI_PHY_REF>,
+ 		 <&clk IMX8MQ_VIDEO_PLL1>;
+ 	clock-names = "core", "phy_ref", "pixel_pll";
+-	
++*/	
+ 	port@1 {
+ 		mipi_dsi_in: endpoint {
+ 			remote-endpoint = <&lcdif_mipi_dsi>;
+diff --git a/arch/arm64/boot/dts/engicam/icoremx8m-sgtl5000.dtsi b/arch/arm64/boot/dts/engicam/icoremx8m-sgtl5000.dtsi
+index 5930f81770c2..8205b2eff880 100644
+--- a/arch/arm64/boot/dts/engicam/icoremx8m-sgtl5000.dtsi
++++ b/arch/arm64/boot/dts/engicam/icoremx8m-sgtl5000.dtsi
+@@ -18,7 +18,7 @@
+ 
+         dailink_master: simple-audio-card,codec {
+             sound-dai = <&sgtl5000>;
+-            clocks = <&clk IMX8MQ_CLK_CLKO2_DIV>;
++            clocks = <&clk IMX8MQ_CLK_CLKO2>;
+         };   
+     };
+ 
+@@ -56,7 +56,7 @@
+                 pinctrl-names = "default";
+                 pinctrl-0 = <&pinctrl_sgtl5000>;
+                 reg = <0x0a>;
+-                clocks = <&clk IMX8MQ_CLK_CLKO2_DIV>;
++                clocks = <&clk IMX8MQ_CLK_CLKO2>;
+                 clock-names = "sgtl5000_mclk";
+                 assigned-clock-rates = <24576000>, <24576000>;                
+                 VDDA-supply = <&reg_module_3v3_avdd>;
+diff --git a/arch/arm64/boot/dts/engicam/icoremx8m.dts b/arch/arm64/boot/dts/engicam/icoremx8m.dts
+index 63317ce7da95..8b128c96a150 100644
+--- a/arch/arm64/boot/dts/engicam/icoremx8m.dts
++++ b/arch/arm64/boot/dts/engicam/icoremx8m.dts
+@@ -17,8 +17,8 @@
+ //#include "../freescale/fsl-imx8mq.dtsi"
+ #include "icoremx8mq.dtsi"
+ #include "icoremx8m-lcdif-sn65dsi83.dtsi"
+-//#include "icoremx8m-laird.dtsi"
+-//#include "icoremx8m-sgtl5000.dtsi"
++#include "icoremx8m-laird.dtsi"
++#include "icoremx8m-sgtl5000.dtsi"
+ //#include "icoremx8m-hdmi.dtsi"
+ 
+ / {
+@@ -143,6 +143,7 @@
+ 			>;
+ 		};
+ 
++#ifdef TOLTO_MM
+ 		pinctrl_qspi: qspigrp {
+ 			fsl,pins = <
+ 				MX8MQ_IOMUXC_NAND_ALE_QSPI_A_SCLK	0x82
+@@ -161,7 +162,7 @@
+ 				MX8MQ_IOMUXC_NAND_CE2_B_GPIO3_IO3	0x17059
+ 			>;
+ 		};
+-
++#endif
+ 		pinctrl_uart1: uart1grp {
+ 			fsl,pins = <
+ 				MX8MQ_IOMUXC_UART1_RXD_UART1_DCE_RX		0x49
+@@ -506,7 +507,7 @@
+ 	status = "disabled";
+ };
+ 
+-
++#ifdef TOLTO_MM
+ &iomuxc {
+ 	icoremx8m {	
+         
+@@ -535,10 +536,10 @@
+ &gpmi {
+ 	pinctrl-names = "default";
+ 	pinctrl-0 = <&pinctrl_gpmi_nand_1>;
+-	status = "okay";
++	status = "disabled";
+ 	nand-on-flash-bbt;
+ };
+-
++#endif
+ &iomuxc {
+ 	icoremx8m {
+         	pinctrl_fec1: fec1grp {
+diff --git a/drivers/gpu/drm/drm_atomic_helper.c b/drivers/gpu/drm/drm_atomic_helper.c
+index db56383f572d..8e27e9059596 100644
+--- a/drivers/gpu/drm/drm_atomic_helper.c
++++ b/drivers/gpu/drm/drm_atomic_helper.c
+@@ -921,7 +921,7 @@ drm_atomic_helper_update_legacy_modeset_state(struct drm_device *dev,
+ 		crtc = new_conn_state->crtc;
+ 		if ((!crtc && old_conn_state->crtc) ||
+ 		    (crtc && drm_atomic_crtc_needs_modeset(crtc->state))) {
+-			int mode = DRM_MODE_DPMS_OFF;
++			int mode = DRM_MODE_DPMS_ON;	// always ON
+ 
+ 			if (crtc && crtc->state->active)
+ 				mode = DRM_MODE_DPMS_ON;
+diff --git a/drivers/gpu/drm/mxsfb/mxsfb_out.c b/drivers/gpu/drm/mxsfb/mxsfb_out.c
+index 044d5fbfbce5..73c0bc5d621e 100644
+--- a/drivers/gpu/drm/mxsfb/mxsfb_out.c
++++ b/drivers/gpu/drm/mxsfb/mxsfb_out.c
+@@ -94,7 +94,7 @@ int mxsfb_create_output(struct drm_device *drm)
+ 
+ 	if (mxsfb->panel) {
+ 		mxsfb->connector = &mxsfb->panel_connector;
+-		mxsfb->connector->dpms = DRM_MODE_DPMS_OFF;
++		mxsfb->connector->dpms = DRM_MODE_DPMS_ON;
+ 		mxsfb->connector->polled = 0;
+ 		drm_connector_helper_add(mxsfb->connector,
+ 				&mxsfb_panel_connector_helper_funcs);
+-- 
+2.17.1
+
