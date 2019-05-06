@@ -13,5 +13,7 @@ SRC_URI_append = " \
     file://0010-add-hdmi-dtb-imx8m.patch \
     file://0011-add-edt-ft5x26-driver.patch \
     file://0012-fix-starter-kit-2.0-support.patch \
+    file://0013-fix-icoremx8m-support.patch \
+    file://0014-fix-edimm-2.0-starterkit-lcd-timing.patch \
     file://defconfig \
     "

@@ -6,4 +6,6 @@ SRC_URI_append = " \
 		file://0003-switch-to-1g-ram-support.patch \
 		file://0004-fix-lpddr4_timing.patch \
 		file://0005-emmc-running-icoremx8mm.patch \
+		file://0006-add-icoremx8m-support.patch \
+		file://0007-fix-u-boot-args-for-icoremx8m.patch \
 "
