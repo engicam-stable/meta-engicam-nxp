@@ -15,5 +15,7 @@ SRC_URI_append = " \
     file://0012-fix-starter-kit-2.0-support.patch \
     file://0013-fix-icoremx8m-support.patch \
     file://0014-fix-edimm-2.0-starterkit-lcd-timing.patch \
+    file://0015-add-edimm-2.0-starter-kit-touch-controller-support.patch \
+    file://0016-fix-hub-usb-reset.patch \
     file://defconfig \
     "
