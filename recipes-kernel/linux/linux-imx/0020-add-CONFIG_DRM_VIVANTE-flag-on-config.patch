@@ -1,0 +1,25 @@
+From c8395f55e354c1f4ae7cff66a543d4b3950e12db Mon Sep 17 00:00:00 2001
+From: Matteo Lisi <matteo.lisi@engicam.com>
+Date: Wed, 15 May 2019 15:53:47 +0200
+Subject: [PATCH] add CONFIG_DRM_VIVANTE flag on config
+
+---
+ arch/arm64/configs/icoremx8mm_defconfig | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/arch/arm64/configs/icoremx8mm_defconfig b/arch/arm64/configs/icoremx8mm_defconfig
+index 752e27cf8..f07963915 100644
+--- a/arch/arm64/configs/icoremx8mm_defconfig
++++ b/arch/arm64/configs/icoremx8mm_defconfig
+@@ -3429,7 +3429,7 @@ CONFIG_NOUVEAU_DEBUG=5
+ CONFIG_NOUVEAU_DEBUG_DEFAULT=3
+ CONFIG_DRM_NOUVEAU_BACKLIGHT=y
+ # CONFIG_DRM_VGEM is not set
+-# CONFIG_DRM_VIVANTE is not set
++CONFIG_DRM_VIVANTE=y
+ # CONFIG_DRM_UDL is not set
+ # CONFIG_DRM_AST is not set
+ # CONFIG_DRM_MGAG200 is not set
+-- 
+2.17.1
+

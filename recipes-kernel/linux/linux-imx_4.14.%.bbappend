@@ -15,5 +15,11 @@ SRC_URI_append = " \
     file://0012-fix-starter-kit-2.0-support.patch \
     file://0013-fix-icoremx8m-support.patch \
     file://0014-fix-edimm-2.0-starterkit-lcd-timing.patch \
+    file://0015-add-edimm-2.0-starter-kit-touch-controller-support.patch \
+    file://0016-fix-hub-usb-reset.patch \
+    file://0017-add-ctouch2-imx8mm-amp-10-dtb.patch \
+    file://0018-remove-useless-i2c-touch-entry.patch \
+    file://0019-remove-ov5640-entry.patch \
+    file://0020-add-CONFIG_DRM_VIVANTE-flag-on-config.patch \
     file://defconfig \
     "
