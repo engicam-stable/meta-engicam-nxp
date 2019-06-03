@@ -9,3 +9,8 @@ SRC_URI_append = " \
 		file://0006-add-icoremx8m-support.patch \
 		file://0007-fix-u-boot-args-for-icoremx8m.patch \
 "
+
+
+#0008-fix-samsung-ddr-timing.patch
+
+
