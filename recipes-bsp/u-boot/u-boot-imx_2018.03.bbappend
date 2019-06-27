@@ -11,6 +11,4 @@ SRC_URI_append = " \
 "
 
 
-#0008-fix-samsung-ddr-timing.patch
-
-
+#0008-fix-samsung-ddr-timing.patch 
