@@ -1,0 +1,25 @@
+From 6b13f59218b1a1369c358874877c564e856d657e Mon Sep 17 00:00:00 2001
+From: engicam <support@engicam.com>
+Date: Mon, 28 Oct 2019 14:00:09 +0100
+Subject: [PATCH] removed CONFIG_LDO_BYPASS_CHECK
+
+---
+ arch/arm/mach-imx/cpu.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/arch/arm/mach-imx/cpu.c b/arch/arm/mach-imx/cpu.c
+index 111f1e4682..969abe9f8d 100644
+--- a/arch/arm/mach-imx/cpu.c
++++ b/arch/arm/mach-imx/cpu.c
+@@ -351,7 +351,7 @@ void arch_preboot_os(void)
+ #endif
+ #endif
+ #if defined(CONFIG_LDO_BYPASS_CHECK)
+-	ldo_mode_set(check_ldo_bypass());
++/*	ldo_mode_set(check_ldo_bypass()); */
+ #endif
+ #if defined(CONFIG_VIDEO_IPUV3)
+ 	/* disable video before launching O/S */
+-- 
+2.17.1
+

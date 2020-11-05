@@ -1,0 +1,26 @@
+From 646d8b7b13c378ae0c667af4bcbbf5e039b8bd9f Mon Sep 17 00:00:00 2001
+From: Matteo Lisi <matteo.lisi@engicam.com>
+Date: Mon, 9 Sep 2019 11:05:09 +0200
+Subject: [PATCH] mx8m mini remove uart4 from m4
+
+---
+ plat/imx/imx8mm/imx8mm_bl31_setup.c | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/plat/imx/imx8mm/imx8mm_bl31_setup.c b/plat/imx/imx8mm/imx8mm_bl31_setup.c
+index aa1c336e..257159f6 100644
+--- a/plat/imx/imx8mm/imx8mm_bl31_setup.c
++++ b/plat/imx/imx8mm/imx8mm_bl31_setup.c
+@@ -310,7 +310,9 @@ void bl31_early_platform_setup2(u_register_t arg0, u_register_t arg1,
+ 
+ 	/* Assign M4 to domain 1 */
+ 	mmio_write_32(IMX_RDC_BASE + 0x204, 0x1);
++#if 0
+ 	mmio_write_32(IMX_RDC_BASE + 0x518, 0xfc);
++#endif
+ 	mmio_write_32(IMX_RDC_BASE + 0x5A4, 0xf3);
+ 
+ #if defined (CSU_RDC_TEST)
+-- 
+2.17.1
+
