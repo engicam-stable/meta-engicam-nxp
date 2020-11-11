@@ -1,13 +1,15 @@
 # Copyright (C) 2013-2016 Freescale Semiconductor
-# Copyright 2017-2019 NXP
+# Copyright 2017-2020 NXP
 
-DESCRIPTION = "i.MX U-Boot suppporting Engicam boards."
+DESCRIPTION = "i.MX U-Boot suppporting i.MX reference boards."
 require u-boot-common.inc
-require u-boot.inc
+require recipes-bsp/u-boot/u-boot.inc
 inherit pythonnative
 
+FILESEXTRAPATHS_prepend := "${THISDIR}/files:"
+
 PROVIDES += "u-boot"
-DEPENDS_append = " python dtc-native"
+DEPENDS_append = " dtc-native"
 
 LICENSE = "GPLv2+"
 LIC_FILES_CHKSUM = "file://Licenses/gpl-2.0.txt;md5=b234ee4d69f5fce4486a80fdaf4a4263"
@@ -20,6 +22,8 @@ SRCREV = "7030570ad908f7bcb548ee568dd5f3a6bc56ebef"
 S = "${WORKDIR}/git"
 
 inherit fsl-u-boot-localversion
+
+LOCALVERSION ?= "-5.4.47-2.2.0"
 
 BOOT_TOOLS = "imx-boot-tools"
 
@@ -35,7 +39,7 @@ do_deploy_append_mx8m () {
                 then
                     install -d ${DEPLOYDIR}/${BOOT_TOOLS}
                     install -m 0777 ${B}/${config}/arch/arm/dts/${UBOOT_DTB_NAME}  ${DEPLOYDIR}/${BOOT_TOOLS}
-                    install -m 0777 ${B}/${config}/u-boot-nodtb.bin  ${DEPLOYDIR}/${BOOT_TOOLS}/u-boot-nodtb.bin-${MACHINE}-${UBOOT_CONFIG}
+                    install -m 0777 ${B}/${config}/u-boot-nodtb.bin  ${DEPLOYDIR}/${BOOT_TOOLS}/u-boot-nodtb.bin-${MACHINE}-${type}
                 fi
             done
             unset  j
