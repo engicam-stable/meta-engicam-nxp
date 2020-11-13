@@ -8,3 +8,9 @@ FILESEXTRAPATHS_prepend := "${THISDIR}/${PN}:"
 SRC_URI_append_mx8mm = " \
 		file://0001-fix-dtb-for-icoremx8mm.patch \
 "
+
+SRC_URI_append_mx8mp = " \
+		file://0001-fixed-dtb-for-imx8mp-icore.patch \
+"
+
+

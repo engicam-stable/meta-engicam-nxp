@@ -1,7 +1,7 @@
 # Copyright (C) 2013-2016 Freescale Semiconductor
 # Copyright 2017-2020 NXP
 
-DESCRIPTION = "i.MX U-Boot suppporting i.MX reference boards."
+DESCRIPTION = "i.MX U-Boot suppporting Engicam boards."
 require u-boot-common.inc
 require recipes-bsp/u-boot/u-boot.inc
 inherit pythonnative
@@ -17,13 +17,11 @@ LIC_FILES_CHKSUM = "file://Licenses/gpl-2.0.txt;md5=b234ee4d69f5fce4486a80fdaf4a
 UBOOT_SRC ?= "git://github.com/engicam-stable/u-boot-engicam_5.4.47.git;protocol=https"
 SRCBRANCH = "imx_v2020.04_5.4.47_2.2.0"
 SRC_URI = "${UBOOT_SRC};branch=${SRCBRANCH}"
-SRCREV = "7030570ad908f7bcb548ee568dd5f3a6bc56ebef"
+SRCREV = "1b26fc5a21bad3199bc86aa323fa44ec589b174f"
 
 S = "${WORKDIR}/git"
 
 inherit fsl-u-boot-localversion
-
-LOCALVERSION ?= "-5.4.47-2.2.0"
 
 BOOT_TOOLS = "imx-boot-tools"
 
