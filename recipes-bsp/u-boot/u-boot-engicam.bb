@@ -19,6 +19,11 @@ SRCBRANCH = "imx_v2020.04_5.4.47_2.2.0"
 SRC_URI = "${UBOOT_SRC};branch=${SRCBRANCH}"
 SRCREV = "1b26fc5a21bad3199bc86aa323fa44ec589b174f"
 
+UBOOT_SRC_mx8mm ?= "git://github.com/engicam-stable/u-boot-engicam_2019.04.git;protocol=https"
+SRCBRANCH = "u-boot-engicam_2019.04_4.19.35"
+SRC_URI = "${UBOOT_SRC};branch=${SRCBRANCH}"
+SRCREV = "40c516e01a46c324acc1f1f0223cd5d30176350d"
+
 S = "${WORKDIR}/git"
 
 inherit fsl-u-boot-localversion
