@@ -22,7 +22,7 @@ SRCREV = "1b26fc5a21bad3199bc86aa323fa44ec589b174f"
 UBOOT_SRC_mx8mm ?= "git://github.com/engicam-stable/u-boot-engicam_2019.04.git;protocol=https"
 SRCBRANCH = "u-boot-engicam_2019.04_4.19.35"
 SRC_URI = "${UBOOT_SRC};branch=${SRCBRANCH}"
-SRCREV = "40c516e01a46c324acc1f1f0223cd5d30176350d"
+SRCREV = "72996f636c03e9ed6ebffe5c74513094bd85c2ae"
 
 S = "${WORKDIR}/git"
 
