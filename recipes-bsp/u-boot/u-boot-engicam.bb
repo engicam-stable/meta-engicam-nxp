@@ -14,15 +14,15 @@ DEPENDS_append = " dtc-native"
 LICENSE = "GPLv2+"
 LIC_FILES_CHKSUM = "file://Licenses/gpl-2.0.txt;md5=b234ee4d69f5fce4486a80fdaf4a4263"
 
-UBOOT_SRC ?= "git://github.com/engicam-stable/u-boot-engicam_5.4.47.git;protocol=https"
-SRCBRANCH = "imx_v2020.04_5.4.47_2.2.0"
-SRC_URI = "${UBOOT_SRC};branch=${SRCBRANCH}"
-SRCREV = "1b26fc5a21bad3199bc86aa323fa44ec589b174f"
+UBOOT_SRC_mx8mp ?= "git://github.com/engicam-stable/u-boot-engicam_5.4.47.git;protocol=https"
+SRCBRANCH_mx8mp = "imx_v2020.04_5.4.47_2.2.0"
+SRC_URI_mx8mp = "${UBOOT_SRC};branch=${SRCBRANCH}"
+SRCREV_mx8mp = "1b26fc5a21bad3199bc86aa323fa44ec589b174f"
 
 UBOOT_SRC_mx8mm ?= "git://github.com/engicam-stable/u-boot-engicam_2019.04.git;protocol=https"
-SRCBRANCH = "u-boot-engicam_2019.04_4.19.35"
-SRC_URI = "${UBOOT_SRC};branch=${SRCBRANCH}"
-SRCREV = "72996f636c03e9ed6ebffe5c74513094bd85c2ae"
+SRCBRANCH_mx8mm = "u-boot-engicam_2019.04_4.19.35"
+SRC_URI_mx8mm = "${UBOOT_SRC};branch=${SRCBRANCH}"
+SRCREV_mx8mm = "72996f636c03e9ed6ebffe5c74513094bd85c2ae"
 
 S = "${WORKDIR}/git"
 
