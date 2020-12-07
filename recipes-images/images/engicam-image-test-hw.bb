@@ -44,7 +44,8 @@ PKG_DEBUG = "\
     tslib-calibrate \
     tslib-conf \
     tslib-tests \
-    usbutils \    
+    usbutils \
+    engicam-emmc-tools \
 "
 
 CORE_IMAGE_EXTRA_INSTALL += " \
