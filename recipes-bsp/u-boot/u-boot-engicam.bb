@@ -22,7 +22,7 @@ SRCREV_mx8mp = "3227e26da6bfe75993717f13e4e29fe6da3ccd22"
 UBOOT_SRC_mx8qxp ?= "git://github.com/engicam-stable/u-boot-engicam_5.4.47.git;protocol=https"
 SRCBRANCH_mx8qxp = "imx_v2020.04_5.4.47_2.2.0"
 SRC_URI_mx8qxp = "${UBOOT_SRC};branch=${SRCBRANCH}"
-SRCREV_mx8qxp = "d8317c54e0803da1994dbd6506eb08a063ab9d6c"
+SRCREV_mx8qxp = "3227e26da6bfe75993717f13e4e29fe6da3ccd22"
 
 UBOOT_SRC_mx8mm ?= "git://github.com/engicam-stable/u-boot-engicam_2019.04.git;protocol=https"
 SRCBRANCH_mx8mm = "u-boot-engicam_2019.04_4.19.35"
