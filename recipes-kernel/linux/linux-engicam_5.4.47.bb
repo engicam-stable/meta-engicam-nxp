@@ -15,7 +15,7 @@ DEPENDS += "lzop-native bc-native"
 KERNEL_BRANCH ?= "imx_5.4.47_2.2.0"
 KERNEL_SRC ?= "git://github.com/engicam-stable/linux-engicam_5.4.47.git;protocol=https"
 SRC_URI = "${KERNEL_SRC};branch=${KERNEL_BRANCH}"
-SRCREV = "be860c151446fc23b5fb4532e07d74df2b58d3c1"
+SRCREV = "b6da755c69e13a8c65ebc94b84a856d0b209e6b1"
 
 FILES_${KERNEL_PACKAGE_NAME}-base += "${nonarch_base_libdir}/modules/${KERNEL_VERSION}/modules.builtin.modinfo "
 
