@@ -46,6 +46,7 @@ PKG_DEBUG = "\
     tslib-tests \
     usbutils \
     engicam-emmc-tools \
+    linux-firmware \
 "
 
 CORE_IMAGE_EXTRA_INSTALL += " \

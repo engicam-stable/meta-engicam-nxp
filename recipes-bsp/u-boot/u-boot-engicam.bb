@@ -17,7 +17,7 @@ LIC_FILES_CHKSUM = "file://Licenses/gpl-2.0.txt;md5=b234ee4d69f5fce4486a80fdaf4a
 UBOOT_SRC_mx8mp ?= "git://github.com/engicam-stable/u-boot-engicam_5.4.47.git;protocol=https"
 SRCBRANCH_mx8mp = "imx_v2020.04_5.4.47_2.2.0"
 SRC_URI_mx8mp = "${UBOOT_SRC};branch=${SRCBRANCH}"
-SRCREV_mx8mp = "3227e26da6bfe75993717f13e4e29fe6da3ccd22"
+SRCREV_mx8mp = "00850db4c0b36e52721fe7e068110dfb4f12594c"
 
 UBOOT_SRC_mx8qxp ?= "git://github.com/engicam-stable/u-boot-engicam_5.4.47.git;protocol=https"
 SRCBRANCH_mx8qxp = "imx_v2020.04_5.4.47_2.2.0"
