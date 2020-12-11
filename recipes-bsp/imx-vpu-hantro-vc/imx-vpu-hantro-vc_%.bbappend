@@ -1,1 +1,1 @@
-COMPATIBLE_MACHINE = "(imx8mp-icore)"
+COMPATIBLE_MACHINE = "(mx8)"
