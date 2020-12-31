@@ -15,7 +15,7 @@ DEPENDS += "lzop-native bc-native"
 KERNEL_BRANCH ?= "imx_5.4.47_2.2.0"
 KERNEL_SRC ?= "git://github.com/engicam-stable/linux-engicam_5.4.47.git;protocol=https"
 SRC_URI = "${KERNEL_SRC};branch=${KERNEL_BRANCH}"
-SRCREV = "2c0acd1b1312cb31cef7520de1cdf5d8c9769669"
+SRCREV_default = "${AUTOREV}"
 
 FILES_${KERNEL_PACKAGE_NAME}-base += "${nonarch_base_libdir}/modules/${KERNEL_VERSION}/modules.builtin.modinfo "
 
@@ -34,7 +34,7 @@ IMX_KERNEL_CONFIG_AARCH32 ?= "imx_v7_defconfig"
 IMX_KERNEL_CONFIG_AARCH64 ?= "imx8mp_icore_defconfig"
 IMX_KERNEL_CONFIG_AARCH64_mx8mpsmarcore ?= "imx8mp_smarcore_defconfig"
 IMX_KERNEL_CONFIG_AARCH64_mx8mm ?= "imx8mm_icore_defconfig"
-IMX_KERNEL_CONFIG_AARCH64_mx8qxp ?= "imx8_icore_defconfig"
+IMX_KERNEL_CONFIG_AARCH64_mx8qxp ?= "imx8x_icore_defconfig"
 
 addtask copy_defconfig after do_unpack before do_preconfigure
 do_copy_defconfig () {
