@@ -12,8 +12,8 @@ LIC_FILES_CHKSUM = "file://COPYING;md5=bbea815ee2795b2f4230826c0c6b8814"
 
 DEPENDS += "lzop-native bc-native"
 
-KERNEL_BRANCH ?= "imx_5.4.47_2.2.0"
-KERNEL_SRC ?= "git://github.com/engicam-stable/linux-engicam_5.4.47.git;protocol=https"
+KERNEL_BRANCH ?= "engicam"
+KERNEL_SRC ?= "git://192.168.2.254/matteolisi/linux-engicam_5.4.70.git;protocol=http"
 SRC_URI = "${KERNEL_SRC};branch=${KERNEL_BRANCH}"
 SRCREV_default = "${AUTOREV}"
 
