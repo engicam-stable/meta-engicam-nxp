@@ -1,6 +1,6 @@
-################
+
 meta-engicam-mx8
-################
+================
 
 Based on NXP Yocto Zeus 2.3 GA
 
@@ -14,13 +14,13 @@ repo sync
 
 
 Boards supported
-================
+----------------
 
 - imx8mp-icore
 - imx8mm-icore
 
 Images available
-================
+----------------
 
 - engicam-image-test-hw
 - engicam-image-qt-multimedia
@@ -28,7 +28,7 @@ Images available
 
 
 First build
-===========
+-----------
 
 ```
 DISTRO=eng-imx-xwayland MACHINE=imx8mp-icore source imx-setup-release.sh -b build
