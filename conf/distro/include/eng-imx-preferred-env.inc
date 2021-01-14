@@ -20,6 +20,9 @@ PREFERRED_VERSION_gstreamer1.0-plugins-good = "1.16.2.imx"
 PREFERRED_VERSION_gstreamer1.0              = "1.16.2.imx"
 PREFERRED_VERSION_gstreamer1.0-libav        = "1.16.2"
 
+PREFERRED_VERSION_opengl-es-cts     = "3.2.6.1"
+PREFERRED_VERSION_opengl-es-cts_mx6 = "3.2.4.0"
+
 # Use systemd as default init manager
 VIRTUAL-RUNTIME_init_manager = "systemd"
 PREFERRED_PROVIDER_udev = "systemd"
