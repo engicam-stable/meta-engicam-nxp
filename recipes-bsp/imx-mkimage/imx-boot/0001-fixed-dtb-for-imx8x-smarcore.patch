@@ -1,0 +1,27 @@
+From 970d04e69ec793ddc0e69b6d10e16300771c145b Mon Sep 17 00:00:00 2001
+From: Mirko Ardinghi <mirko.ardinghi@engicam.com>
+Date: Fri, 15 Jan 2021 13:49:00 +0000
+Subject: [PATCH] ddd
+
+---
+ iMX8QX/soc.mak | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/iMX8QX/soc.mak b/iMX8QX/soc.mak
+index 1ec1ec0..3a7c204 100755
+--- a/iMX8QX/soc.mak
++++ b/iMX8QX/soc.mak
+@@ -138,8 +138,8 @@ flash_regression_linux_m4_xip : $(MKIMG) $(AHAB_IMG) scfw_tcm.bin u-boot-atf.bin
+ flash_scfw: $(MKIMG) $(AHAB_IMG) scfw_tcm.bin
+ 	./$(MKIMG) -soc QX -rev B0 -dcd skip -append $(AHAB_IMG) -c -scfw scfw_tcm.bin -out flash.bin
+ 
+-flash_kernel: $(MKIMG) Image imx8x-icore-starterkit.dtb
+-	./$(MKIMG) -soc QX -rev B0 -c -ap Image a35 0x80280000 --data imx8x-icore-starterkit.dtb 0x83000000 -out flash.bin
++flash_kernel: $(MKIMG) Image imx8x-smarcore-multimedia-4k.dtb
++	./$(MKIMG) -soc QX -rev B0 -c -ap Image a35 0x80280000 --data imx8x-smarcore-multimedia-4k.dtb 0x83000000 -out flash.bin
+ 
+ parse_container: $(MKIMG) flash.bin
+ 	./$(MKIMG) -soc QX -rev B0 -parse flash.bin
+-- 
+2.25.1
+

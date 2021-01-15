@@ -71,6 +71,7 @@ PKG_DEBUG = "\
     ethtool \
     evtest \
     i2c-tools \
+    imx-test \
     iproute2 \ 
     ldd \   
     minicom \

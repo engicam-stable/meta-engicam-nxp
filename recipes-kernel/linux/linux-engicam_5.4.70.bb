@@ -35,6 +35,7 @@ IMX_KERNEL_CONFIG_AARCH64 ?= "imx8mp_icore_defconfig"
 IMX_KERNEL_CONFIG_AARCH64_mx8mpsmarcore ?= "imx8mp_smarcore_defconfig"
 IMX_KERNEL_CONFIG_AARCH64_mx8mm ?= "imx8mm_icore_defconfig"
 IMX_KERNEL_CONFIG_AARCH64_mx8qxp ?= "imx8x_icore_defconfig"
+IMX_KERNEL_CONFIG_AARCH64_mx8qxpsmarcore = "imx8x_smarcore_defconfig"
 
 addtask copy_defconfig after do_unpack before do_preconfigure
 do_copy_defconfig () {
