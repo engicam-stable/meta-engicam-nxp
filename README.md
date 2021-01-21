@@ -1,5 +1,5 @@
 
-meta-engicam-mx8
+meta-engicam-nxp
 ================
 
 Based on NXP Yocto Zeus 2.3 GA
@@ -34,6 +34,6 @@ First build
 
 ```
 DISTRO=eng-imx-xwayland MACHINE=imx8mp-icore source imx-setup-release.sh -b build
-bitbake-layers add-layer ../sources/meta-engicam-mx8
-bitbake engicam-image-test-hw
+bitbake-layers add-layer ../sources/meta-engicam-nxp
+bitbake engicam-evaluation-image
 ```

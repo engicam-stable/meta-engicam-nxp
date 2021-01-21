@@ -6,6 +6,7 @@ DESCRIPTION = "Engicam evaluation image"
 LICENSE = "MIT"
 
 inherit core-image
+inherit populate_sdk_qt5
 
 ### WARNING: This image is NOT suitable for production use and is intended
 ###          to provide a way for users to reproduce the image used during
