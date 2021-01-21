@@ -13,8 +13,8 @@ repo sync
 ```
 
 
-Boards supported
-----------------
+SOMs supported
+--------------
 
 - imx8mp-icore
 - imx8mp-smarcore
