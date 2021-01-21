@@ -20,6 +20,8 @@ Boards supported
 - imx8mp-smarcore
 - imx8mm-icore
 - imx8mm-icore-2g
+- imx8x-icore
+- imx8x-smarcore
 
 
 Images available
