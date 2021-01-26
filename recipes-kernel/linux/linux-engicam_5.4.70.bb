@@ -16,7 +16,7 @@ KERNEL_BRANCH ?= "5.4.70"
 KERNEL_SRC ?= "git://192.168.2.254/matteolisi/linux-engicam-nxp.git;protocol=http"
 SRC_URI = "${KERNEL_SRC};branch=${KERNEL_BRANCH}"
 SRCREV_default = "${AUTOREV}"
-
+PV = "${KERNEL_BRANCH}+git${SRCPV}"
 FILES_${KERNEL_PACKAGE_NAME}-base += "${nonarch_base_libdir}/modules/${KERNEL_VERSION}/modules.builtin.modinfo "
 
 KERNEL_CONFIG_COMMAND = "oe_runmake_call -C ${S} CC="${KERNEL_CC}" O=${B} olddefconfig"
