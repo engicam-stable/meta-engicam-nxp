@@ -18,6 +18,7 @@ UBOOT_BRANCH ?= "2020.04"
 UBOOT_SRC ?= "git://192.168.2.254/Bozzo/u-boot-engicam-nxp.git;protocol=http"
 SRC_URI = "${UBOOT_SRC};branch=${UBOOT_BRANCH}"
 SRCREV_default = "${AUTOREV}"
+PV = "${UBOOT_BRANCH}+git${SRCPV}"
 
 S = "${WORKDIR}/git"
 
