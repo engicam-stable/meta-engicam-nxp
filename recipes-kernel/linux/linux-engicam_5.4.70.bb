@@ -15,7 +15,9 @@ DEPENDS += "lzop-native bc-native"
 KERNEL_BRANCH ?= "5.4.70"
 KERNEL_SRC ?= "git://192.168.2.254/matteolisi/linux-engicam-nxp.git;protocol=http"
 SRC_URI = "${KERNEL_SRC};branch=${KERNEL_BRANCH}"
-SRCREV_default = "${AUTOREV}"
+# SRCREV_default = "${AUTOREV}"
+
+SRCREV = "dbfc2df0f4e94c8b102dcfb09d525ab7d0fb1a76"
 
 FILES_${KERNEL_PACKAGE_NAME}-base += "${nonarch_base_libdir}/modules/${KERNEL_VERSION}/modules.builtin.modinfo "
 
@@ -30,12 +32,11 @@ DO_CONFIG_V7_COPY_mx6 = "yes"
 DO_CONFIG_V7_COPY_mx7 = "yes"
 DO_CONFIG_V7_COPY_mx8 = "no"
 
-IMX_KERNEL_CONFIG_AARCH32 ?= "imx_v7_defconfig"
-IMX_KERNEL_CONFIG_AARCH64 ?= "imx8mp_icore_defconfig"
-IMX_KERNEL_CONFIG_AARCH64_mx8mpsmarcore ?= "imx8mp_smarcore_defconfig"
-IMX_KERNEL_CONFIG_AARCH64_mx8mm ?= "imx8mm_icore_defconfig"
-IMX_KERNEL_CONFIG_AARCH64_mx8qxp ?= "imx8x_icore_defconfig"
+IMX_KERNEL_CONFIG_AARCH64_mx8mpsmarcore = "imx8mp_smarcore_defconfig"
+IMX_KERNEL_CONFIG_AARCH64_mx8mp = "imx8mp_icore_defconfig"
+IMX_KERNEL_CONFIG_AARCH64_mx8mm = "imx8mm_icore_defconfig"
 IMX_KERNEL_CONFIG_AARCH64_mx8qxpsmarcore = "imx8x_smarcore_defconfig"
+IMX_KERNEL_CONFIG_AARCH64_mx8qxp = "imx8x_icore_defconfig"
 
 addtask copy_defconfig after do_unpack before do_preconfigure
 do_copy_defconfig () {
