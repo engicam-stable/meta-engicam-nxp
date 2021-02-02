@@ -15,7 +15,7 @@ LICENSE = "GPLv2+"
 LIC_FILES_CHKSUM = "file://Licenses/gpl-2.0.txt;md5=b234ee4d69f5fce4486a80fdaf4a4263"
 
 UBOOT_BRANCH ?= "2020.04"
-UBOOT_SRC ?= "git://192.168.2.254/Bozzo/u-boot-engicam-nxp.git;protocol=http"
+UBOOT_SRC ?= "git://github.com/engicam-stable/u-boot-engicam-nxp.git;protocol=http"
 SRC_URI = "${UBOOT_SRC};branch=${UBOOT_BRANCH}"
 SRCREV_default = "${AUTOREV}"
 PV = "${UBOOT_BRANCH}+git${SRCPV}"
