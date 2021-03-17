@@ -32,12 +32,6 @@ DO_CONFIG_V7_COPY_mx6 = "yes"
 DO_CONFIG_V7_COPY_mx7 = "yes"
 DO_CONFIG_V7_COPY_mx8 = "no"
 
-IMX_KERNEL_CONFIG_AARCH64_mx8mpsmarcore = "imx8mp_smarcore_defconfig"
-IMX_KERNEL_CONFIG_AARCH64_mx8mp = "imx8mp_icore_defconfig"
-IMX_KERNEL_CONFIG_AARCH64_mx8mm = "imx8mm_icore_defconfig"
-IMX_KERNEL_CONFIG_AARCH64_mx8qxpsmarcore = "imx8x_smarcore_defconfig"
-IMX_KERNEL_CONFIG_AARCH64_mx8qxp = "imx8x_icore_defconfig"
-
 addtask copy_defconfig after do_unpack before do_preconfigure
 do_copy_defconfig () {
     install -d ${B}
