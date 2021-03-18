@@ -20,16 +20,18 @@ SOMs supported
 - imx8mp-smarcore
 - imx8mm-icore
 - imx8mm-icore-2g
-- imx8x-icore
-- imx8x-smarcore
+- imx8xq-icore
+- imx8xd-icore
+- imx8xq-smarcore
+- imx8xd-smarcore
+- imx6ull-microgea
 
 
 Images available
 ----------------
 
 - engicam-evaluation-image
-
-
+- engicam-evaluation-image-mx6ull
 
 First build
 -----------
