@@ -76,6 +76,7 @@ PKG_DEBUG = "\
     iproute2 \ 
     ldd \   
     minicom \
+    nvme-cli \
     serialtools \
     tslib \
     tslib-calibrate \
