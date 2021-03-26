@@ -14,17 +14,17 @@ inherit populate_sdk_qt5
 
 ## Select Image Features
 IMAGE_FEATURES += " \
-    debug-tweaks \
-    tools-profile \
-    package-management \
-    splash \
-    nfs-server \
-    tools-debug \
-    ssh-server-dropbear \
-    tools-testapps \
-    hwcodecs \
-    ${@bb.utils.contains('DISTRO_FEATURES', 'wayland', '', \
-       bb.utils.contains('DISTRO_FEATURES',     'x11', 'x11-base x11-sato', \
+	debug-tweaks \
+	tools-profile \
+	package-management \
+	splash \
+	nfs-server \
+	tools-debug \
+	ssh-server-dropbear \
+	tools-testapps \
+	hwcodecs \
+	${@bb.utils.contains('DISTRO_FEATURES', 'wayland', '', \
+		bb.utils.contains('DISTRO_FEATURES',     'x11', 'x11-base x11-sato', \
                                                        '', d), d)} \
 "
 ERPC_COMPS ?= ""
@@ -52,57 +52,62 @@ QT5_IMAGE = " \
     ${@bb.utils.contains('DISTRO_FEATURES', 'opengl', 'qtdeclarative-qmlplugins', '', d)} \
     qtmqtt-dev \
     qtmultimedia-dev \
-    ${@bb.utils.contains('DISTRO_FEATURES', 'opengl', 'qtmultimedia-qmlplugins', '', d)} \ 
+    ${@bb.utils.contains('DISTRO_FEATURES', 'opengl', 'qtmultimedia-qmlplugins', '', d)} \
     qtserialport-dev \
     qtserialbus-dev \
     qtwebsockets-dev \
-    ${@bb.utils.contains('DISTRO_FEATURES', 'opengl', 'qtwebsockets-qmlplugins', '', d)} \    
+    ${@bb.utils.contains('DISTRO_FEATURES', 'opengl', 'qtwebsockets-qmlplugins', '', d)} \
     qtquickcontrols2 \
     qtquickcontrols2-dev \
     qtquickcontrols-qmlplugins \
 "
 
 PKG_DEBUG = "\
-    brcm-patchram-plus \
-    cantest \
-    canutils \
-    devmem2 \
-    dosfstools \
-    e2fsprogs \
-    ethtool \
-    evtest \
-    i2c-tools \
-    imx-test \
-    iproute2 \ 
-    ldd \   
-    minicom \
-    nvme-cli \
-    serialtools \
-    tslib \
-    tslib-calibrate \
-    tslib-conf \
-    tslib-tests \
-    usbutils \
-    engicam-emmc-tools \
-    linux-firmware \
+	brcm-patchram-plus \
+	cantest \
+	canutils \
+	devmem2 \
+	dosfstools \
+	e2fsprogs \
+	ethtool \
+	evtest \
+	i2c-tools \
+	iproute2 \
+	minicom \
+	serialtools \
+	tslib \
+	tslib-calibrate \
+	tslib-conf \
+	tslib-tests \
+	usbutils \
+	linux-firmware \
+	nvme-cli \
+	ldd \
 "
 
-CORE_IMAGE_EXTRA_INSTALL += " \
-    packagegroup-core-full-cmdline \
-    packagegroup-tools-bluetooth \
-    packagegroup-fsl-tools-audio \
-    packagegroup-fsl-gstreamer1.0 \
-    packagegroup-fsl-gstreamer1.0-full \
-    packagegroup-qt5-eng-qtcreator-debug \
-    ${@bb.utils.contains('DISTRO_FEATURES', 'wayland', 'weston-init', '', d)} \
-    ${@bb.utils.contains('DISTRO_FEATURES', 'x11 wayland', 'weston-xwayland xterm', '', d)} \
-    ${ERPC_COMPS} \
-    ${ISP_PKGS} \
-    ${QT5_IMAGE} \
+IMAGE_INSTALL += " \
+	packagegroup-core-full-cmdline \
+	packagegroup-tools-bluetooth \
+	packagegroup-fsl-tools-audio \
+	packagegroup-fsl-gstreamer1.0 \
+	packagegroup-fsl-gstreamer1.0-full \
+	packagegroup-qt5-eng-qtcreator-debug \
+	${@bb.utils.contains('DISTRO_FEATURES', 'wayland', 'weston-init', '', d)} \
+	${@bb.utils.contains('DISTRO_FEATURES', 'x11 wayland', 'weston-xwayland xterm', '', d)} \
+	${ERPC_COMPS} \
+	${ISP_PKGS} \
+	${QT5_IMAGE} \
 	${PKG_DEBUG} \
 "
 
-## CORE_IMAGE_EXTRA_INSTALL_mx8mp += "\
-## 	kernel-module-isp-vvcam \
-## 	kernel-module-os08a20 \
-## "
+IMAGE_INSTALL_append_mx6ull += "\
+	engicam-mtd-script \
+	imx-kobs \
+	mtd-utils \
+	mtd-utils-ubifs \
+"
+
+##IMAGE_INSTALL_append_mx8mp += "\
+##	engicam-emmc-tools \
+##"
+##	imx-test \ 
