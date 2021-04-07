@@ -26,6 +26,12 @@ SOMs supported
 - imx8xd-smarcore
 - imx6ull-microgea
 
+Supported distros
+-----------------
+
+- eng-imx-wayland: Distro for Wayland without X11. This distro includes wayland feature but doesn’t have X11 support.
+- eng-imx-xwayland: Distro for Wayland with X11. This distro includes both wayland and X11 emulation features.
+
 
 Images available
 ----------------
