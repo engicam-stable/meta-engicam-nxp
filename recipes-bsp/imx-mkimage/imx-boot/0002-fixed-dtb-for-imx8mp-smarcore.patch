@@ -1,0 +1,25 @@
+From ea0676fa4d0afb724c21fc6d7a0efb163664b582 Mon Sep 17 00:00:00 2001
+From: Matteo Lisi <matteo.lisi@engicam.com>
+Date: Thu, 10 Dec 2020 15:28:51 +0100
+Subject: [PATCH] fix soc.mak for imx8mp-smarcore
+
+---
+ iMX8M/soc.mak | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/iMX8M/soc.mak b/iMX8M/soc.mak
+index ef2e516..6ef339b 100644
+--- a/iMX8M/soc.mak
++++ b/iMX8M/soc.mak
+@@ -133,7 +133,7 @@ u-boot-atf-tee.bin: u-boot.bin bl31.bin tee.bin
+ clean:
+ 	@rm -f $(MKIMG) u-boot-atf.bin u-boot-atf-tee.bin u-boot-spl-ddr.bin u-boot.itb u-boot.its u-boot-ddr3l.itb u-boot-ddr3l.its u-boot-spl-ddr3l.bin u-boot-ddr4.itb u-boot-ddr4.its u-boot-spl-ddr4.bin u-boot-ddr4-evk.itb u-boot-ivt.itb u-boot-ddr4-evk.its $(OUTIMG)
+ 
+-dtbs = $(PLAT)-icore.dtb
++dtbs = $(PLAT)-smarcore.dtb
+ $(dtbs):
+ 	./$(DTB_PREPROC) $(dtbs)
+ 
+-- 
+2.17.1
+
