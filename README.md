@@ -25,6 +25,7 @@ SOMs supported
 - imx8xq-smarcore
 - imx8xd-smarcore
 - imx6ull-microgea
+- imx6ull-isiot
 
 Supported distros
 -----------------
