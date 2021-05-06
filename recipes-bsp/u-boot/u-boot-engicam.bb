@@ -2,14 +2,13 @@
 # Copyright 2017-2020 NXP
 
 DESCRIPTION = "i.MX U-Boot suppporting Engicam boards."
-require u-boot-common.inc
 require recipes-bsp/u-boot/u-boot.inc
 inherit pythonnative
 
 FILESEXTRAPATHS_prepend := "${THISDIR}/files:"
 
 PROVIDES += "u-boot"
-DEPENDS_append = " dtc-native"
+DEPENDS += "flex-native bison-native dtc-native "
 
 LICENSE = "GPLv2+"
 LIC_FILES_CHKSUM = "file://Licenses/gpl-2.0.txt;md5=b234ee4d69f5fce4486a80fdaf4a4263"

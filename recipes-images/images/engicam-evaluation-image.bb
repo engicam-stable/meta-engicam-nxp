@@ -83,6 +83,7 @@ PKG_DEBUG = "\
 	linux-firmware \
 	nvme-cli \
 	ldd \
+	u-boot-fw-utils \
 "
 
 IMAGE_INSTALL += " \

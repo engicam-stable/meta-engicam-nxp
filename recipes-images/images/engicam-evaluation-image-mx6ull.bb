@@ -53,6 +53,7 @@ QT5_IMAGE = " \
 
 PKG_DEBUG = "\
 	brcm-patchram-plus \
+	imx6ull-brcm \
 	cantest \
 	canutils \
 	devmem2 \
