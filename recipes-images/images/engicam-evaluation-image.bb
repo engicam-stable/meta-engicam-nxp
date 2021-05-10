@@ -84,6 +84,7 @@ PKG_DEBUG = "\
 	nvme-cli \
 	ldd \
 	u-boot-fw-utils \
+	imx8-brcm \
 "
 
 IMAGE_INSTALL += " \
