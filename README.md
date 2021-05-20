@@ -18,6 +18,7 @@ SOMs supported
 --------------
 
 - imx8mp-icore
+- imx8mp-icore-4gb
 - imx8mm-icore
 - imx6ull-microgea
 
