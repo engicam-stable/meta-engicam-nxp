@@ -8,7 +8,7 @@ inherit allarch
 SRC_URI = "file://emmc_tools.sh \
 	   file://copyright"
 	   
-RDEPENDS_${PN} += "bash dosfstools e2fsprogs pv"
+RDEPENDS_${PN} += "bash dosfstools e2fsprogs-resize2fs pv parted"
 
 do_install () {
 	install -d ${D}${bindir}

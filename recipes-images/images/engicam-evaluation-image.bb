@@ -69,11 +69,14 @@ PKG_DEBUG = "\
 	devmem2 \
 	dosfstools \
 	e2fsprogs \
+	engicam-emmc-tools \
 	ethtool \
 	evtest \
 	i2c-tools \
 	iproute2 \
 	minicom \
+	parted \
+	e2fsprogs-resize2fs \
 	serialtools \
 	tslib \
 	tslib-calibrate \
