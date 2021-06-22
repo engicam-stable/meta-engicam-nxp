@@ -53,27 +53,31 @@ QT5_IMAGE = " \
 
 PKG_DEBUG = "\
 	brcm-patchram-plus \
-	imx6ull-brcm \
 	cantest \
 	canutils \
 	devmem2 \
 	dosfstools \
 	e2fsprogs \
+	engicam-mtd-script \
 	ethtool \
 	evtest \
+	hostapd \
 	i2c-tools \
+	imx-kobs \
+	imx6ull-brcm \
+	imx6ull-lwb5plus \
 	iproute2 \
+	microdev-startup-service \
 	minicom \
+	mtd-utils \
+	mtd-utils-ubifs \
+	ppp \
 	serialtools \
 	tslib \
 	tslib-calibrate \
 	tslib-conf \
 	tslib-tests \
 	usbutils \
-	engicam-mtd-script \
-	imx-kobs \
-	mtd-utils \
-	mtd-utils-ubifs \
 "
 
 CORE_IMAGE_EXTRA_INSTALL += " \

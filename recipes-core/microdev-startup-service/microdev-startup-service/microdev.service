@@ -1,0 +1,8 @@
+[Unit]
+Description=Start LAE Script
+
+[Service]
+ExecStart=/usr/bin/startUpMicrodev.sh
+
+[Install]
+WantedBy=multi-user.target
