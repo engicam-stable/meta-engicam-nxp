@@ -18,7 +18,6 @@ IMAGE_FEATURES += " \
 	nfs-server \
 	tools-debug \
 	ssh-server-dropbear \
-	tools-testapps \
 	hwcodecs \
 "
 
