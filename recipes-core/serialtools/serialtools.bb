@@ -12,7 +12,7 @@ SRC_URI = "file://Makefile \
            file://test_gps.c \
            file://test_serial.c \
            file://test_serial2.c \           
-	   file://copyright"
+            file://copyright"
 
 do_compile () {
     cd ${WORKDIR}

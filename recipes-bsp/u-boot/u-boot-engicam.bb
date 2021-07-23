@@ -4,7 +4,7 @@
 DESCRIPTION = "i.MX U-Boot suppporting Engicam boards."
 require u-boot-common.inc
 require recipes-bsp/u-boot/u-boot.inc
-inherit pythonnative
+
 
 FILESEXTRAPATHS_prepend := "${THISDIR}/files:"
 

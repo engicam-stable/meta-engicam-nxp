@@ -2,13 +2,13 @@
 meta-engicam-nxp
 ================
 
-Based on NXP Yocto Zeus 2.3 GA
-
+Based on NXP FSL Community BSP DUNFELL
 
 ```
-mkdir imx-yocto-bsp
-cd imx-yocto-bsp
-repo init -u https://source.codeaurora.org/external/imx/imx-manifest -b imx-linux-zeus -m imx-5.4.70-2.3.0.xml
+PATH=${PATH}:~/bin
+mkdir fsl-community-bsp
+cd fsl-community-bsp
+repo init -u https://github.com/Freescale/fsl-community-bsp-platform -b dunfell
 repo sync
 ```
 
@@ -16,29 +16,13 @@ repo sync
 SOMs supported
 --------------
 
-- imx8mp-icore
-- imx8mp-smarcore
-- imx8mm-icore
-- imx8mm-icore-2g
-- imx8xq-icore
-- imx8xd-icore
-- imx8xq-smarcore
-- imx8xd-smarcore
 - imx6ull-microgea
-- imx6ull-isiot
-
-Supported distros
------------------
-
-- eng-imx-wayland: Distro for Wayland without X11. This distro includes wayland feature but doesn’t have X11 support.
-- eng-imx-xwayland: Distro for Wayland with X11. This distro includes both wayland and X11 emulation features.
 
 
 Images available
 ----------------
 
 - engicam-evaluation-image
-- engicam-evaluation-image-mx6ull
 
 First build
 -----------
