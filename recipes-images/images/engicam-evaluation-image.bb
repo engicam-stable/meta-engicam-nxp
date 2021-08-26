@@ -85,6 +85,7 @@ PKG_DEBUG = "\
 	ldd \
 	u-boot-fw-utils \
 	imx8-brcm \
+	fsl-rc-local \
 "
 
 IMAGE_INSTALL += " \
