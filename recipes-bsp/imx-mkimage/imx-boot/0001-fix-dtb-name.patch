@@ -1,28 +1,24 @@
-From 5f78f2f9c535181f08c5aca41f4f428f0713ed4d Mon Sep 17 00:00:00 2001
-From: Domenico Acri <domenico.acri@engicam.com>
-Date: Fri, 13 Nov 2020 09:08:25 +0000
-Subject: [PATCH] fixed dtb for imx8mp icore
+From 241d6743dc9414c2c508e710a84411ccd7015d84 Mon Sep 17 00:00:00 2001
+From: Matteo Lisi <matteo.lisi@engicam.com>
+Date: Wed, 22 Sep 2021 11:51:56 +0200
+Subject: [PATCH] fix dtb name
 
 ---
- iMX8M/soc.mak | 4 ++--
- 1 file changed, 2 insertions(+), 2 deletions(-)
+ iMX8M/soc.mak | 3 +--
+ 1 file changed, 1 insertion(+), 2 deletions(-)
 
 diff --git a/iMX8M/soc.mak b/iMX8M/soc.mak
-index b7b3986..ef2e516 100644
+index 30ecefd..4e68ca0 100644
 --- a/iMX8M/soc.mak
 +++ b/iMX8M/soc.mak
-@@ -133,9 +133,9 @@ u-boot-atf-tee.bin: u-boot.bin bl31.bin tee.bin
+@@ -137,9 +137,8 @@ u-boot-atf-tee.bin: u-boot.bin bl31.bin tee.bin
  clean:
  	@rm -f $(MKIMG) u-boot-atf.bin u-boot-atf-tee.bin u-boot-spl-ddr.bin u-boot.itb u-boot.its u-boot-ddr3l.itb u-boot-ddr3l.its u-boot-spl-ddr3l.bin u-boot-ddr4.itb u-boot-ddr4.its u-boot-spl-ddr4.bin u-boot-ddr4-evk.itb u-boot-ivt.itb u-boot-ddr4-evk.its $(OUTIMG)
  
 -dtbs = evk.dtb
-+dtbs = $(PLAT)-icore.dtb
  $(dtbs):
 -	./$(DTB_PREPROC) $(PLAT)-evk.dtb $(dtbs)
-+	./$(DTB_PREPROC) $(dtbs)
++	./$(DTB_PREPROC) $(PLAT)-icore.dtb 
  
  u-boot.itb: $(dtbs)
  	./$(PAD_IMAGE) tee.bin
--- 
-2.17.1
-

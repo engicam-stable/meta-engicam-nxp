@@ -1,0 +1,44 @@
+meta-engicam-nxp
+================
+
+-----------------------
+
+# ** ALPHA RELEASE **
+
+-----------------------
+
+Based on NXP Yocto hardknott 2.0 GA
+
+Retrieve the sources
+--------------------
+
+```
+mkdir imx-yocto-bsp
+cd imx-yocto-bsp
+repo init -u https://source.codeaurora.org/external/imx/imx-manifest -b imx-linux-hardknott -m imx-5.10.35-2.0.0.xml
+repo sync
+```
+
+
+SOMs supported
+--------------
+
+- imx8mp-icore
+- imx8mp-icore-2e
+- imx8mm-icore
+
+
+Images available
+----------------
+
+- engicam-evaluation-image
+
+First build
+-----------
+
+```
+DISTRO=fsl-imx-xwayland MACHINE=imx8mp-icore source imx-setup-release.sh -b build
+bitbake-layers add-layer ../sources/meta-engicam-nxp
+bitbake engicam-evaluation-image
+```
+

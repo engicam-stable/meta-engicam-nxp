@@ -8,31 +8,35 @@ LICENSE = "MIT"
 inherit core-image
 inherit populate_sdk_qt5
 
-### WARNING: This image is NOT suitable for production use and is intended
-###          to provide a way for users to reproduce the image used during
-###          the validation process of Engicam SOM
-
 ## Select Image Features
 IMAGE_FEATURES += " \
-	debug-tweaks \
-	tools-profile \
-	package-management \
-	splash \
-	nfs-server \
-	tools-debug \
-	ssh-server-dropbear \
-	tools-testapps \
-	hwcodecs \
-	${@bb.utils.contains('DISTRO_FEATURES', 'wayland', '', \
-		bb.utils.contains('DISTRO_FEATURES',     'x11', 'x11-base x11-sato', \
+    debug-tweaks \
+    tools-profile \
+    tools-sdk \
+    package-management \
+    splash \
+    nfs-server \
+    tools-debug \
+    ssh-server-dropbear \
+    tools-testapps \
+    hwcodecs \
+    ${@bb.utils.contains('DISTRO_FEATURES', 'wayland', 'weston', \
+       bb.utils.contains('DISTRO_FEATURES',     'x11', 'x11-base x11-sato', \
                                                        '', d), d)} \
 "
+
+
+HANTRO_PKGS = ""
+HANTRO_PKGS_mx8mm = "imx-vpu-hantro-daemon"
+HANTRO_PKGS_mx8mp = "imx-vpu-hantro-daemon"
+HANTRO_PKGS_mx8mq = "imx-vpu-hantro-daemon"
+
+
 ERPC_COMPS ?= ""
 ERPC_COMPS_append_mx7ulp = "packagegroup-imx-erpc"
 
 ISP_PKGS = ""
 ## ISP_PKGS_mx8mp = "packagegroup-imx-isp"
-
 
 # Install fonts
 QT5_FONTS = "ttf-dejavu-common ttf-dejavu-sans \
@@ -42,28 +46,28 @@ QT5_FONTS = "ttf-dejavu-common ttf-dejavu-sans \
 QT5_QTQUICK3D = "qtquick3d qtquick3d-dev"
 
 QT5_IMAGE = " \
-    ${QT5_QTQUICK3D} \
-    ${QT5_FONTS} \
-    ${@bb.utils.contains('DISTRO_FEATURES', 'x11', 'libxkbcommon', '', d)} \
-    ${@bb.utils.contains('DISTRO_FEATURES', 'wayland', 'qtwayland qtwayland-plugins', '', d)}\
-    ${@bb.utils.contains('DISTRO_FEATURES', 'opengl', 'qt3d-dev', '', d)} \
-    ${@bb.utils.contains('DISTRO_FEATURES', 'opengl', 'qt3d-qmlplugins', '', d)} \
-    qtdeclarative-dev \
-    ${@bb.utils.contains('DISTRO_FEATURES', 'opengl', 'qtdeclarative-qmlplugins', '', d)} \
-    qtmqtt-dev \
-    qtmultimedia-dev \
-    ${@bb.utils.contains('DISTRO_FEATURES', 'opengl', 'qtmultimedia-qmlplugins', '', d)} \
-    qtserialport-dev \
-    qtserialbus-dev \
-    qtwebsockets-dev \
-    ${@bb.utils.contains('DISTRO_FEATURES', 'opengl', 'qtwebsockets-qmlplugins', '', d)} \
-    qtquickcontrols2 \
-    qtquickcontrols2-dev \
-    qtquickcontrols-qmlplugins \
+	${QT5_QTQUICK3D} \
+	${QT5_FONTS} \
+	${@bb.utils.contains('DISTRO_FEATURES', 'x11', 'libxkbcommon', '', d)} \
+	${@bb.utils.contains('DISTRO_FEATURES', 'wayland', 'qtwayland qtwayland-plugins', '', d)}\
+	${@bb.utils.contains('DISTRO_FEATURES', 'opengl', 'qt3d-dev', '', d)} \
+	${@bb.utils.contains('DISTRO_FEATURES', 'opengl', 'qt3d-qmlplugins', '', d)} \
+	qtdeclarative-dev \
+	${@bb.utils.contains('DISTRO_FEATURES', 'opengl', 'qtdeclarative-qmlplugins', '', d)} \
+	qtmqtt-dev \
+	qtmultimedia-dev \
+	${@bb.utils.contains('DISTRO_FEATURES', 'opengl', 'qtmultimedia-qmlplugins', '', d)} \
+	qtserialport-dev \
+	qtserialbus-dev \
+	qtwebsockets-dev \
+	${@bb.utils.contains('DISTRO_FEATURES', 'opengl', 'qtwebsockets-qmlplugins', '', d)} \
+	qtquickcontrols2 \
+	qtquickcontrols2-dev \
+	qtquickcontrols-qmlplugins \
+	packagegroup-qt5-eng-qtcreator-debug \
 "
 
-PKG_DEBUG = "\
-	brcm-patchram-plus \
+PKG_DEBUG = "\	
 	cantest \
 	canutils \
 	devmem2 \
@@ -78,10 +82,6 @@ PKG_DEBUG = "\
 	parted \
 	e2fsprogs-resize2fs \
 	serialtools \
-	tslib \
-	tslib-calibrate \
-	tslib-conf \
-	tslib-tests \
 	usbutils \
 	linux-firmware \
 	nvme-cli \
@@ -89,28 +89,19 @@ PKG_DEBUG = "\
 "
 
 IMAGE_INSTALL += " \
+	brcm-patchram-plus \
+	imx8-brcm \
+	linux-firmware-bcm43430 \
 	packagegroup-core-full-cmdline \
 	packagegroup-tools-bluetooth \
-	packagegroup-fsl-tools-audio \
 	packagegroup-fsl-gstreamer1.0 \
 	packagegroup-fsl-gstreamer1.0-full \
-	packagegroup-qt5-eng-qtcreator-debug \
 	${@bb.utils.contains('DISTRO_FEATURES', 'wayland', 'weston-init', '', d)} \
 	${@bb.utils.contains('DISTRO_FEATURES', 'x11 wayland', 'weston-xwayland xterm', '', d)} \
 	${ERPC_COMPS} \
-	${ISP_PKGS} \
-	${QT5_IMAGE} \
+	${ISP_PKGS} \	
 	${PKG_DEBUG} \
+	${HANTRO_PKGS} \
 "
 
-IMAGE_INSTALL_append_mx6ull += "\
-	engicam-mtd-script \
-	imx-kobs \
-	mtd-utils \
-	mtd-utils-ubifs \
-"
-
-##IMAGE_INSTALL_append_mx8mp += "\
-##	engicam-emmc-tools \
-##"
-##	imx-test \ 
+# ${QT5_IMAGE} 

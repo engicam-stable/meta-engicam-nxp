@@ -1,28 +1,32 @@
 # Copyright (C) 2013-2016 Freescale Semiconductor
-# Copyright 2017-2020 NXP
+# Copyright 2017-2021 NXP
 
-DESCRIPTION = "i.MX U-Boot suppporting Engicam boards."
-require u-boot-common.inc
+DESCRIPTION = "i.MX U-Boot suppporting i.MX reference boards."
+SECTION = "bootloaders"
+DEPENDS += "flex-native bison-native  dtc-native"
+
 require recipes-bsp/u-boot/u-boot.inc
-inherit pythonnative
+inherit fsl-u-boot-localversion
+
+S = "${WORKDIR}/git"
+B = "${WORKDIR}/build"
+
+do_configure[cleandirs] = "${B}"
 
 FILESEXTRAPATHS_prepend := "${THISDIR}/files:"
-
 PROVIDES += "u-boot"
-DEPENDS_append = " dtc-native"
 
 LICENSE = "GPLv2+"
 LIC_FILES_CHKSUM = "file://Licenses/gpl-2.0.txt;md5=b234ee4d69f5fce4486a80fdaf4a4263"
 
-UBOOT_BRANCH ?= "2020.04"
 UBOOT_SRC ?= "git://github.com/engicam-stable/u-boot-engicam-nxp.git;protocol=http"
-SRC_URI = "${UBOOT_SRC};branch=${UBOOT_BRANCH}"
+
+SRCBRANCH = "2021.04"
+SRC_URI = "${UBOOT_SRC};branch=${SRCBRANCH}"
+
 SRCREV_default = "${AUTOREV}"
-PV = "${UBOOT_BRANCH}+git${SRCPV}"
 
-S = "${WORKDIR}/git"
-
-inherit fsl-u-boot-localversion
+LOCALVERSION ?= "-5.10.35-2.0.0"
 
 BOOT_TOOLS = "imx-boot-tools"
 
@@ -49,8 +53,7 @@ do_deploy_append_mx8m () {
 }
 
 PACKAGE_ARCH = "${MACHINE_ARCH}"
-COMPATIBLE_MACHINE = "(mx6|mx7|mx8)"
+COMPATIBLE_MACHINE = "(mx6|mx8)"
 
 UBOOT_NAME_mx6 = "u-boot-${MACHINE}.bin-${UBOOT_CONFIG}"
-UBOOT_NAME_mx7 = "u-boot-${MACHINE}.bin-${UBOOT_CONFIG}"
 UBOOT_NAME_mx8 = "u-boot-${MACHINE}.bin-${UBOOT_CONFIG}"
