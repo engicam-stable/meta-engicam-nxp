@@ -1,0 +1,56 @@
+From 7914681597e690612e083987edf1946179da22ae Mon Sep 17 00:00:00 2001
+From: Mirko Ardinghi <mirko.ardinghi@engicam.com>
+Date: Mon, 18 Oct 2021 14:11:50 +0200
+Subject: [PATCH] Added can
+
+---
+ arch/arm/boot/dts/Makefile                    |  1 +
+ .../imx6ull-microgea-microdev-lcd7-can.dts    | 24 +++++++++++++++++++
+ 2 files changed, 25 insertions(+)
+ create mode 100644 arch/arm/boot/dts/imx6ull-microgea-microdev-lcd7-can.dts
+
+diff --git a/arch/arm/boot/dts/Makefile b/arch/arm/boot/dts/Makefile
+index 1b3f4c335cbd..a055f7520f57 100644
+--- a/arch/arm/boot/dts/Makefile
++++ b/arch/arm/boot/dts/Makefile
+@@ -702,6 +702,7 @@ dtb-$(CONFIG_SOC_IMX6UL) += \
+ 	imx6ulz-14x14-evk-emmc.dtb \
+ 	imx6ull-microgea-microdev.dtb \
+ 	imx6ull-microgea-microdev-lcd7.dtb \
++	imx6ull-microgea-microdev-lcd7-can.dtb \
+ 	imx6ull-microgea-microdev-rev3.dtb \
+ 	imx6ull-gea-starterkit.dtb
+ dtb-$(CONFIG_SOC_IMX7D) += \
+diff --git a/arch/arm/boot/dts/imx6ull-microgea-microdev-lcd7-can.dts b/arch/arm/boot/dts/imx6ull-microgea-microdev-lcd7-can.dts
+new file mode 100644
+index 000000000000..045ae616e005
+--- /dev/null
++++ b/arch/arm/boot/dts/imx6ull-microgea-microdev-lcd7-can.dts
+@@ -0,0 +1,24 @@
++/*
++ * Copyright (C) 2016 Freescale Semiconductor, Inc.
++ * Copyright 2017 NXP
++ *
++ * This program is free software; you can redistribute it and/or modify
++ * it under the terms of the GNU General Public License version 2 as
++ * published by the Free Software Foundation.
++ */
++
++/dts-v1/;
++
++#include <dt-bindings/input/input.h>
++#include "imx6ull-microgea-microdev-lcd7.dts"
++
++&can2 {
++	pinctrl-names = "default";
++	pinctrl-0 = <&pinctrl_flexcan2>;
++	xceiver-supply = <&reg_out_3v3>;
++	status = "okay";
++};
++
++&uart2 {
++	status = "disabled";
++};
+-- 
+2.25.1
+
