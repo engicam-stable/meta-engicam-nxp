@@ -68,6 +68,7 @@ QT5_IMAGE = " \
 "
 
 PKG_DEBUG = "\	
+  alsa-utils \
 	cantest \
 	canutils \
 	devmem2 \
@@ -92,6 +93,7 @@ IMAGE_INSTALL += " \
 	brcm-patchram-plus \
 	imx8-brcm \
 	linux-firmware-bcm43430 \
+	linux-firmware-sd8897 \
 	packagegroup-core-full-cmdline \
 	packagegroup-tools-bluetooth \
 	packagegroup-fsl-gstreamer1.0 \
