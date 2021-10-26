@@ -29,8 +29,8 @@ SRC_URI = "${KERNEL_SRC};branch=${KERNEL_BRANCH}"
 
 SRCREV_default = "${AUTOREV}"
 
-PV = "5.10.35"
-
+PVBASE = "5.10.35"
+PV = "${PVBASE}+git${SRCPV}"
 S = "${WORKDIR}/git"
 
 LINUX_VERSION = "5.10.35"
