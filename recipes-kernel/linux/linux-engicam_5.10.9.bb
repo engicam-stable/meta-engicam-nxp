@@ -14,11 +14,11 @@ DEPENDS += "lzop-native bc-native"
 
 KERNEL_BRANCH ?= "5.10.9"
 KERNEL_SRC ?= "git://github.com/engicam-stable/linux-engicam-nxp.git;protocol=http"
-SRC_URI = "${KERNEL_SRC};branch=${KERNEL_BRANCH} \
-          file://0001-Added-can.patch "
+SRC_URI = "${KERNEL_SRC};branch=${KERNEL_BRANCH}"
           
 SRCREV_default = "${AUTOREV}"
-PV = "5.10.9"
+PVBASE = "5.10.9"
+PV = "${PVBASE}+git${SRCPV}"
 
 FILES_${KERNEL_PACKAGE_NAME}-base += "${nonarch_base_libdir}/modules/${KERNEL_VERSION}/modules.builtin.modinfo "
 
