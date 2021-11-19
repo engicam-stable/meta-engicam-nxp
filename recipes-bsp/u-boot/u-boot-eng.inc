@@ -6,8 +6,11 @@ LICENSE = "GPLv2+"
 LIC_FILES_CHKSUM = "file://Licenses/README;md5=30503fd321432fc713238f582193b78e"
 PE = "1"
 
-SRC_URI = "git://github.com/engicam-stable/u-boot-engicam_2019.04.git;protocol=https;branch=u-boot-engicam_2019.04_4.19.35"
 
-SRCREV = "40c516e01a46c324acc1f1f0223cd5d30176350d"
+UBOOT_BRANCH ?= "2020.04"
+UBOOT_SRC ?= "git://github.com/engicam-stable/u-boot-engicam-nxp.git;protocol=http"
+SRC_URI = "${UBOOT_SRC};branch=${UBOOT_BRANCH}"
+SRCREV_default = "${AUTOREV}"
+PV = "${UBOOT_BRANCH}+git${SRCPV}"
 
 S = "${WORKDIR}/git"
