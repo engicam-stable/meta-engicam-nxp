@@ -28,7 +28,11 @@ First build
 -----------
 
 ```
-DISTRO=eng-imx-xwayland MACHINE=imx8mp-icore source imx-setup-release.sh -b build
+Clone the repository inside the sources folder:
+git clone https://github.com/engicam-stable/meta-engicam-nxp.git -b dunfell-community-bsp
+
+Then setup the environment from the fsl-community-bsp folder:
+DISTRO=eng-imx-xwayland MACHINE=imx6ull-microgea source setup-environment build
 bitbake-layers add-layer ../sources/meta-engicam-nxp
 bitbake engicam-evaluation-image
 ```
