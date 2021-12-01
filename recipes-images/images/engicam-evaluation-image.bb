@@ -10,19 +10,19 @@ inherit populate_sdk_qt5
 
 ## Select Image Features
 IMAGE_FEATURES += " \
-    debug-tweaks \
-    tools-profile \
-    tools-sdk \
-    package-management \
-    splash \
-    nfs-server \
-    tools-debug \
-    ssh-server-dropbear \
-    tools-testapps \
-    hwcodecs \
-    ${@bb.utils.contains('DISTRO_FEATURES', 'wayland', 'weston', \
-       bb.utils.contains('DISTRO_FEATURES',     'x11', 'x11-base x11-sato', \
-                                                       '', d), d)} \
+	debug-tweaks \
+	tools-profile \
+	tools-sdk \
+	package-management \
+	splash \
+	nfs-server \
+	tools-debug \
+	ssh-server-dropbear \
+	tools-testapps \
+	hwcodecs \
+	${@bb.utils.contains('DISTRO_FEATURES', 'wayland', 'weston', \
+	   bb.utils.contains('DISTRO_FEATURES',     'x11', 'x11-base x11-sato', \
+	                                                   '', d), d)} \
 "
 
 
@@ -64,11 +64,10 @@ QT5_IMAGE = " \
 	qtquickcontrols2 \
 	qtquickcontrols2-dev \
 	qtquickcontrols-qmlplugins \
-	packagegroup-qt5-eng-qtcreator-debug \
 "
 
-PKG_DEBUG = "\	
-  alsa-utils \
+PKG_DEBUG = "\
+	alsa-utils \
 	cantest \
 	canutils \
 	devmem2 \
@@ -87,6 +86,7 @@ PKG_DEBUG = "\
 	linux-firmware \
 	nvme-cli \
 	ldd \
+	fsl-rc-local \
 "
 
 IMAGE_INSTALL += " \
@@ -98,12 +98,12 @@ IMAGE_INSTALL += " \
 	packagegroup-tools-bluetooth \
 	packagegroup-fsl-gstreamer1.0 \
 	packagegroup-fsl-gstreamer1.0-full \
+	packagegroup-qt5-eng-qtcreator-debug \
 	${@bb.utils.contains('DISTRO_FEATURES', 'wayland', 'weston-init', '', d)} \
 	${@bb.utils.contains('DISTRO_FEATURES', 'x11 wayland', 'weston-xwayland xterm', '', d)} \
 	${ERPC_COMPS} \
-	${ISP_PKGS} \	
+	${ISP_PKGS} \
+	${QT5_IMAGE} \
 	${PKG_DEBUG} \
 	${HANTRO_PKGS} \
 "
-
-# ${QT5_IMAGE} 
