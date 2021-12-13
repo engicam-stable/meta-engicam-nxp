@@ -1,6 +1,6 @@
 
 meta-engicam-nxp
-================ls 
+================ 
 
 Based on NXP Yocto Gatesgarth 2.3 GA
 
@@ -28,7 +28,6 @@ SOMs supported
 - imx8mp-icore
 - imx8mp-smarcore
 - imx8qx-icore
-
 
 Supported distros
 -----------------
