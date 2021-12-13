@@ -17,10 +17,17 @@ git clone https://github.com/engicam-stable/meta-engicam-nxp.git -b gatesgarth
 SOMs supported
 --------------
 
-- imx8mp-icore
-- imx8mp-icore-4gb
-- imx8mm-icore
+- imx6ull-gea
+- imx6ull-gea-emmc
 - imx6ull-microgea
+- imx6ull-microgea-y1
+- imx8dx-icore
+- imx8mm-icore-2gb
+- imx8mm-icore
+- imx8mp-icore-4gb
+- imx8mp-icore
+- imx8mp-smarcore
+- imx8qx-icore
 
 
 Supported distros
