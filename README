@@ -1,13 +1,9 @@
+
 meta-engicam-nxp
 ================
 
------------------------
-
-# ** ALPHA RELEASE **
-
------------------------
-
 Based on NXP Yocto hardknott 2.0 GA
+
 
 Retrieve the sources
 --------------------
@@ -19,14 +15,20 @@ repo init -u https://source.codeaurora.org/external/imx/imx-manifest -b imx-linu
 repo sync
 ```
 
-
 SOMs supported
 --------------
 
 - imx8mp-icore
 - imx8mp-icore-2e
 - imx8mm-icore
+- imx8mm-icore-2gb
+- imx8mp-smarcore
 
+Supported distros
+-----------------
+
+- fsl-imx-wayland: Distro for Wayland without X11. This distro includes wayland feature but doesn’t have X11 support.
+- fsl-imx-xwayland: Distro for Wayland with X11. This distro includes both wayland and X11 emulation features.
 
 Images available
 ----------------
