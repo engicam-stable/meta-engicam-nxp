@@ -91,7 +91,6 @@ PKG_DEBUG = "\
 
 IMAGE_INSTALL += " \
 	brcm-patchram-plus \
-	imx8-brcm \
 	linux-firmware-bcm43430 \
 	linux-firmware-sd8897 \
 	packagegroup-core-full-cmdline \
@@ -106,4 +105,8 @@ IMAGE_INSTALL += " \
 	${QT5_IMAGE} \
 	${PKG_DEBUG} \
 	${HANTRO_PKGS} \
+"
+
+IMAGE_INSTALL_append_mx8m += "\
+	imx8-brcm \
 "
