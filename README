@@ -23,6 +23,8 @@ SOMs supported
 - imx8mm-icore
 - imx8mm-icore-2gb
 - imx8mp-smarcore
+- imx8xd-smarcore
+- imx8xq-smarcore
 
 Supported distros
 -----------------
