@@ -84,7 +84,6 @@ PKG_DEBUG = "\
 	nvme-cli \
 	ldd \
 	u-boot-fw-utils \
-	imx8-brcm \
 	fsl-rc-local \
 "
 
@@ -109,6 +108,9 @@ IMAGE_INSTALL_append_mx6ull += "\
 	mtd-utils \
 	mtd-utils-ubifs \
 "
+
+IMAGE_INSTALL_append_mx8mm = " imx8-brcm "
+IMAGE_INSTALL_append_mx8mp = " imx8-brcm "
 
 ##IMAGE_INSTALL_append_mx8mp += "\
 ##	engicam-emmc-tools \
