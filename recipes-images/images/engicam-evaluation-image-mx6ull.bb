@@ -82,5 +82,11 @@ PKG_DEBUG = "\
 CORE_IMAGE_EXTRA_INSTALL += " \
 	packagegroup-tools-bluetooth \
 	${PKG_DEBUG} \
-  ${QT5_IMAGE} \
+	${QT5_IMAGE} \
+	packagegroup-qt5-eng-qtcreator-debug \
+	${@bb.utils.contains('DISTRO_FEATURES', 'wayland', 'weston-init', '', d)} \
+	${@bb.utils.contains('DISTRO_FEATURES', 'x11 wayland', 'weston-xwayland xterm', '', d)} \
+	packagegroup-fsl-tools-audio \
+	packagegroup-fsl-gstreamer1.0 \
+	packagegroup-fsl-gstreamer1.0-full \
 "

@@ -1,0 +1,1 @@
+PLATFORM_mx6ull = "IMX6UL"
