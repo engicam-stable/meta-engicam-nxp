@@ -90,3 +90,6 @@ CORE_IMAGE_EXTRA_INSTALL += " \
 	packagegroup-fsl-gstreamer1.0 \
 	packagegroup-fsl-gstreamer1.0-full \
 "
+
+TOOLCHAIN_TARGET_TASK_remove = "imx6ull-lwb5plus"
+TOOLCHAIN_HOST_TASK_remove = "imx6ull-lwb5plus"
