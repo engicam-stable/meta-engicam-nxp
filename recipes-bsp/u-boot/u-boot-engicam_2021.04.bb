@@ -16,18 +16,15 @@ PROVIDES += "u-boot"
 LICENSE = "GPLv2+"
 LIC_FILES_CHKSUM = "file://Licenses/gpl-2.0.txt;md5=b234ee4d69f5fce4486a80fdaf4a4263"
 
-#UBOOT_SRC ?= "git://github.com/engicam-stable/u-boot-engicam-nxp.git;protocol=http"
-UBOOT_SRC = "git:///home/mirko/u-boot-source/honister/git/uboot-imx/;protocol=file"
+UBOOT_SRC ?= "git://192.168.2.254/yocto_honister/uboot-imx.git;protocol=http"
+#UBOOT_SRC = "git:///home/mirko/u-boot-source/honister/git/uboot-imx/;protocol=file"
 SRCBRANCH = "imx8mp"
 SRC_URI = "${UBOOT_SRC};branch=${SRCBRANCH}"
-
-SRCREV_default = "${AUTOREV}"
-
+SRCREV = "2c69d67acfaaefc8606e114509f7be9cf1f9078f"
 LOCALVERSION = "-${SRCBRANCH}"
-
 BOOT_TOOLS = "imx-boot-tools"
 
-do_deploy:append_mx8m () {
+do_deploy:append:mx8m () {
     # Deploy u-boot-nodtb.bin and fsl-imx8mq-XX.dtb, to be packaged in boot binary by imx-boot
     if [ -n "${UBOOT_CONFIG}" ]
     then
