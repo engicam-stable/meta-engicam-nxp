@@ -19,7 +19,7 @@ DEPENDS += "lzop-native bc-native"
 KERNEL_SRC = "git://192.168.2.254/yocto_honister/linux-imx.git;protocol=http"
 SRCBRANCH = "imx8mp"
 SRC_URI = "${KERNEL_SRC};branch=${SRCBRANCH}"
-SRCREV = "679af66d3356c85f6c7b20c6068ce1cbb4a4065f"
+SRCREV = "87469240a991acf119189415e859b6b9394aecfc"
 LOCALVERSION = "-${SRCBRANCH}"
 
 # PV is defined in the base in linux-imx.inc file and uses the LINUX_VERSION definition

@@ -6,7 +6,14 @@ DESCRIPTION = "Engicam evaluation image"
 LICENSE = "MIT"
 
 inherit core-image
-inherit populate_sdk_qt6_base
+
+ROOTFS_POSTPROCESS_COMMAND:append:mx8 = "fix_bcm43430; "
+
+fix_bcm43430() { 
+  cd ${IMAGE_ROOTFS}/lib/firmware/brcm
+  ln -sf brcmfmac43430-sdio.bin brcmfmac43430-sdio.engi,icore-imx8mp.bin
+}
+
 
 ## Select Image Features
 IMAGE_FEATURES += " \
@@ -37,6 +44,8 @@ G2D_SAMPLES:imxgpu2d = "imx-g2d-samples"
 
 ENGICAM_PKG = "\
 	\
+  brcm-patchram-plus \
+  \
 	cantest \
 	canutils \
 	\
@@ -54,6 +63,8 @@ ENGICAM_PKG = "\
 	\
 	ldd \
 	linux-firmware \
+	linux-firmware-bcm43430 \
+	linux-firmware-sd8897 \
 	\
 	minicom \
 	\
@@ -86,4 +97,8 @@ CORE_IMAGE_EXTRA_INSTALL += " \
 
 IMAGE_INSTALL += " \
     tzdata \
+"
+
+IMAGE_INSTALL:append:mx8m += "\
+	imx8-brcm \
 "
