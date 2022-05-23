@@ -1,6 +1,4 @@
 CFLAGS=-I.
-LDFLAGS=
-LDLIBS=
 
 EXEC = cantest
 OBJS = cansend.o lib.o
@@ -8,7 +6,7 @@ OBJS = cansend.o lib.o
 all: $(EXEC)
 
 $(EXEC): $(OBJS)
-	$(CC) $(LDFLAGS) -o $@ $(OBJS) $(LDLIBS)
+	$(CC) $(LDFLAGS) -o $@ $(OBJS) ${LDFLAGS}
 
 romfs:
 	$(ROMFSINST) -e CONFIG_USER_CAN_TEST /usr/bin/cantest

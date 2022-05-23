@@ -17,7 +17,7 @@ LIC_FILES_CHKSUM = "file://COPYING;md5=6bc538ed5bd9a7fc9398086aedcd7e46"
 DEPENDS += "lzop-native bc-native"
 
 KERNEL_SRC = "git://192.168.2.254/yocto_honister/linux-imx.git;protocol=http"
-SRCBRANCH = "imx8mp"
+SRCBRANCH = "main"
 SRC_URI = "${KERNEL_SRC};branch=${SRCBRANCH}"
 SRCREV = "87469240a991acf119189415e859b6b9394aecfc"
 LOCALVERSION = "-${SRCBRANCH}"

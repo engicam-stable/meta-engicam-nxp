@@ -18,7 +18,7 @@ LIC_FILES_CHKSUM = "file://Licenses/gpl-2.0.txt;md5=b234ee4d69f5fce4486a80fdaf4a
 
 UBOOT_SRC ?= "git://192.168.2.254/yocto_honister/uboot-imx.git;protocol=http"
 #UBOOT_SRC = "git:///home/mirko/u-boot-source/honister/git/uboot-imx/;protocol=file"
-SRCBRANCH = "imx8mp"
+SRCBRANCH = "main"
 SRC_URI = "${UBOOT_SRC};branch=${SRCBRANCH}"
 SRCREV = "2c69d67acfaaefc8606e114509f7be9cf1f9078f"
 LOCALVERSION = "-${SRCBRANCH}"
