@@ -16,10 +16,10 @@ LIC_FILES_CHKSUM = "file://COPYING;md5=6bc538ed5bd9a7fc9398086aedcd7e46"
 
 DEPENDS += "lzop-native bc-native"
 
-KERNEL_SRC = "git://192.168.2.254/yocto_honister/linux-imx.git;protocol=http"
-SRCBRANCH = "main"
+KERNEL_SRC ?= "git://github.com/engicam-stable/linux-engicam-nxp.git;protocol=http"
+SRCBRANCH = "5.15.5"
 SRC_URI = "${KERNEL_SRC};branch=${SRCBRANCH}"
-SRCREV = "87469240a991acf119189415e859b6b9394aecfc"
+SRCREV_default = "${AUTOREV}"
 LOCALVERSION = "-${SRCBRANCH}"
 
 # PV is defined in the base in linux-imx.inc file and uses the LINUX_VERSION definition
