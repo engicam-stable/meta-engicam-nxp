@@ -20,6 +20,7 @@ KERNEL_SRC ?= "git://github.com/engicam-stable/linux-engicam-nxp.git;protocol=ht
 SRCBRANCH = "5.15.5"
 SRC_URI = "${KERNEL_SRC};branch=${SRCBRANCH}"
 SRCREV_default = "${AUTOREV}"
+PV = "${SRCBRANCH}+git${SRCPV}"
 LOCALVERSION = "-${SRCBRANCH}"
 
 # PV is defined in the base in linux-imx.inc file and uses the LINUX_VERSION definition
