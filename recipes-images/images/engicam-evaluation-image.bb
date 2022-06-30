@@ -11,7 +11,7 @@ ROOTFS_POSTPROCESS_COMMAND:append:mx8 = "fix_bcm43430; "
 
 fix_bcm43430() { 
   cd ${IMAGE_ROOTFS}/lib/firmware/brcm
-  ln -sf brcmfmac43430-sdio.bin brcmfmac43430-sdio.engi,icore-imx8mp.bin
+  ln -sf brcmfmac43430-sdio.bin brcmfmac43430-sdio.engi,imx8-icore.bin
 }
 
 

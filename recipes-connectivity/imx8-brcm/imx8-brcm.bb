@@ -2,18 +2,11 @@
 LICENSE = "CLOSED"
 
 
-SRC_URI += "file://brcmfmac43430-sdio.engi,icore-imx8mm.txt"
-SRC_URI += "file://brcmfmac43430-sdio.engi,icore-imx8mp.txt"
+SRC_URI += "file://brcmfmac43430-sdio.engi,imx8-icore.txt"
 
-
-do_install:mx8mm() {
+do_install:mx8() {
 	install -d ${D}/lib/firmware/brcm/
-	install -m 0755 ${WORKDIR}/brcmfmac43430-sdio.engi,icore-imx8mm.txt ${D}/lib/firmware/brcm/brcmfmac43430-sdio.engi,icore-imx8mm.txt
-}
-
-do_install:mx8mp() {
-	install -d ${D}/lib/firmware/brcm/
-	install -m 0755 ${WORKDIR}/brcmfmac43430-sdio.engi,icore-imx8mp.txt ${D}/lib/firmware/brcm/brcmfmac43430-sdio.engi,icore-imx8mp.txt
+	install -m 0755 ${WORKDIR}/brcmfmac43430-sdio.engi,imx8-icore.txt ${D}/lib/firmware/brcm/brcmfmac43430-sdio.engi,imx8-icore.txt
 }
 
 FILES:${PN} = "/lib/firmware/brcm/*"
