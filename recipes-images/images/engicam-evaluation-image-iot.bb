@@ -28,7 +28,6 @@ PKG_DEBUG = "\
 	e2fsprogs-resize2fs \
 	serialtools \
 	usbutils \
-	imx6ull-brcm \
 	imx6ull-lwb5plus \
 	engicam-mtd-script \
 	mtd-utils \
@@ -55,8 +54,6 @@ PKG_IOT = "\
 
 IMAGE_INSTALL += " \
 	brcm-patchram-plus \
-	linux-firmware-bcm43430 \
-	linux-firmware-sd8897 \
 	packagegroup-core-full-cmdline \
 	packagegroup-tools-bluetooth \
 	${PKG_DEBUG} \
