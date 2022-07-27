@@ -19,9 +19,9 @@ LIC_FILES_CHKSUM = "file://Licenses/gpl-2.0.txt;md5=b234ee4d69f5fce4486a80fdaf4a
 UBOOT_SRC ?= "git://github.com/engicam-stable/u-boot-engicam-nxp.git;protocol=http"
 SRCBRANCH = "lf_v2021.04"
 SRC_URI = "${UBOOT_SRC};branch=${SRCBRANCH}"
-SRCREV_default = "${AUTOREV}"
-PV = "${SRCBRANCH}+git${SRCPV}"
-LOCALVERSION = "-${SRCBRANCH}"
+
+SRCREV = "e3524f1257fe3e0da626950cfaaa87e3d813dcf9"
+
 BOOT_TOOLS = "imx-boot-tools"
 
 do_deploy:append:mx8m () {
