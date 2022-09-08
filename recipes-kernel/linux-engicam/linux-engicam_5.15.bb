@@ -20,7 +20,7 @@ KERNEL_SRC ?= "git://github.com/engicam-stable/linux-engicam-nxp.git;protocol=ht
 SRCBRANCH = "5.15.5"
 SRC_URI = "${KERNEL_SRC};branch=${SRCBRANCH}"
 
-SRCREV = "8daa6d6c8d4ed79ef12553aad4df9c39ff47ba33"
+SRCREV = "691b053e641b3e1d186cfe7441ce98a4e0eaa500"
 
 # PV is defined in the base in linux-imx.inc file and uses the LINUX_VERSION definition
 # required by kernel-yocto.bbclass.
