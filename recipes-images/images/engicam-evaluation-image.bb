@@ -61,6 +61,8 @@ ENGICAM_PKG = "\
 	i2c-tools \
 	iproute2 \
 	\
+	libgpiod \
+  libgpiod-tools \
 	ldd \
 	linux-firmware \
 	linux-firmware-bcm43430 \
