@@ -18,8 +18,13 @@ SOMs supported
 --------------
 
 - imx6ull-microgea
+- imx8mm-icore-2gb
+- imx8mm-icore
+- imx8mp-icore-1gb
 - imx8mp-icore
+- imx8mp-smarcore
 - imx8xd-icore
+- imx8xq-icore
 
 Supported distros
 -----------------
