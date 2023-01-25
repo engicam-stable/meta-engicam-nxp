@@ -22,6 +22,7 @@ SOMs supported
 - imx8mm-icore
 - imx8mp-icore-1gb
 - imx8mp-icore
+- imx8mp-icore-2e
 - imx8mp-smarcore
 - imx8xd-icore
 - imx8xq-icore
