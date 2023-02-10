@@ -20,6 +20,7 @@ SOMs supported
 
 - imx8mp-icore
 - imx8mp-icore-2e
+- imx8mp-icore-2e-phy [1]
 - imx8mm-icore
 - imx8mm-icore-2gb
 - imx8mp-smarcore
@@ -47,3 +48,6 @@ bitbake-layers add-layer ../sources/meta-engicam-nxp
 bitbake engicam-evaluation-image
 ```
 
+
+
+[1] The machine imx8mp-icore-2e-phy apply a kernel patch out of tree. See 0001-mx8mp-icore-2e-net-mac-devicetree-added.patch file under linux-engicam folder.
