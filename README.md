@@ -21,6 +21,7 @@ SOMs supported
 - imx8mm-icore-2gb
 - imx8mm-icore
 - imx8mp-icore-1gb
+- imx8mp-icore-4gb
 - imx8mp-icore-2e
 - imx8mp-icore-fasteth
 - imx8mp-icore
