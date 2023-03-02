@@ -71,8 +71,10 @@ ENGICAM_PKG = "\
 	minicom \
 	\
 	parted \
+	ppp \
 	\
 	serialtools \
+	stress \
 	\
 	usbutils \
 	\
