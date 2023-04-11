@@ -8,7 +8,7 @@ Based on NXP Yocto Zeus 2.3 GA
 ```
 mkdir imx-yocto-bsp
 cd imx-yocto-bsp
-repo init -u https://source.codeaurora.org/external/imx/imx-manifest -b imx-linux-zeus -m imx-5.4.70-2.3.0.xml
+repo init -u https://github.com/nxp-imx/imx-manifest -b imx-linux-zeus -m imx-5.4.70-2.3.0.xml
 repo sync
 ```
 
