@@ -1,0 +1,53 @@
+# imx8mp-icore-2e-mac
+
+https://github.com/wkz/phytool.git
+
+la eth1 è attaccata a eqos ed è il J22
+
+ mount /dev/mmcblk1p1 /mnt/
+
+
+
+root@imx8mp-icore-2e:~# ./phytool print  eth0/0
+ieee-phy: id:00000000
+
+   ieee-phy: reg:BMCR(0x00) val:0x1000
+      flags:          -reset -loopback +aneg-enable -power-down -isolate -aneg-restart -collision-test
+      speed:          10-half
+
+   ieee-phy: reg:BMSR(0x01) val:0x402c
+      capabilities:   -100-b4 +100-f -100-h -10-f -10-h -100-t2-f -100-t2-h
+      flags:          -ext-status +aneg-complete -remote-fault +aneg-capable +link -jabber -ext-register
+
+
+
+
+
+root@imx8mp-icore-2e:~# ./phytool print  eth1/7
+ieee-phy: id:0x00221622
+
+   ieee-phy: reg:BMCR(0x00) val:0x1140
+      flags:          -reset -loopback +aneg-enable -power-down -isolate -aneg-restart -collision-test
+      speed:          1000-full
+
+   ieee-phy: reg:BMSR(0x01) val:0x796d
+      capabilities:   -100-b4 +100-f +100-h +10-f +10-h -100-t2-f -100-t2-h
+      flags:          +ext-status +aneg-complete -remote-fault +aneg-capable +link -jabber +ext-register
+
+
+
+data8 =  BIT(4);
+printk("[ML] set 0x6301 bit 4 %u",data8);
+ksz_pwrite8(dev, port, 0x6301, BIT(4));
+
+
+
+
+
+
+
+
+IMX_BOOT_SEEK
+
+make mrproper && make imx93_icore_defconfig && make -j 16
+
