@@ -1,7 +1,7 @@
 #!/bin/bash
 # EMMC programmer
 
-ver="ver. 1.10, 2020-04-27"
+ver="ver. 1.11, 2023-05-03"
 filebytftp=false
 
 function error
@@ -96,12 +96,12 @@ function usage
 
 	if [ "$1" == "emmc_boot" ];
 	then
-		echo "Usage: ${1}${ext} [-h] <emmc_device> $path <soc type: mx8qx mx8qm mx8mm mx8m mx8mp>"
+		echo "Usage: ${1}${ext} [-h] <emmc_device> $path <soc type: mx8qx mx8qm mx8mm mx8m mx8mp mx8ulp mx93>"
 	fi
 	
 	if [ "$1" == "emmc_sdcard" ];
 	then
-		echo "Usage: ${1}${ext} [-h] <emmc_device>  <path file .sdcard/.sdcard.bz2>"
+		echo "Usage: ${1}${ext} [-h] <emmc_device>  <path file .sdcard/.sdcard.bz2/.wic/.wic.zst>"
 	fi
 	
 	if [ "$filebytftp" == true ];
@@ -156,7 +156,7 @@ function write_fs
 	then
 		
 		echo "Extract filesystem"
-		tar xjvfm $2 -C $tempdir
+		tar xvfm $2 -C $tempdir
 	
 		echo "Umount device"
 		umount $tempdir
@@ -259,12 +259,15 @@ function write_sdcard
   filename=$2
   ext="${filename##*.}"
 
-  if [ "$ext" == "sdcard" ];
+  if [ "$ext" == "sdcard" -o "$ext" == "wic" ];
   then
     dd if=$2 of=$1 bs=16M status=progress
   elif [ "$ext" == "bz2" ];
   then
     bzip2 -cd $2 | dd of=$1 bs=16M status=progress
+  elif [ "$ext" == "zst" ];
+  then
+    zstdcat -cd $2 | dd of=$1 bs=16M status=progress
   else
     echo "Not supported format"
     return
@@ -332,10 +335,10 @@ then
 	then
 		usage $command
 	fi
-	
+
 	if [ "$command" == "emmc_boot" ];
 	then
-    declare -a types=("mx8qx" "mx8qm" "mx8mm" "mx8m" "mx8mp")
+    declare -a types=("mx8qx" "mx8qm" "mx8mm" "mx8m" "mx8mp" "mx8ulp" "mx93")
     for i in "${types[@]}"
     do
       if [ "$i" == "$2" ]; 
@@ -448,7 +451,22 @@ else
 
 	if grep -q "fs" <<< "$command" ;
 	then
-		check_file "${pathfile}rootfs.tar.bz2"
+		rootfsname=""
+		if [ -f "${pathfile}rootfs.tar.bz2" ];
+		then
+			rootfsname="${pathfile}rootfs.tar.bz2"
+		else
+			if [ -f "${pathfile}rootfs.tar.zst" ];
+			then
+				rootfsname="${pathfile}rootfs.tar.zst"
+			fi
+		fi
+
+		if [ "$rootfsname" == "" ];
+		then
+			echo "ERROR: file rootfs.tar.bz2/rootfs.tar.zst not found in ${pathfile}"
+			exit
+		fi
 	fi
 		
 	if grep -q "ker" <<< "$command" ;
@@ -479,7 +497,7 @@ then
 		fi
 	fi
 	
-	write_fs $DEVICE "${pathfile}rootfs.tar.bz2"
+	write_fs $DEVICE $rootfsname
 fi
 
 if grep -q "ker" <<< "$command" ; # Write kernel

@@ -33,6 +33,8 @@ G2D_SAMPLES:imxgpu2d = "imx-g2d-samples"
 
 ENGICAM_PKG = "\
 	\
+	alsa-utils \
+	\
 	brcm-patchram-plus \
 	\
 	cantest \
@@ -47,13 +49,14 @@ ENGICAM_PKG = "\
 	ethtool \
 	evtest \
 	\
+	firmware-imx-hdmi \
+	\
 	i2c-tools \
 	iproute2 \
 	\
+	ldd \
 	libgpiod \
 	libgpiod-tools \
-	ldd \
-	alsa-utils \
 	linux-firmware-bcm43430 \
 	linux-firmware \
 	\
@@ -64,7 +67,9 @@ ENGICAM_PKG = "\
 	serialtools \
 	\
 	usbutils \
-	firmware-imx-hdmi \
+	\
+	zstd \
+	\
 "
 
 EXTRA_PACKAGE_INSTALL += " \
