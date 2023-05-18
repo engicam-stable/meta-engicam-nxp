@@ -23,7 +23,7 @@ SRC_URI = "git://git.engicam.com/external/linux-engicam-nxp.git;branch=${SRCBRAN
 SRC_URI[sha256sum] = "e83cf5ea603e014ca7e1505465bb8c9cec822451c0a8e6668acc70ae87cf367b"
 S = "${WORKDIR}/git"
 #SRCREV = "${AUTOREV}"
-SRCREV = "3789aba3b9eb405000762e493c6363a3da8d0078"
+SRCREV = "3293fd0e36cc94da62292aae249a7763b83b65b0"
 
 # PV is defined in the base in linux-imx.inc file and uses the LINUX_VERSION definition
 # required by kernel-yocto.bbclass.

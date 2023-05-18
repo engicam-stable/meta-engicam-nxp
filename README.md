@@ -25,6 +25,7 @@ SOMs supported
 - imx8mm-icore
 - imx8ulp-microgea
 - imx93-icore
+- imx6dl-icore-edimm2
 
 Supported distros
 -----------------
@@ -37,6 +38,7 @@ Images available
 ----------------
 
 - engicam-evaluation-image-mx6ull
+- engicam-evaluation-image-mx6
 - engicam-evaluation-image-mx8
 - engicam-evaluation-image-mx93
 
