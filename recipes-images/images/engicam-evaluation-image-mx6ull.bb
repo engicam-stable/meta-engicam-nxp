@@ -35,6 +35,7 @@ PKG_DEBUG = "\
 	mtd-utils \
 	mtd-utils-ubifs \
 	imx-kobs \
+	zstd \
 "
 
 IMAGE_INSTALL += " \

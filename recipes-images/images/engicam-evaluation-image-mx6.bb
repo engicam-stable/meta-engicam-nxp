@@ -40,6 +40,7 @@ PKG_DEBUG = "\
 	lwb-bcm4343w-fw \
 	imx6-brcm \
 	bluez5 \
+	zstd \
 "
 
 IMAGE_INSTALL += " \
