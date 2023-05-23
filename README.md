@@ -26,6 +26,7 @@ SOMs supported
 - imx8ulp-microgea
 - imx93-icore
 - imx6dl-icore-edimm2
+- imx6qd-icore-edimm2
 
 Supported distros
 -----------------
