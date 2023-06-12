@@ -30,7 +30,7 @@ LIC_FILES_CHKSUM = "file://Licenses/gpl-2.0.txt;md5=b234ee4d69f5fce4486a80fdaf4a
 SRC_URI = "${UBOOT_SRC};branch=${SRCBRANCH}"
 UBOOT_SRC = "git://github.com/engicam-stable/u-boot-engicam-nxp-2022.04.git;protocol=https"
 SRCBRANCH = "master"
-SRCREV = "c22c114ed7f22cd33c3d6c5de503988c69738b3c"
+SRCREV = "7b935c0d479ad2eef4953e955574d4f017ebc9fa"
 #SRCREV = "${AUTOREV}"
 LOCALVERSION = "-${SRCBRANCH}"
 PROVIDES += "u-boot"
