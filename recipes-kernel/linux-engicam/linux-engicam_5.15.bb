@@ -11,18 +11,13 @@ i.MX Family Reference Boards. It includes support for many IPs such as GPU, VPU 
 
 require recipes-kernel/linux/linux-imx.inc
 
-LICENSE = "GPL-2.0-only"
+LICENSE = "GPLv2"
 LIC_FILES_CHKSUM = "file://COPYING;md5=6bc538ed5bd9a7fc9398086aedcd7e46"
 
 DEPENDS += "lzop-native bc-native"
-
-SRCBRANCH = "eng_5.15.71"
-LOCALVERSION = "-engicam"
-KBRANCH = "${SRCBRANCH}"
-SRC_URI = "git://git.engicam.com/external/linux-engicam-nxp.git;branch=${SRCBRANCH};protocol=https"
-SRC_URI[sha256sum] = "e83cf5ea603e014ca7e1505465bb8c9cec822451c0a8e6668acc70ae87cf367b"
-S = "${WORKDIR}/git"
-#SRCREV = "${AUTOREV}"
+KERNEL_SRC ?= "git://github.com/engicam-stable/linux-engicam-nxp.git;protocol=http"
+SRCBRANCH = "5.15.71"
+SRC_URI = "${KERNEL_SRC};branch=${SRCBRANCH}"
 SRCREV = "35f80f1fc00da6ea3fe3cf714d5294fc35bb2cb3"
 
 # PV is defined in the base in linux-imx.inc file and uses the LINUX_VERSION definition

@@ -39,7 +39,7 @@ OPTEE_BIN_EXT = "8mm"
 TEE_LOAD_ADDR = "0xbe000000"
 
 PREFERRED_PROVIDER_linux-imx-mfgtool:mx8-nxp-bsp = ""
-PREFERRED_PROVIDER_virtual/kernel:mx8-nxp-bsp = "linux-engicam-imx"
+PREFERRED_PROVIDER_virtual/kernel:mx8-nxp-bsp = "linux-engicam"
 PREFERRED_PROVIDER_virtual/bootloader:mx8-nxp-bsp = "u-boot-engicam"
 PREFERRED_PROVIDER_u-boot:mx8-nxp-bsp = "u-boot-engicam"
 KERNEL_IMAGETYPE:mx8-nxp-bsp = "Image"
