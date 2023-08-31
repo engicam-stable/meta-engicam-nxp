@@ -90,6 +90,7 @@ CORE_IMAGE_EXTRA_INSTALL += " \
 	firmwared \
 	${@bb.utils.contains('DISTRO_FEATURES', 'x11 wayland', 'weston-xwayland xterm', '', d)} \
 	${ENGICAM_PKG} \
+	${EXTRA_PACKAGE_INSTALL} \
 	${G2D_SAMPLES} \
 "
 
