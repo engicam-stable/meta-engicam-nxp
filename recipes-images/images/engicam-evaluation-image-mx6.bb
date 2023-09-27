@@ -8,9 +8,10 @@ LICENSE = "MIT"
 inherit core-image
 
 ## Select Image Features
-IMAGE_FEATURES += "splash package-management ssh-server-dropbear hwcodecs weston"
+IMAGE_FEATURES_mx6 += "splash package-management ssh-server-dropbear hwcodecs weston"
+IMAGE_FEATURES += "splash package-management ssh-server-dropbear hwcodecs"
 
-CORE_IMAGE_BASE_INSTALL += "gtk+3-demo"
+CORE_IMAGE_BASE_INSTALL_mx6 += "gtk+3-demo"
 CORE_IMAGE_BASE_INSTALL += "${@bb.utils.contains('DISTRO_FEATURES', 'x11', 'weston-xwayland matchbox-terminal', '', d)}"
 
 QB_MEM = "-m 512"

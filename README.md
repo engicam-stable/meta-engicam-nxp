@@ -27,6 +27,7 @@ SOMs supported
 - imx93-icore
 - imx6dl-icore-edimm2
 - imx6qd-icore-edimm2
+- imx6sx-smarcore
 
 Supported distros
 -----------------
