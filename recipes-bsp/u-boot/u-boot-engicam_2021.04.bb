@@ -20,7 +20,7 @@ UBOOT_SRC ?= "git://github.com/engicam-stable/u-boot-engicam-nxp.git;protocol=ht
 SRCBRANCH = "lf_v2021.04"
 SRC_URI = "${UBOOT_SRC};branch=${SRCBRANCH}"
 
-SRCREV = "36fa856375eba72c178e6880dbe93c504cb6a384"
+SRCREV = "8403021b96fd36131114cb98f671b1a5073a65aa"
 
 BOOT_TOOLS = "imx-boot-tools"
 
