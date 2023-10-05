@@ -12,7 +12,7 @@ MACHINE_FEATURES += "pci wifi bluetooth"
 # NXP BSP can consume proprietary jailhouse and Marvell drivers
 # OP-TEE is also applicable to NXP BSP, mainline BSP seems not to have
 # a full support for it yet.
-MACHINE_FEATURES:append:use-nxp-bsp = " optee jailhouse mrvl8997"
+MACHINE_FEATURES:append:use-nxp-bsp = " jailhouse mrvl8997"
 
 UBOOT_DTB_NAME = "${KERNEL_DEVICETREE_BASENAME}.dtb"
 
