@@ -70,6 +70,7 @@ ENGICAM_PKG = "\
 	\
 	zstd \
 	\
+	stress-ng \
 "
 
 EXTRA_PACKAGE_INSTALL += " \
