@@ -103,6 +103,11 @@ IMAGE_INSTALL += " \
 	${PKG_DEBUG} \
 "
 
+IMAGE_INSTALL_remove_mx6ull += "\
+	packagegroup-fsl-gstreamer1.0 \
+	packagegroup-fsl-gstreamer1.0-full \
+	"
+
 IMAGE_INSTALL_append_mx6ull += "\
 	engicam-mtd-script \
 	imx-kobs \
