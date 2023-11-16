@@ -1,6 +1,12 @@
 
 BRCM_DIR = "${D}${nonarch_base_libdir}/firmware/brcm"
 
+do_install:append:mx6sx-icore() {
+  install -d ${BRCM_DIR}
+  ln -sf -r ${BRCM_DIR}/brcmfmac43430-sdio.bin ${BRCM_DIR}/brcmfmac43430-sdio.engi,imx6sx-icore.bin
+  ln -sf -r ${BRCM_DIR}/brcmfmac43430-sdio.txt ${BRCM_DIR}/brcmfmac43430-sdio.engi,imx6sx-icore.txt
+}
+
 do_install:append:mx8() { 
   install -d ${BRCM_DIR}
   ln -sf ${BRCM_DIR}/brcmfmac43430-sdio.bin ${BRCM_DIR}/brcmfmac43430-sdio.engi,imx8-icore.bin
