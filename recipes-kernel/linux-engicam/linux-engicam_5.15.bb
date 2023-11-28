@@ -18,7 +18,7 @@ DEPENDS += "lzop-native bc-native"
 KERNEL_SRC ?= "git://github.com/engicam-stable/linux-engicam-nxp.git;protocol=http"
 SRCBRANCH = "5.15.71"
 SRC_URI = "${KERNEL_SRC};branch=${SRCBRANCH}"
-SRCREV = "ac5854881745bdc06b48cb58670e0a98c0eaf3a6"
+SRCREV = "72d7bc65875669ae5c4e1b2df1cd1e19d3b9f20e"
 
 # PV is defined in the base in linux-imx.inc file and uses the LINUX_VERSION definition
 # required by kernel-yocto.bbclass.
