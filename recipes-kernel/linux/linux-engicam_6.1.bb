@@ -8,7 +8,7 @@ LIC_FILES_CHKSUM = "file://COPYING;md5=6bc538ed5bd9a7fc9398086aedcd7e46"
 DEPENDS += "lzop-native bc-native"
 
 SRCBRANCH = "eng-6.1.y"
-KERNEL_SRC = "git://git.engicam.com/engicam/linux-imx-langdale.git;protocol=https;branch=${SRCBRANCH};user=wikiengicam:w1k13ng1c4m2023!"
+KERNEL_SRC = "git://github.com/engicam-stable/linux-imx-engicam.git;protocol=https;branch=${SRCBRANCH};user=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"
 KBRANCH = "${SRCBRANCH}"
 SRC_URI = "${KERNEL_SRC}"
 SRCREV_default = "${AUTOREV}"

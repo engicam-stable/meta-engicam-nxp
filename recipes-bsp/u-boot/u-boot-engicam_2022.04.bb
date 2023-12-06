@@ -9,8 +9,8 @@ LIC_FILES_CHKSUM = "file://Licenses/gpl-2.0.txt;md5=b234ee4d69f5fce4486a80fdaf4a
 
 DESCRIPTION = "Engicam U-Boot support for i.MX based engicam boards"
 
-SRC_URI = "${UBOOT_SRC};branch=${SRCBRANCH};user=wikiengicam:w1k13ng1c4m2023!"
-UBOOT_SRC = "git://git.engicam.com/engicam/u-boot-imx-langdale.git;protocol=https"
+SRC_URI = "${UBOOT_SRC};branch=${SRCBRANCH};user=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"
+UBOOT_SRC = "git://github.com/engicam-stable/u-boot-imx-engicam.git;protocol=https"
 SRCBRANCH = "eng_v2022.04"
 
 SRCREV_default = "${AUTOREV}"
