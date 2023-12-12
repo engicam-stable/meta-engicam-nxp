@@ -21,6 +21,7 @@ SOMs supported
 - imx8mp-icore
 - imx8mp-icore-2e
 - imx8mp-icore-fasteth
+- imx8mp-smarcore
 - imx93-icore
 
 
