@@ -17,9 +17,11 @@ repo sync
 SOMs supported
 --------------
 
+- imx8mm-icore
 - imx8mp-icore
 - imx8mp-icore-2e
 - imx8mp-icore-fasteth
+- imx93-icore
 
 
 Supported distros
@@ -43,7 +45,7 @@ First build
 ```bash
 DISTRO=fsl-imx-xwayland MACHINE=imx8mp-icore source imx-setup-release.sh -b build
 bitbake-layers add-layer ../sources/meta-engicam-nxp
-bitbake engicam-evaluation-image
+bitbake engicam-evaluation-image-mx8
 ```
 
 
