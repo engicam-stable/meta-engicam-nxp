@@ -49,6 +49,8 @@ IMAGE_INSTALL += " \
 	brcm-patchram-plus \
 	packagegroup-core-full-cmdline \
 	packagegroup-tools-bluetooth \
+	packagegroup-fsl-gstreamer1.0 \
+	packagegroup-fsl-gstreamer1.0-full \
 	${PKG_DEBUG} \
 "
 ROOTFS_POSTPROCESS_COMMAND:append = "fix_bcm43430; "
