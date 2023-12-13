@@ -18,6 +18,7 @@ SOMs supported
 --------------
 
 - imx6dl-icore
+- imx6qd-icore
 - imx8mm-icore
 - imx8mp-icore
 - imx8mp-icore-2e
