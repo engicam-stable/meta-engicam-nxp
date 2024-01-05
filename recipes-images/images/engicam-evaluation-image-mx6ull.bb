@@ -21,6 +21,7 @@ PKG_DEBUG = "\
 	dosfstools \
 	e2fsprogs \
 	ethtool \
+	evtest \
 	i2c-tools \
 	iproute2 \
 	minicom \
@@ -31,6 +32,7 @@ PKG_DEBUG = "\
 	ldd \
 	fsl-rc-local \
 	imx6ull-lwb5plus \
+	imx6ull-brcm \
 	engicam-mtd-script \
 	mtd-utils \
 	mtd-utils-ubifs \
@@ -38,6 +40,7 @@ PKG_DEBUG = "\
 	zstd \
 	stress-ng \
 	iperf3 \
+	firmwared \
 "
 
 IMAGE_INSTALL += " \
