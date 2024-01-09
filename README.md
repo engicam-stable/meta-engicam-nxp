@@ -19,11 +19,13 @@ SOMs supported
 
 - imx6dl-icore
 - imx6qd-icore
+- imx6ull-microgea
 - imx8mm-icore
 - imx8mp-icore
 - imx8mp-icore-2e
 - imx8mp-icore-fasteth
 - imx8mp-smarcore
+- imx8ulp-microgea
 - imx8xq-smarcore
 - imx93-icore
 
