@@ -11,7 +11,7 @@ SRCBRANCH = "eng-6.1.y"
 KERNEL_SRC = "git://github.com/engicam-stable/linux-imx-engicam.git;protocol=https;branch=${SRCBRANCH}"
 KBRANCH = "${SRCBRANCH}"
 SRC_URI = "${KERNEL_SRC}"
-SRCREV_default = "${AUTOREV}"
+SRCREV = "31fe3ada8995224fa7e1ddf3e58c7354f9a7104a"
 PV = "${SRCBRANCH}+git${SRCPV}"
 LOCALVERSION = "-${SRCBRANCH}"
 
