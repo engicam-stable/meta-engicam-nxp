@@ -19,6 +19,7 @@ SOMs supported
 
 - imx6dl-icore
 - imx6qd-icore
+- imx6s-icore
 - imx6ull-microgea
 - imx8mm-icore
 - imx8mp-icore
