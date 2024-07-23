@@ -21,6 +21,8 @@ PKG_DEBUG = "\
 	dosfstools \
 	e2fsprogs \
 	ethtool \
+	evtest \
+	firmwared \
 	i2c-tools \
 	iproute2 \
 	minicom \
