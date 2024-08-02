@@ -47,4 +47,8 @@ IMAGE_INSTALL += " \
 	packagegroup-core-full-cmdline \
 	packagegroup-tools-bluetooth \
 	${PKG_DEBUG} \
+	alsa-utils \
+	packagegroup-fsl-tools-audio \
+	packagegroup-fsl-gstreamer1.0 \
+	packagegroup-fsl-gstreamer1.0-full \
 "
