@@ -73,12 +73,11 @@ ENGICAM_PKG = "\
 	test-sound \
 	stress-ng \
 	iperf3 \
+	psplash \
 "
 
 EXTRA_PACKAGE_INSTALL += " \
 	packagegroup-fsl-tools-audio \
-	packagegroup-fsl-tools-gpu \
-	packagegroup-fsl-tools-gpu-external\ 
 	packagegroup-fsl-tools-testapps \
 	packagegroup-fsl-tools-benchmark \
 	packagegroup-imx-isp \
