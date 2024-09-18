@@ -3,7 +3,7 @@ FILESEXTRAPATHS:prepend := "${THISDIR}/files:"
 SRC_URI += "file://eng_m33_image.bin"
 
 # Use mx93a0-ahab-container.img for the a1 does not boot SPL
-REV_OPTION:mx93-generic-bsp  = "REV=A0"
+REV_OPTION:mx93-generic-bsp  = "REV=A1"
 
 do_compile:prepend() {
     if ${IS_DXL}; then

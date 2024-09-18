@@ -22,7 +22,7 @@ SRC_URI = "${KERNEL_SRC}"
 KERNEL_SRC ?= "git://github.com/engicam-stable/linux-imx-engicam.git;protocol=https;branch=${SRCBRANCH}"
 KBRANCH = "${SRCBRANCH}"
 SRCBRANCH = "eng-6.1.36"
-SRCREV = "e72ab281961e2e7050b748dd4d7fd1ca0c150322"
+SRCREV = "952aed92d6fe96ee8645689d74abb37e67e9e591"
 
 # PV is defined in the base in linux-imx.inc file and uses the LINUX_VERSION definition
 # required by kernel-yocto.bbclass.
