@@ -25,6 +25,7 @@ PKG_DEBUG = "\
 	ethtool \
 	i2c-tools \
 	iproute2 \
+	firmwared \
 	minicom \
 	parted \
 	e2fsprogs-resize2fs \
