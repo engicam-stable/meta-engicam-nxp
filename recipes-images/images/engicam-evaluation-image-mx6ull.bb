@@ -33,6 +33,7 @@ PKG_DEBUG = "\
 	ldd \
 	fsl-rc-local \
 	imx6ull-lwb5plus \
+	imx6ull-brcm \
 	engicam-mtd-script \
 	mtd-utils \
 	mtd-utils-ubifs \
