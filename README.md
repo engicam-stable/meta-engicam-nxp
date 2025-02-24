@@ -49,6 +49,7 @@ Boards supported
 |----------------------|-------------------------------------|
 |imx93-icore           |ctouch2                              |
 |imx91-microgea        |microdev-rev3                        |
+|                      |micro5                               |
 |imx8mm-icore          |ctouch2                              |
 |                      |starterkit-v2                        |
 |imx8mp-icore-2e       |ctouch2                              |
