@@ -53,4 +53,7 @@ CORE_IMAGE_EXTRA_INSTALL += " \
 	tcpdump \ 
 	iw \ 
 	imx91-lwb5plus \
+	packagegroup-fsl-tools-audio \
+	packagegroup-fsl-gstreamer1.0 \
+	packagegroup-fsl-gstreamer1.0-full \
 "
