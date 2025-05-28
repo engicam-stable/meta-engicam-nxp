@@ -37,6 +37,7 @@ SOMs supported
 - imx8ulp-microgea
 - imx91-microgea
 - imx93-icore
+- imx95-smarcore
 
 
 
@@ -47,6 +48,7 @@ Boards supported
 
 |SOM                   |                BOARD                |
 |----------------------|-------------------------------------|
+|imx95-smarcore        |xtouch2                              |
 |imx93-icore           |ctouch2                              |
 |imx91-microgea        |microdev-rev3                        |
 |                      |micro5                               |
@@ -81,6 +83,7 @@ Images available
 - engicam-evaluation-image-mx8
 - engicam-evaluation-image-mx93
 - engicam-evaluation-image-mx91
+- engicam-evaluation-image-mx95
 
 First build
 -----------

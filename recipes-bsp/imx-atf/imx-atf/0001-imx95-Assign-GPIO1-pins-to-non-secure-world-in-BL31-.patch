@@ -1,0 +1,25 @@
+From d1bd8a665eb86800ae4b57c341a7b09b10c670da Mon Sep 17 00:00:00 2001
+From: Engicam <support@engicam.com>
+Date: Tue, 27 May 2025 15:46:48 +0000
+Subject: [PATCH] imx95: Assign GPIO1 pins to non-secure world in BL31 setup
+
+---
+ plat/imx/imx95/imx95_bl31_setup.c | 5 +++++
+ 1 file changed, 5 insertions(+)
+
+diff --git a/plat/imx/imx95/imx95_bl31_setup.c b/plat/imx/imx95/imx95_bl31_setup.c
+index 175a78a20..e3e54477f 100644
+--- a/plat/imx/imx95/imx95_bl31_setup.c
++++ b/plat/imx/imx95/imx95_bl31_setup.c
+@@ -108,6 +108,11 @@ void bl31_early_platform_setup2(u_register_t arg0, u_register_t arg1,
+ void bl31_plat_arch_setup(void)
+ {
+ 	/* Assign all the GPIO pins to non-secure world by default */
++	mmio_write_32(GPIO1_BASE + 0x10, 0xffff7fff);
++	mmio_write_32(GPIO1_BASE + 0x14, 0x3);
++	mmio_write_32(GPIO1_BASE + 0x18, 0xffff7fff);
++	mmio_write_32(GPIO1_BASE + 0x1c, 0x3);
++
+ 	mmio_write_32(GPIO2_BASE + 0x10, 0xffffffff);
+ 	mmio_write_32(GPIO2_BASE + 0x14, 0x3);
+ 	mmio_write_32(GPIO2_BASE + 0x18, 0xffffffff);
