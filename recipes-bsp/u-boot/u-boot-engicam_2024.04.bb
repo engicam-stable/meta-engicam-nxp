@@ -11,7 +11,7 @@ require recipes-bsp/u-boot/u-boot-imx-common_${PV}.inc
 
 LIC_FILES_CHKSUM = "file://Licenses/gpl-2.0.txt;md5=b234ee4d69f5fce4486a80fdaf4a4263"
 
-SRC_URI = "${UBOOT_SRC};branch=${SRCBRANCH};user=wikiengicam:w1k13ng1c4m2023!"
+SRC_URI = "${UBOOT_SRC};branch=${SRCBRANCH};"
 UBOOT_SRC = "git://github.com/engicam-stable/u-boot-engicam-2024.04.git;protocol=https"
 SRCBRANCH = "eng_v2024.04"
 SRCREV = "236411b10a4809de83ad10eb821f1e832052a0c1"
