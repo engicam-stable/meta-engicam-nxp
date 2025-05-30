@@ -21,7 +21,7 @@ KBRANCH = "${SRCBRANCH}"
 
 SRCBRANCH = "eng-6.6.y"
 LOCALVERSION = "eng-6.6"
-SRCREV = "549c34157f78a16ee75dc9409f9c9c9371e1fbb4"
+SRCREV = "e7da031bfebe94580b6a7a993b8804a3abf234a9"
 
 DEPENDS += "lzop-native"
 
