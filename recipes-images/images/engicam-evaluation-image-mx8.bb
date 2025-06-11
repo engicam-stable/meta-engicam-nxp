@@ -45,6 +45,8 @@ ENGICAM_PKG = "\
 	tzdata \
 	usbutils \
 	zstd \
+    packagegroup-security-tpm2 \
+	libtss2-tcti-device \
 "
 
 CORE_IMAGE_EXTRA_INSTALL += " \
