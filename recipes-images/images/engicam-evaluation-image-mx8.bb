@@ -9,7 +9,7 @@ inherit core-image
 
 ROOTFS_POSTPROCESS_COMMAND:append:mx8 = "fix_bcm43430;"
 
-fix_bcm43430() { 
+fix_bcm43430() {
   cd ${IMAGE_ROOTFS}/lib/firmware/brcm
   ln -sf brcmfmac43430-sdio.bin brcmfmac43430-sdio.engi,imx8-icore.bin
 }
@@ -71,12 +71,14 @@ ENGICAM_PKG = "\
 	zstd \
 	\
 	stress-ng \
+	packagegroup-security-tpm2 \
+	libtss2-tcti-device \
 "
 
 EXTRA_PACKAGE_INSTALL += " \
 	packagegroup-fsl-tools-audio \
 	packagegroup-fsl-tools-gpu \
-	packagegroup-fsl-tools-gpu-external\ 
+	packagegroup-fsl-tools-gpu-external\
 	packagegroup-fsl-tools-testapps \
 	packagegroup-fsl-tools-benchmark \
 	packagegroup-imx-isp \
