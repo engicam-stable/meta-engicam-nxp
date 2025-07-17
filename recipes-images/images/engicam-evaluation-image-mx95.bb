@@ -44,8 +44,6 @@ ENGICAM_PKG = "\
 	tzdata \
 	usbutils \
 	zstd \
-	kernel-module-ti-backports \
-	ti351-firmware \
 "
 
 CORE_IMAGE_EXTRA_INSTALL += " \
@@ -57,6 +55,7 @@ CORE_IMAGE_EXTRA_INSTALL += " \
 	packagegroup-fsl-gstreamer1.0 \
 	packagegroup-fsl-gstreamer1.0-full \
 	firmwared \
+        v4l-utils \
 	${ENGICAM_PKG} \
 "
 
@@ -65,3 +64,5 @@ PACKAGE_IMX_TO_REMOVE:imxgpu2d = "gtk+3-demo"
 PACKAGE_IMX_TO_REMOVE:imxgpu3d = ""
 
 CORE_IMAGE_EXTRA_INSTALL:remove = "${PACKAGE_IMX_TO_REMOVE}"
+CORE_IMAGE_EXTRA_INSTALL:append:mx95-smarcore = "kernel-module-ti-backports ti351-firmware "
+CORE_IMAGE_EXTRA_INSTALL:append:mx95-icore = "kernel-module-lwb-if-backports lwb-etsi-firmware "

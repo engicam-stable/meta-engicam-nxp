@@ -1,0 +1,57 @@
+From 2fed6a0cb4d74771c13d57dfe5f00489b469b79f Mon Sep 17 00:00:00 2001
+From: Engicam <support@engicam.com>
+Date: Thu, 17 Jul 2025 10:46:56 +0200
+Subject: [PATCH] iMX95-icore: added pins to A55
+
+GPIO_IO14
+GPIO_IO15
+---
+ configs/imx95smarc.cfg           | 5 ++---
+ configs/imx95smarc/config_scmi.h | 4 ++--
+ 2 files changed, 4 insertions(+), 5 deletions(-)
+
+diff --git a/configs/imx95smarc.cfg b/configs/imx95smarc.cfg
+index ba406e5..efa6826 100755
+--- a/configs/imx95smarc.cfg
++++ b/configs/imx95smarc.cfg
+@@ -370,9 +370,6 @@ WDOG5               OWNER
+ 
+ # Pins
+ 
+-PIN_GPIO_IO14       OWNER
+-PIN_GPIO_IO15       OWNER
+-
+ # Memory
+ 
+ M7MIX               DATA, begin=0x020380000, end=0x02047FFFF
+@@ -897,6 +894,8 @@ PIN_GPIO_IO10        OWNER
+ PIN_GPIO_IO11        OWNER
+ PIN_GPIO_IO12        OWNER
+ PIN_GPIO_IO13        OWNER
++PIN_GPIO_IO14        OWNER
++PIN_GPIO_IO15        OWNER
+ PIN_GPIO_IO16        OWNER
+ PIN_GPIO_IO17        OWNER
+ PIN_GPIO_IO18        OWNER
+diff --git a/configs/imx95smarc/config_scmi.h b/configs/imx95smarc/config_scmi.h
+index ddaa60b..22f6652 100755
+--- a/configs/imx95smarc/config_scmi.h
++++ b/configs/imx95smarc/config_scmi.h
+@@ -91,8 +91,6 @@
+         .perfPerms[DEV_SM_PERF_M7] = SM_SCMI_PERM_ALL, \
+         .perlpiPerms[DEV_SM_PERLPI_LPUART3] = SM_SCMI_PERM_ALL, \
+         .perlpiPerms[DEV_SM_PERLPI_WDOG5] = SM_SCMI_PERM_ALL, \
+-        .pinPerms[DEV_SM_PIN_GPIO_IO14] = SM_SCMI_PERM_ALL, \
+-        .pinPerms[DEV_SM_PIN_GPIO_IO15] = SM_SCMI_PERM_ALL, \
+         .sensorPerms[BRD_SM_SENSOR_TEMP_PF09] = SM_SCMI_PERM_SET, \
+         .sensorPerms[BRD_SM_SENSOR_TEMP_PF5301] = SM_SCMI_PERM_SET, \
+         .sensorPerms[BRD_SM_SENSOR_TEMP_PF5302] = SM_SCMI_PERM_SET, \
+@@ -539,6 +537,8 @@
+         .pinPerms[DEV_SM_PIN_GPIO_IO11] = SM_SCMI_PERM_ALL, \
+         .pinPerms[DEV_SM_PIN_GPIO_IO12] = SM_SCMI_PERM_ALL, \
+         .pinPerms[DEV_SM_PIN_GPIO_IO13] = SM_SCMI_PERM_ALL, \
++        .pinPerms[DEV_SM_PIN_GPIO_IO14] = SM_SCMI_PERM_ALL, \
++        .pinPerms[DEV_SM_PIN_GPIO_IO15] = SM_SCMI_PERM_ALL, \
+         .pinPerms[DEV_SM_PIN_GPIO_IO16] = SM_SCMI_PERM_ALL, \
+         .pinPerms[DEV_SM_PIN_GPIO_IO17] = SM_SCMI_PERM_ALL, \
+         .pinPerms[DEV_SM_PIN_GPIO_IO18] = SM_SCMI_PERM_ALL, \
