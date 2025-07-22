@@ -19,7 +19,7 @@ Then download the yocto project BSP base on scarthgap
 ```bash
 mkdir imx-yocto-bsp
 cd imx-yocto-bsp
-repo init -u https://github.com/nxp-imx/imx-manifest -b imx-linux-scarthgap -m imx-6.6.52-2.2.0.xml 
+repo init -u https://github.com/engicam-stable/engicam-bsp-release.git -b scarthgap-nxp -m engicam-bsp-release.xml
 repo sync
 ```
 
@@ -37,6 +37,7 @@ SOMs supported
 - imx8ulp-microgea
 - imx91-microgea
 - imx93-icore
+- imx95-icore
 - imx95-smarcore
 
 
@@ -48,6 +49,7 @@ Boards supported
 
 |SOM                   |                BOARD                |
 |----------------------|-------------------------------------|
+|imx95-icore           |starterkit-v2                        |
 |imx95-smarcore        |xtouch2                              |
 |imx93-icore           |ctouch2                              |
 |imx91-microgea        |microdev-rev3                        |
@@ -105,7 +107,13 @@ bitbake-layers add-layer ../sources/meta-engicam-nxp
 bitbake engicam-evaluation-image-mx91
 ```
 
+# NOTE for iMX95 family
 
+To correctly compile the image you need to add meta-summit-radio to your bblayer.conf
+
+```
+bitbake-layers add-layer ../sources/meta-summit-radio/meta-summit-radio
+```
 
 # NOTE for imx91-microgea
 
