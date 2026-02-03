@@ -50,6 +50,7 @@ Boards supported
 |SOM                   |                BOARD                |
 |----------------------|-------------------------------------|
 |imx95-icore           |starterkit-v2                        |
+|                      |ctouch 3.1                           |
 |imx95-smarcore        |xtouch2                              |
 |imx93-icore           |starterkit-v2                        |
 |                      |ctouch2                              |
@@ -115,6 +116,15 @@ To correctly compile the image you need to add meta-summit-radio to your bblayer
 
 ```
 bitbake-layers add-layer ../sources/meta-summit-radio/meta-summit-radio
+```
+
+## FOR CTOUCH 3.1
+
+Add the following line to the local.conf file
+
+```
+CORE_IMAGE_EXTRA_INSTALL:remove:mx95-icore = "kernel-module-lwb-if-backports lwb-etsi-firmware"
+
 ```
 
 # NOTE for imx91-microgea
