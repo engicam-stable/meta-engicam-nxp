@@ -1,0 +1,71 @@
+From 0e681f09c518fef832d7c5a0da4b6504be06d341 Mon Sep 17 00:00:00 2001
+From: engicam <support@engicam.com>
+Date: Thu, 9 Jul 2026 17:26:47 +0200
+Subject: [PATCH] arch: arm64: boot: dts: engicam:
+ imx91-microgea-starterkit:fixes
+Upstream-Status: Inappropriate [For engicam use only]
+
+---
+ .../boot/dts/engicam/imx91-microgea-starterkit.dts | 14 +++++++++++---
+ 1 file changed, 11 insertions(+), 3 deletions(-)
+
+diff --git a/arch/arm64/boot/dts/engicam/imx91-microgea-starterkit.dts b/arch/arm64/boot/dts/engicam/imx91-microgea-starterkit.dts
+index 1402c8a3e723..c5885073b0f7 100644
+--- a/arch/arm64/boot/dts/engicam/imx91-microgea-starterkit.dts
++++ b/arch/arm64/boot/dts/engicam/imx91-microgea-starterkit.dts
+@@ -23,6 +23,7 @@ chosen {
+ 
+ 	aliases {
+ 		rtc0 = &pcf8523;
++		rtc1 = &bbnsm_rtc;
+ 	};
+ 
+ 	reserved-memory {
+@@ -331,6 +332,13 @@ exp-wlan-en {
+ 			gpios = <7 GPIO_ACTIVE_HIGH>;
+ 			output-high;
+ 		};
++
++		EXPIO_1_3 {
++			gpio-hog;
++			gpios = <11 GPIO_ACTIVE_HIGH>;
++			output-high;
++			line-name = "GPIO_LCD1_SPARE";
++		};
+ 	};
+ };
+ 
+@@ -348,7 +356,7 @@ polytouch: edt-ft5x26@38 {
+ 		pinctrl-names = "default";
+ 		interrupt-parent = <&pcal6416>;
+ 		interrupts = <4 IRQ_TYPE_EDGE_FALLING>;
+-		reset-gpios= <&pcal6416 11 GPIO_ACTIVE_LOW>;
++		reset-gpios= <&gpio4 17 GPIO_ACTIVE_LOW>;
+ 	};
+ 
+ 	pcf8523: rtc@68 {
+@@ -418,7 +426,7 @@ display_out: endpoint {
+ };
+ 
+ &usbotg1 {
+-	dr_mode = "otg";
++	dr_mode = "host";
+ 	status = "okay";
+ };
+ 
+@@ -567,6 +575,7 @@ MX91_PAD_GPIO_IO24__MEDIAMIX_DISP_DATA20	0x31e
+ 			MX91_PAD_GPIO_IO25__MEDIAMIX_DISP_DATA21	0x31e
+ 			MX91_PAD_GPIO_IO26__MEDIAMIX_DISP_DATA22	0x31e
+ 			MX91_PAD_GPIO_IO27__MEDIAMIX_DISP_DATA23	0x31e
++			MX91_PAD_ENET2_TD2__GPIO4_IO17			0x31e /* DISP0_RST */
+ 			MX91_PAD_ENET2_TD1__GPIO4_IO18			0x31e /* DISP0_PWD */
+ 		>;
+ 	};
+@@ -742,7 +751,6 @@ pinctrl_codec: codecgrp {
+ 			MX91_PAD_CCM_CLKO1__CCMSRCGPCMIX_CLKO1	0x31e
+ 		>;
+ 	};
+-
+ };
+ 
+ &gpio1 {

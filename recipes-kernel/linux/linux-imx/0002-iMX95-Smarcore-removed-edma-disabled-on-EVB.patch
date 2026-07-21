@@ -1,0 +1,73 @@
+From a25b3b765a18987038a298e03ae64a7e4fc15532 Mon Sep 17 00:00:00 2001
+From: engicam <support@engicam.com>
+Date: Fri, 5 Jun 2026 15:50:25 +0200
+Subject: [PATCH] iMX95 Smarcore: removed edma disabled on EVB
+Upstream-Status: Pending
+
+---
+ .../engicam/imx95-smarcore-smarcore-evb.dts   | 24 ++++---------------
+ 1 file changed, 4 insertions(+), 20 deletions(-)
+
+diff --git a/arch/arm64/boot/dts/engicam/imx95-smarcore-smarcore-evb.dts b/arch/arm64/boot/dts/engicam/imx95-smarcore-smarcore-evb.dts
+index f0396fe13910..7ce59aadbe94 100644
+--- a/arch/arm64/boot/dts/engicam/imx95-smarcore-smarcore-evb.dts
++++ b/arch/arm64/boot/dts/engicam/imx95-smarcore-smarcore-evb.dts
+@@ -348,18 +348,6 @@ &dpu {
+ 	status = "okay";
+ };
+ 
+-&edma1 {
+-	status = "disabled";
+-};
+-
+-&edma2 {
+-	status = "disabled";
+-};
+-
+-&edma3 {
+-	status = "disabled";
+-};
+-
+ &flexcan1 {
+ 	pinctrl-names = "default";
+ 	pinctrl-0 = <&pinctrl_flexcan1>;
+@@ -397,8 +385,8 @@ sgtl5000: codec@a {
+         reg = <0x0a>;
+         clocks = <&scmi_clk IMX95_CLK_SAI3>;
+ 		clock-names = "mclk";
+-		assigned-clock-rates = <24576000>, <24576000>;
+-		VDDA-supply = <&reg_3v3_sgtl>;
++		assigned-clock-rates = <24576000>;
++		VDDA-supply = <&reg_1v8_sgtl>;
+ 		VDDIO-supply = <&reg_1v8_sgtl>;
+ 		VDDD-supply = <&reg_1v8_sgtl>;
+     };
+@@ -413,7 +401,7 @@ &lpi2c4 {
+ 	status = "okay";
+ 
+ 	ov5640_0: ov5640_mipi@3c {
+-		compatible = "ov5640_mainline";
++		compatible = "ovti,ov5640";
+ 		reg = <0x3c>;
+ 		pinctrl-names = "default";
+ 		pinctrl-0 = <&pinctrl_csi0>;
+@@ -638,10 +626,6 @@ &lpuart1 {
+ 	status = "okay";
+ };
+ 
+-&mu7 {
+-	status = "disabled";
+-};
+-
+ &lpuart5 {
+ 	/* RS232 SER2 */
+ 	pinctrl-names = "default";
+@@ -697,7 +681,7 @@ &usdhc2 {
+ 	iommus = <&smmu 0x1>;
+ 	status = "okay";
+ };
+- 
++
+ /* WIFI */
+ &usdhc3 {
+ 	#address-cells = <1>;

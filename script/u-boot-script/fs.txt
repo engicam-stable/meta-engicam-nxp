@@ -1,0 +1,12 @@
+#setenv mtdids 'nand0=gpmi-nand'
+#setenv mtdparts 'mtdparts=gpmi-nand:4m(boot),8m(kernel),1m(dtb),-(rootfs)'
+setenv filesize '0x0ad2a000'
+
+#FS:
+nand erase.part nandrootfs
+tftp ${loadaddr} rootfs.ubifs
+ubi part nandrootfs
+ubi create nandrootfs
+ubi write ${loadaddr} nandrootfs ${filesize}
+ubifsmount ubi0:nandrootfs
+ubifsls

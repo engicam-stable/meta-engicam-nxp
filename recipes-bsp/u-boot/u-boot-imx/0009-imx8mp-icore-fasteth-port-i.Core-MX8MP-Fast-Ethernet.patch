@@ -1,0 +1,1247 @@
+From 42039b9e35aa3f99671188d95dc8de4f61e4c554 Mon Sep 17 00:00:00 2001
+From: engicam <support@engicam.com>
+Date: Thu, 9 Jul 2026 14:47:20 +0200
+Subject: [PATCH] imx8mp-icore-fasteth: port i.Core MX8MP Fast Ethernet boards
+Upstream-Status: Inappropriate [for engicam use only]
+
+---
+ arch/arm/dts/imx8mp-icore-fasteth-u-boot.dtsi | 234 ++++++++++
+ arch/arm/dts/imx8mp-icore-fasteth.dts         | 399 ++++++++++++++++++
+ arch/arm/mach-imx/imx8m/Kconfig               |  10 +
+ arch/arm/mach-imx/imx8m/clock_imx8mm.c        |  14 +-
+ board/engicam/imx8mp_icore/Kconfig            |   2 +-
+ configs/imx8mp_icore_fasteth_1gb_defconfig    | 163 +++++++
+ configs/imx8mp_icore_fasteth_4gb_defconfig    | 163 +++++++
+ configs/imx8mp_icore_fasteth_defconfig        | 162 +++++++
+ include/configs/imx8mp_icore.h                |   6 +-
+ 9 files changed, 1143 insertions(+), 10 deletions(-)
+ create mode 100644 arch/arm/dts/imx8mp-icore-fasteth-u-boot.dtsi
+ create mode 100644 arch/arm/dts/imx8mp-icore-fasteth.dts
+ create mode 100644 configs/imx8mp_icore_fasteth_1gb_defconfig
+ create mode 100644 configs/imx8mp_icore_fasteth_4gb_defconfig
+ create mode 100644 configs/imx8mp_icore_fasteth_defconfig
+
+diff --git a/arch/arm/dts/imx8mp-icore-fasteth-u-boot.dtsi b/arch/arm/dts/imx8mp-icore-fasteth-u-boot.dtsi
+new file mode 100644
+index 00000000000..4bf947e4914
+--- /dev/null
++++ b/arch/arm/dts/imx8mp-icore-fasteth-u-boot.dtsi
+@@ -0,0 +1,234 @@
++// SPDX-License-Identifier: GPL-2.0+
++/*
++ * Copyright 2019 NXP
++ */
++#include "imx8mp-sec-def.h"
++
++/ {
++	wdt-reboot {
++		compatible = "wdt-reboot";
++		wdt = <&wdog1>;
++		bootph-pre-ram;
++	};
++
++	firmware {
++		optee {
++			compatible = "linaro,optee-tz";
++			method = "smc";
++		};
++	};
++
++	mcu_rdc {
++		compatible = "imx8m,mcu_rdc";
++			    /* rdc config when MCU starts
++			     * master
++			     *   SDMA3p --> domain 1
++			     *   SDMA3b --> domian 1
++			     *   SDMA3_SPBA2  --> domian 1
++			     * peripheral:
++			     *   SAI3   --> Only Domian 1 can access
++			     *   UART4  --> Only Domian 1 can access
++			     *   GPT1   --> Only Domian 1 can access
++			     *   SDMA3  --> Only Domian 1 can access
++			     *   I2C3   --> Only Domian 1 can access
++			     * memory:
++			     *   TCM    --> Only Domian 1 can access (0x7E0000~0x81FFFF)
++			     *   DDR    --> Only Domian 1 can access (0x80000000~0x81000000)
++			     * end.
++			     */
++		start-config = <
++			    RDC_MDA  RDC_MDA_SDMA3p DID1 0x0 0x0
++			    RDC_MDA  RDC_MDA_SDMA3b DID1 0x0 0x0
++			    RDC_MDA  RDC_MDA_SDMA3_SPBA2 DID1 0x0 0x0
++			    RDC_PDAP RDC_PDAP_SAI3  PDAP_D1_ACCESS 0x0 0x0
++			    RDC_PDAP RDC_PDAP_UART4 PDAP_D1_ACCESS 0x0 0x0
++			    RDC_PDAP RDC_PDAP_GPT1  PDAP_D1_ACCESS 0x0 0x0
++			    RDC_PDAP RDC_PDAP_SDMA3 PDAP_D1_ACCESS 0x0 0x0
++			    RDC_PDAP RDC_PDAP_I2C3  PDAP_D1_ACCESS 0x0 0x0
++			    RDC_MEM_REGION 22 TCM_START TCM_END MEM_D1_ACCESS
++			    RDC_MEM_REGION 39 M4_DDR_START M4_DDR_END MEM_D1_ACCESS
++			    0x0      0x0            0x0  0x0 0x0
++			  >;
++			    /* rdc config when MCU stops
++			     * memory:
++			     *   TCM    --> domain 0/1 can access (0x7E0000~0x81FFFF)
++			     *   DDR    --> domain 0/1 can access (0x80000000~0x81000000)
++			     * end.
++			     */
++		stop-config = <
++			    RDC_MEM_REGION 22 TCM_START TCM_END MEM_D0D1_ACCESS
++			    RDC_MEM_REGION 39 M4_DDR_START M4_DDR_END MEM_D0D1_ACCESS
++			    0x0      0x0            0x0  0x0 0x0
++			  >;
++	};
++};
++
++&soc {
++	bootph-all;
++	bootph-pre-ram;
++};
++
++&clk {
++	bootph-pre-ram;
++	bootph-all;
++	/delete-property/ assigned-clocks;
++	/delete-property/ assigned-clock-parents;
++	/delete-property/ assigned-clock-rates;
++};
++
++&osc_32k {
++	bootph-pre-ram;
++	bootph-all;
++};
++
++&osc_24m {
++	bootph-pre-ram;
++	bootph-all;
++};
++
++&aips1 {
++	bootph-pre-ram;
++	bootph-all;
++};
++
++&aips2 {
++	bootph-pre-ram;
++};
++
++&aips3 {
++	bootph-pre-ram;
++	spba-bus@30800000 {
++		bootph-pre-ram;
++	};
++};
++
++&iomuxc {
++	bootph-pre-ram;
++};
++
++&pinctrl_reg_usdhc2_vmmc {
++	bootph-pre-ram;
++};
++
++&reg_usdhc2_vmmc {
++	bootph-pre-ram;
++	u-boot,off-on-delay-us = <20000>;
++};
++
++&pinctrl_uart2 {
++	bootph-pre-ram;
++};
++
++&pinctrl_usdhc2_gpio {
++	bootph-pre-ram;
++};
++
++&pinctrl_usdhc2 {
++	bootph-pre-ram;
++};
++
++&pinctrl_usdhc3 {
++	bootph-pre-ram;
++};
++
++&gpio1 {
++	bootph-pre-ram;
++};
++
++&gpio2 {
++	bootph-pre-ram;
++};
++
++&gpio3 {
++	bootph-pre-ram;
++};
++
++&gpio4 {
++	bootph-pre-ram;
++};
++
++&gpio5 {
++	bootph-pre-ram;
++};
++
++&uart2 {
++	bootph-pre-ram;
++};
++
++&crypto {
++	bootph-pre-ram;
++};
++
++#ifdef CONFIG_FSL_CAAM
++&sec_jr0 {
++	bootph-pre-ram;
++};
++
++&sec_jr1 {
++	bootph-pre-ram;
++};
++
++&sec_jr2 {
++	bootph-pre-ram;
++};
++#endif
++
++&i2c1 {
++	bootph-all;
++};
++
++&pinctrl_i2c1 {
++	bootph-all;
++};
++
++&pinctrl_i2c1_gpio {
++	bootph-all;
++};
++
++&pinctrl_pmic {
++	bootph-all;
++};
++
++&{/soc@0/bus@30800000/i2c@30a20000/pca9450@25} {
++	bootph-all;
++};
++
++&{/soc@0/bus@30800000/i2c@30a20000/pca9450@25/regulators} {
++	bootph-all;
++};
++
++&usdhc2 {
++	bootph-pre-ram;
++	sd-uhs-sdr104;
++	sd-uhs-ddr50;
++	assigned-clocks = <&clk IMX8MP_CLK_USDHC2>;
++	assigned-clock-rates = <400000000>;
++	assigned-clock-parents = <&clk IMX8MP_SYS_PLL1_400M>;
++};
++
++&usdhc3 {
++	bootph-pre-ram;
++	mmc-hs400-1_8v;
++	mmc-hs400-enhanced-strobe;
++	assigned-clocks = <&clk IMX8MP_CLK_USDHC3>;
++	assigned-clock-rates = <400000000>;
++	assigned-clock-parents = <&clk IMX8MP_SYS_PLL1_400M>;
++};
++
++&wdog1 {
++	bootph-pre-ram;
++};
++
++&usb_dwc3_0 {
++	compatible = "fsl,imx8mq-dwc3", "snps,dwc3";
++	assigned-clocks = <&clk IMX8MP_CLK_HSIO_AXI>;
++	assigned-clock-parents = <&clk IMX8MP_SYS_PLL1_800M>;
++	assigned-clock-rates = <400000000>;
++};
++
++&usb_dwc3_1 {
++	compatible = "fsl,imx8mq-dwc3", "snps,dwc3";
++	assigned-clocks = <&clk IMX8MP_CLK_HSIO_AXI>;
++	assigned-clock-parents = <&clk IMX8MP_SYS_PLL1_800M>;
++	assigned-clock-rates = <400000000>;
++};
+diff --git a/arch/arm/dts/imx8mp-icore-fasteth.dts b/arch/arm/dts/imx8mp-icore-fasteth.dts
+new file mode 100644
+index 00000000000..e18a52ae1ad
+--- /dev/null
++++ b/arch/arm/dts/imx8mp-icore-fasteth.dts
+@@ -0,0 +1,399 @@
++// SPDX-License-Identifier: (GPL-2.0+ OR MIT)
++/*
++ * Copyright 2019 NXP
++ */
++
++/dts-v1/;
++
++#include <dt-bindings/usb/pd.h>
++#include "imx8mp.dtsi"
++
++/ {
++	model = "Engicam i.Core MX8M Plus Fast Ethernet";
++	compatible = "engi,imx8mp-icore-fasteth", "fsl,imx8mp-evk", "fsl,imx8mp";
++
++	chosen {
++		bootargs = "console=ttymxc1,115200";
++		stdout-path = &uart2;
++	};
++
++	memory@40000000 {
++		device_type = "memory";
++		reg = <0x0 0x40000000 0 0xc0000000>,
++		      <0x1 0x00000000 0 0xc0000000>;
++	};
++
++	reg_usdhc2_vmmc: regulator-usdhc2 {
++		compatible = "regulator-fixed";
++		pinctrl-names = "default";
++		pinctrl-0 = <&pinctrl_reg_usdhc2_vmmc>;
++		regulator-name = "VSD_3V3";
++		regulator-min-microvolt = <3300000>;
++		regulator-max-microvolt = <3300000>;
++		gpio = <&gpio2 19 GPIO_ACTIVE_HIGH>;
++		enable-active-high;
++		startup-delay-us = <100>;
++		off-on-delay-us = <12000>;
++	};
++};
++
++&eqos {
++	pinctrl-names = "default";
++	pinctrl-0 = <&pinctrl_eqos>;
++	phy-mode = "rmii";
++	phy-handle = <&ethphy0>;
++	status = "okay";
++
++	mdio {
++		compatible = "snps,dwmac-mdio";
++		#address-cells = <1>;
++		#size-cells = <0>;
++
++		ethphy0: ethernet-phy@0 {
++			compatible = "ethernet-phy-ieee802.3-c22";
++			reg = <0>;
++			eee-broken-1000t;
++		};
++	};
++};
++
++&i2c1 {
++	clock-frequency = <400000>;
++	pinctrl-names = "default", "gpio";
++	pinctrl-0 = <&pinctrl_i2c1>;
++	pinctrl-1 = <&pinctrl_i2c1_gpio>;
++	scl-gpios = <&gpio5 14 GPIO_ACTIVE_HIGH>;
++	sda-gpios = <&gpio5 15 GPIO_ACTIVE_HIGH>;
++	status = "okay";
++
++	pmic: pca9450@25 {
++		reg = <0x25>;
++		compatible = "nxp,pca9450c";
++		/* PMIC PCA9450 PMIC_nINT GPIO3_IO1 */
++		pinctrl-0 = <&pinctrl_pmic>;
++		gpio_intr = <&gpio3 1 GPIO_ACTIVE_LOW>;
++
++		regulators {
++			#address-cells = <1>;
++			#size-cells = <0>;
++
++			pca9450,pmic-buck2-uses-i2c-dvs;
++			/* Run/Standby voltage */
++			pca9450,pmic-buck2-dvs-voltage = <950000>, <850000>;
++
++			buck1_reg: regulator@0 {
++				reg = <0>;
++				regulator-compatible = "buck1";
++				regulator-min-microvolt = <600000>;
++				regulator-max-microvolt = <2187500>;
++				regulator-boot-on;
++				regulator-always-on;
++				regulator-ramp-delay = <3125>;
++			};
++
++			buck2_reg: regulator@1 {
++				reg = <1>;
++				regulator-compatible = "buck2";
++				regulator-min-microvolt = <600000>;
++				regulator-max-microvolt = <2187500>;
++				regulator-boot-on;
++				regulator-always-on;
++				regulator-ramp-delay = <3125>;
++			};
++
++			buck4_reg: regulator@3 {
++				reg = <3>;
++				regulator-compatible = "buck4";
++				regulator-min-microvolt = <600000>;
++				regulator-max-microvolt = <3400000>;
++				regulator-boot-on;
++				regulator-always-on;
++			};
++
++			buck5_reg: regulator@4 {
++				reg = <4>;
++				regulator-compatible = "buck5";
++				regulator-min-microvolt = <600000>;
++				regulator-max-microvolt = <3400000>;
++				regulator-boot-on;
++				regulator-always-on;
++			};
++
++			buck6_reg: regulator@5 {
++				reg = <5>;
++				regulator-compatible = "buck6";
++				regulator-min-microvolt = <600000>;
++				regulator-max-microvolt = <3400000>;
++				regulator-boot-on;
++				regulator-always-on;
++			};
++
++			ldo1_reg: regulator@6 {
++				reg = <6>;
++				regulator-compatible = "ldo1";
++				regulator-min-microvolt = <1600000>;
++				regulator-max-microvolt = <3300000>;
++				regulator-boot-on;
++				regulator-always-on;
++			};
++
++			ldo2_reg: regulator@7 {
++				reg = <7>;
++				regulator-compatible = "ldo2";
++				regulator-min-microvolt = <800000>;
++				regulator-max-microvolt = <1150000>;
++				regulator-boot-on;
++				regulator-always-on;
++			};
++
++			ldo3_reg: regulator@8 {
++				reg = <8>;
++				regulator-compatible = "ldo3";
++				regulator-min-microvolt = <800000>;
++				regulator-max-microvolt = <3300000>;
++				regulator-boot-on;
++				regulator-always-on;
++			};
++
++			ldo4_reg: regulator@9 {
++				reg = <9>;
++				regulator-compatible = "ldo4";
++				regulator-min-microvolt = <800000>;
++				regulator-max-microvolt = <3300000>;
++				regulator-boot-on;
++				regulator-always-on;
++			};
++
++			ldo5_reg: regulator@10 {
++				reg = <10>;
++				regulator-compatible = "ldo5";
++				regulator-min-microvolt = <1800000>;
++				regulator-max-microvolt = <3300000>;
++			};
++		};
++	};
++};
++
++&snvs_pwrkey {
++	status = "okay";
++};
++
++&uart2 {
++	/* console */
++	pinctrl-names = "default";
++	pinctrl-0 = <&pinctrl_uart2>;
++	status = "okay";
++};
++
++&usdhc2 {
++	pinctrl-names = "default";
++	pinctrl-0 = <&pinctrl_usdhc2>, <&pinctrl_usdhc2_gpio>;
++	cd-gpios = <&gpio2 12 GPIO_ACTIVE_LOW>;
++	max-frequency = <35000000>;
++	vmmc-supply = <&reg_usdhc2_vmmc>;
++	no-1-8-v;
++	bus-width = <4>;
++	status = "okay";
++};
++
++&usb3_phy0 {
++	status = "okay";
++};
++
++&usb3_0 {
++	status = "okay";
++};
++
++&usb_dwc3_0 {
++	dr_mode = "peripheral";
++	status = "okay";
++};
++
++&usb3_phy1 {
++	status = "okay";
++};
++
++&usb3_1 {
++	status = "okay";
++};
++
++&usb_dwc3_1 {
++	dr_mode = "host";
++	status = "okay";
++};
++
++&usdhc3 {
++	pinctrl-names = "default", "state_100mhz", "state_200mhz";
++	pinctrl-0 = <&pinctrl_usdhc3>;
++	pinctrl-1 = <&pinctrl_usdhc3_100mhz>;
++	pinctrl-2 = <&pinctrl_usdhc3_200mhz>;
++	bus-width = <8>;
++	non-removable;
++	status = "okay";
++};
++
++&wdog1 {
++	pinctrl-names = "default";
++	pinctrl-0 = <&pinctrl_wdog>;
++	fsl,ext-reset-output;
++	status = "okay";
++};
++
++&iomuxc {
++	pinctrl-names = "default";
++	pinctrl-0 = <&pinctrl_hog>;
++
++	pinctrl_hog: hoggrp {
++		fsl,pins = <
++			MX8MP_IOMUXC_GPIO1_IO00__GPIO1_IO00		0x119
++			MX8MP_IOMUXC_GPIO1_IO03__GPIO1_IO03		0x119
++			MX8MP_IOMUXC_GPIO1_IO04__GPIO1_IO04		0x119
++			MX8MP_IOMUXC_GPIO1_IO05__GPIO1_IO05		0x119
++			MX8MP_IOMUXC_GPIO1_IO06__GPIO1_IO06		0x119
++			MX8MP_IOMUXC_GPIO1_IO07__GPIO1_IO07		0x119
++			MX8MP_IOMUXC_GPIO1_IO08__GPIO1_IO08		0x119
++			MX8MP_IOMUXC_GPIO1_IO09__GPIO1_IO09		0x119
++			MX8MP_IOMUXC_GPIO1_IO10__GPIO1_IO10		0x119
++			MX8MP_IOMUXC_GPIO1_IO12__GPIO1_IO12		0x119
++			MX8MP_IOMUXC_GPIO1_IO13__GPIO1_IO13		0x119
++			MX8MP_IOMUXC_GPIO1_IO14__GPIO1_IO14		0x119
++			MX8MP_IOMUXC_GPIO1_IO15__GPIO1_IO15		0x119
++			MX8MP_IOMUXC_SD1_DATA4__GPIO2_IO06		0x119
++			MX8MP_IOMUXC_SD1_DATA5__GPIO2_IO07		0x119
++			MX8MP_IOMUXC_SD1_DATA7__GPIO2_IO09		0x119
++			MX8MP_IOMUXC_SD2_WP__GPIO2_IO20		0x119
++			MX8MP_IOMUXC_SAI5_RXFS__GPIO3_IO19		0x119
++			MX8MP_IOMUXC_SAI5_RXC__GPIO3_IO20		0x119
++			MX8MP_IOMUXC_SAI1_RXD7__GPIO4_IO09		0x119
++			MX8MP_IOMUXC_SAI2_RXFS__GPIO4_IO21		0x119
++			MX8MP_IOMUXC_SAI2_RXC__GPIO4_IO22		0x119
++			MX8MP_IOMUXC_SPDIF_TX__GPIO5_IO03		0x119
++			MX8MP_IOMUXC_SPDIF_RX__GPIO5_IO04		0x119
++			MX8MP_IOMUXC_SPDIF_EXT_CLK__GPIO5_IO05		0x119
++		>;
++	};
++
++	pinctrl_eqos: eqosgrp {
++		fsl,pins = <
++			MX8MP_IOMUXC_ENET_MDC__ENET_QOS_MDC				0x3
++			MX8MP_IOMUXC_ENET_MDIO__ENET_QOS_MDIO				0x3
++			MX8MP_IOMUXC_ENET_TX_CTL__ENET_QOS_RGMII_TX_CTL			0x12
++			MX8MP_IOMUXC_ENET_TD0__ENET_QOS_RGMII_TD0			0x12
++			MX8MP_IOMUXC_ENET_TD1__ENET_QOS_RGMII_TD1			0x12
++			MX8MP_IOMUXC_ENET_TD2__CCM_ENET_QOS_CLOCK_GENERATE_REF_CLK	0x12
++			MX8MP_IOMUXC_ENET_TD3__GPIO1_IO18				0x1f
++
++			MX8MP_IOMUXC_ENET_RX_CTL__ENET_QOS_RGMII_RX_CTL			0x1d0
++			MX8MP_IOMUXC_ENET_RXC__ENET_QOS_RX_ER				0x91
++			MX8MP_IOMUXC_ENET_RD0__ENET_QOS_RGMII_RD0			0x1d0
++			MX8MP_IOMUXC_ENET_RD1__ENET_QOS_RGMII_RD1			0x1d0
++
++			MX8MP_IOMUXC_ENET_RD3__GPIO1_IO29				0x1f //reset phy
++		>;
++	};
++
++	pinctrl_i2c1: i2c1grp {
++		fsl,pins = <
++			MX8MP_IOMUXC_I2C1_SCL__I2C1_SCL		0x400001c3
++			MX8MP_IOMUXC_I2C1_SDA__I2C1_SDA		0x400001c3
++		>;
++	};
++
++	pinctrl_i2c1_gpio: i2c1grp-gpio {
++		fsl,pins = <
++			MX8MP_IOMUXC_I2C1_SCL__GPIO5_IO14        	0x1c3
++			MX8MP_IOMUXC_I2C1_SDA__GPIO5_IO15        	0x1c3
++		>;
++	};
++
++	pinctrl_pmic: pmicirq {
++		fsl,pins = <
++			MX8MP_IOMUXC_NAND_CE0_B__GPIO3_IO01	0x41
++		>;
++	};
++
++	pinctrl_reg_usdhc2_vmmc: regusdhc2vmmc {
++		fsl,pins = <
++			MX8MP_IOMUXC_SD2_RESET_B__GPIO2_IO19	0x141
++		>;
++	};
++
++	pinctrl_uart2: uart2grp {
++		fsl,pins = <
++			MX8MP_IOMUXC_UART2_RXD__UART2_DCE_RX	0x149
++			MX8MP_IOMUXC_UART2_TXD__UART2_DCE_TX	0x149
++		>;
++	};
++
++	pinctrl_usdhc2: usdhc2grp {
++		fsl,pins = <
++			MX8MP_IOMUXC_SD2_CLK__USDHC2_CLK	0x190
++			MX8MP_IOMUXC_SD2_CMD__USDHC2_CMD	0x1d0
++			MX8MP_IOMUXC_SD2_DATA0__USDHC2_DATA0	0x1d0
++			MX8MP_IOMUXC_SD2_DATA1__USDHC2_DATA1	0x1d0
++			MX8MP_IOMUXC_SD2_DATA2__USDHC2_DATA2	0x1d0
++			MX8MP_IOMUXC_SD2_DATA3__USDHC2_DATA3	0x1d0
++			/*MX8MP_IOMUXC_GPIO1_IO04__USDHC2_VSELECT	0xc1*/
++		>;
++	};
++
++	pinctrl_usdhc2_gpio: usdhc2gpiogrp {
++		fsl,pins = <
++			MX8MP_IOMUXC_SD2_CD_B__GPIO2_IO12	0x1c4
++		>;
++	};
++
++	pinctrl_usdhc3: usdhc3grp {
++		fsl,pins = <
++			MX8MP_IOMUXC_NAND_WE_B__USDHC3_CLK	0x190
++			MX8MP_IOMUXC_NAND_WP_B__USDHC3_CMD	0x1d0
++			MX8MP_IOMUXC_NAND_DATA04__USDHC3_DATA0	0x1d0
++			MX8MP_IOMUXC_NAND_DATA05__USDHC3_DATA1	0x1d0
++			MX8MP_IOMUXC_NAND_DATA06__USDHC3_DATA2	0x1d0
++			MX8MP_IOMUXC_NAND_DATA07__USDHC3_DATA3	0x1d0
++			MX8MP_IOMUXC_NAND_RE_B__USDHC3_DATA4	0x1d0
++			MX8MP_IOMUXC_NAND_CE2_B__USDHC3_DATA5	0x1d0
++			MX8MP_IOMUXC_NAND_CE3_B__USDHC3_DATA6	0x1d0
++			MX8MP_IOMUXC_NAND_CLE__USDHC3_DATA7	0x1d0
++			MX8MP_IOMUXC_NAND_CE1_B__USDHC3_STROBE	0x190
++		>;
++	};
++
++	pinctrl_usdhc3_100mhz: usdhc3-100mhzgrp {
++		fsl,pins = <
++			MX8MP_IOMUXC_NAND_WE_B__USDHC3_CLK	0x194
++			MX8MP_IOMUXC_NAND_WP_B__USDHC3_CMD	0x1d4
++			MX8MP_IOMUXC_NAND_DATA04__USDHC3_DATA0	0x1d4
++			MX8MP_IOMUXC_NAND_DATA05__USDHC3_DATA1	0x1d4
++			MX8MP_IOMUXC_NAND_DATA06__USDHC3_DATA2	0x1d4
++			MX8MP_IOMUXC_NAND_DATA07__USDHC3_DATA3	0x1d4
++			MX8MP_IOMUXC_NAND_RE_B__USDHC3_DATA4	0x1d4
++			MX8MP_IOMUXC_NAND_CE2_B__USDHC3_DATA5	0x1d4
++			MX8MP_IOMUXC_NAND_CE3_B__USDHC3_DATA6	0x1d4
++			MX8MP_IOMUXC_NAND_CLE__USDHC3_DATA7	0x1d4
++			MX8MP_IOMUXC_NAND_CE1_B__USDHC3_STROBE	0x194
++		>;
++	};
++
++	pinctrl_usdhc3_200mhz: usdhc3-200mhzgrp {
++		fsl,pins = <
++			MX8MP_IOMUXC_NAND_WE_B__USDHC3_CLK	0x196
++			MX8MP_IOMUXC_NAND_WP_B__USDHC3_CMD	0x1d6
++			MX8MP_IOMUXC_NAND_DATA04__USDHC3_DATA0	0x1d6
++			MX8MP_IOMUXC_NAND_DATA05__USDHC3_DATA1	0x1d6
++			MX8MP_IOMUXC_NAND_DATA06__USDHC3_DATA2	0x1d6
++			MX8MP_IOMUXC_NAND_DATA07__USDHC3_DATA3	0x1d6
++			MX8MP_IOMUXC_NAND_RE_B__USDHC3_DATA4	0x1d6
++			MX8MP_IOMUXC_NAND_CE2_B__USDHC3_DATA5	0x1d6
++			MX8MP_IOMUXC_NAND_CE3_B__USDHC3_DATA6	0x1d6
++			MX8MP_IOMUXC_NAND_CLE__USDHC3_DATA7	0x1d6
++			MX8MP_IOMUXC_NAND_CE1_B__USDHC3_STROBE	0x196
++		>;
++	};
++
++	pinctrl_wdog: wdoggrp {
++		fsl,pins = <
++			MX8MP_IOMUXC_GPIO1_IO02__WDOG1_WDOG_B	0xc6
++		>;
++	};
++};
+diff --git a/arch/arm/mach-imx/imx8m/Kconfig b/arch/arm/mach-imx/imx8m/Kconfig
+index 7ddb8eca8c5..7a52d4f666c 100644
+--- a/arch/arm/mach-imx/imx8m/Kconfig
++++ b/arch/arm/mach-imx/imx8m/Kconfig
+@@ -417,6 +417,16 @@ config TARGET_IMX8MP_ICORE
+ 	select ARCH_MISC_INIT
+ 	select SPL_CRYPTO if SPL
+ 
++config TARGET_IMX8MP_ICORE_FASTETH
++	bool "i.Core MX8M Plus FastEthernet Engicam Module"
++	select IMX8MP
++	select SUPPORT_SPL
++	select IMX8M_LPDDR4
++	select FSL_CAAM
++	select FSL_BLOB
++	select ARCH_MISC_INIT
++	select SPL_CRYPTO if SPL
++
+ config TARGET_IMX8MP_NAVQP
+ 	bool "Emcraft Systems i.MX8M Plus NavQ+ board"
+ 	select IMX8MP
+diff --git a/arch/arm/mach-imx/imx8m/clock_imx8mm.c b/arch/arm/mach-imx/imx8m/clock_imx8mm.c
+index c38915d57b5..cf7c37bb5fc 100644
+--- a/arch/arm/mach-imx/imx8m/clock_imx8mm.c
++++ b/arch/arm/mach-imx/imx8m/clock_imx8mm.c
+@@ -1103,10 +1103,16 @@ static int imx8mp_eqos_interface_init(struct udevice *dev,
+ 			     IOMUXC_GPR_GPR1_GPR_ENET_QOS_INTF_SEL_MII);
+ 		break;
+ 	case PHY_INTERFACE_MODE_RMII:
+-		setbits_le32(&gpr->gpr[1],
+-			     IOMUXC_GPR_GPR1_GPR_ENET_QOS_CLK_TX_CLK_SEL |
+-			     IOMUXC_GPR_GPR1_GPR_ENET_QOS_CLK_GEN_EN |
+-			     IOMUXC_GPR_GPR1_GPR_ENET_QOS_INTF_SEL_RMII);
++		if (of_machine_is_compatible("engi,imx8mp-icore-fasteth")) {
++			setbits_le32(&gpr->gpr[1],
++				     IOMUXC_GPR_GPR1_GPR_ENET_QOS_CLK_GEN_EN |
++				     IOMUXC_GPR_GPR1_GPR_ENET_QOS_INTF_SEL_RMII);
++		} else {
++			setbits_le32(&gpr->gpr[1],
++				     IOMUXC_GPR_GPR1_GPR_ENET_QOS_CLK_TX_CLK_SEL |
++				     IOMUXC_GPR_GPR1_GPR_ENET_QOS_CLK_GEN_EN |
++				     IOMUXC_GPR_GPR1_GPR_ENET_QOS_INTF_SEL_RMII);
++		}
+ 		break;
+ 	case PHY_INTERFACE_MODE_RGMII:
+ 	case PHY_INTERFACE_MODE_RGMII_ID:
+diff --git a/board/engicam/imx8mp_icore/Kconfig b/board/engicam/imx8mp_icore/Kconfig
+index 509d057ae82..76171e72330 100644
+--- a/board/engicam/imx8mp_icore/Kconfig
++++ b/board/engicam/imx8mp_icore/Kconfig
+@@ -1,4 +1,4 @@
+-if TARGET_IMX8MP_ICORE
++if TARGET_IMX8MP_ICORE || TARGET_IMX8MP_ICORE_FASTETH
+ 
+ config SYS_BOARD
+ 	default "imx8mp_icore"
+diff --git a/configs/imx8mp_icore_fasteth_1gb_defconfig b/configs/imx8mp_icore_fasteth_1gb_defconfig
+new file mode 100644
+index 00000000000..6e8b8a85363
+--- /dev/null
++++ b/configs/imx8mp_icore_fasteth_1gb_defconfig
+@@ -0,0 +1,163 @@
++CONFIG_ARM=y
++CONFIG_ARCH_IMX8M=y
++CONFIG_TEXT_BASE=0x40200000
++CONFIG_SYS_MALLOC_LEN=0x2000000
++CONFIG_SPL_GPIO=y
++CONFIG_SPL_LIBCOMMON_SUPPORT=y
++CONFIG_SPL_LIBGENERIC_SUPPORT=y
++CONFIG_NR_DRAM_BANKS=3
++CONFIG_ENV_SIZE=0x4000
++CONFIG_ENV_OFFSET=0x400000
++CONFIG_DM_GPIO=y
++CONFIG_DEFAULT_DEVICE_TREE="imx8mp-icore-fasteth"
++CONFIG_TARGET_IMX8MP_ICORE_FASTETH=y
++CONFIG_OF_LIBFDT_OVERLAY=y
++CONFIG_SYS_MONITOR_LEN=524288
++CONFIG_SPL_SERIAL=y
++CONFIG_SPL_DRIVERS_MISC=y
++CONFIG_SPL_STACK=0x96dff0
++CONFIG_SPL_TEXT_BASE=0x920000
++CONFIG_SPL_HAS_BSS_LINKER_SECTION=y
++CONFIG_SPL_BSS_START_ADDR=0x96e000
++CONFIG_SPL_BSS_MAX_SIZE=0x2000
++CONFIG_SYS_BOOTM_LEN=0x2000000
++CONFIG_SYS_LOAD_ADDR=0x40400000
++CONFIG_SPL=y
++CONFIG_SPL_IMX_ROMAPI_LOADADDR=0x48000000
++CONFIG_OF_BOARD_FIXUP=y
++CONFIG_SYS_MEMTEST_START=0x60000000
++CONFIG_SYS_MEMTEST_END=0xC0000000
++# CONFIG_ANDROID_BOOT_IMAGE is not set
++CONFIG_FIT=y
++CONFIG_FIT_EXTERNAL_OFFSET=0x3000
++CONFIG_FIT_SIGNATURE=y
++CONFIG_SPL_LOAD_FIT=y
++CONFIG_DISTRO_DEFAULTS=y
++CONFIG_OF_BOARD_SETUP=y
++CONFIG_OF_SYSTEM_SETUP=y
++CONFIG_BOOTCOMMAND="run distro_bootcmd;run bsp_bootcmd"
++CONFIG_DEFAULT_FDT_FILE="imx8mp-icore-fasteth-starterkit.dtb"
++CONFIG_SYS_CBSIZE=2048
++CONFIG_SYS_PBSIZE=2074
++# CONFIG_SYS_CONSOLE_IS_IN_ENV is not set
++# CONFIG_SYS_DEVICE_NULLDEV is not set
++CONFIG_BOARD_EARLY_INIT_F=y
++CONFIG_BOARD_LATE_INIT=y
++CONFIG_SPL_MAX_SIZE=0x2c000
++CONFIG_SPL_PAD_TO=0x0
++CONFIG_SPL_BOARD_INIT=y
++CONFIG_SPL_BOOTROM_SUPPORT=y
++# CONFIG_SPL_SHARES_INIT_SP_ADDR is not set
++CONFIG_SPL_SYS_MMCSD_RAW_MODE=y
++CONFIG_SYS_MMCSD_RAW_MODE_U_BOOT_SECTOR=0x300
++CONFIG_SPL_I2C=y
++CONFIG_SPL_POWER=y
++CONFIG_SPL_WATCHDOG=y
++CONFIG_SYS_PROMPT="u-boot=> "
++# CONFIG_BOOTM_NETBSD is not set
++# CONFIG_CMD_EXPORTENV is not set
++# CONFIG_CMD_IMPORTENV is not set
++CONFIG_CMD_ERASEENV=y
++CONFIG_CRC32_VERIFY=y
++CONFIG_CMD_MEMTEST=y
++# CONFIG_CMD_BIND is not set
++CONFIG_CMD_CLK=y
++CONFIG_CMD_DFU=y
++CONFIG_CMD_FUSE=y
++CONFIG_CMD_GPIO=y
++CONFIG_CMD_I2C=y
++CONFIG_CMD_MMC=y
++CONFIG_CMD_OPTEE_RPMB=y
++CONFIG_CMD_POWEROFF=y
++CONFIG_CMD_USB=y
++CONFIG_CMD_SNTP=y
++CONFIG_CMD_CACHE=y
++CONFIG_CMD_RTC=y
++CONFIG_CMD_TIME=y
++CONFIG_CMD_GETTIME=y
++CONFIG_CMD_TIMER=y
++CONFIG_CMD_REGULATOR=y
++CONFIG_CMD_EXT4_WRITE=y
++CONFIG_OF_CONTROL=y
++CONFIG_SPL_OF_CONTROL=y
++CONFIG_ENV_OVERWRITE=y
++CONFIG_ENV_IS_NOWHERE=y
++CONFIG_ENV_IS_IN_MMC=y
++CONFIG_SYS_RELOC_GD_ENV_ADDR=y
++CONFIG_SYS_MMC_ENV_DEV=1
++CONFIG_NET_RANDOM_ETHADDR=y
++CONFIG_SPL_DM=y
++CONFIG_REGMAP=y
++CONFIG_SYSCON=y
++CONFIG_SPL_CLK_COMPOSITE_CCF=y
++CONFIG_CLK_COMPOSITE_CCF=y
++CONFIG_SPL_CLK_IMX8MP=y
++CONFIG_CLK_IMX8MP=y
++CONFIG_IMX8MP_1GB_LPDDR4=y
++CONFIG_DFU_TFTP=y
++CONFIG_DFU_MMC=y
++CONFIG_DFU_RAM=y
++CONFIG_USB_FUNCTION_FASTBOOT=y
++CONFIG_UDP_FUNCTION_FASTBOOT=y
++CONFIG_FASTBOOT_BUF_ADDR=0x42800000
++CONFIG_FASTBOOT_BUF_SIZE=0x40000000
++CONFIG_FASTBOOT_FLASH=y
++CONFIG_MXC_GPIO=y
++CONFIG_DM_PCA953X=y
++CONFIG_DM_I2C=y
++CONFIG_LED=y
++CONFIG_LED_GPIO=y
++CONFIG_SUPPORT_EMMC_RPMB=y
++CONFIG_SUPPORT_EMMC_BOOT=y
++CONFIG_MMC_IO_VOLTAGE=y
++CONFIG_MMC_UHS_SUPPORT=y
++CONFIG_MMC_HS400_ES_SUPPORT=y
++CONFIG_MMC_HS400_SUPPORT=y
++CONFIG_FSL_USDHC=y
++CONFIG_PHY_REALTEK=y
++CONFIG_DM_ETH_PHY=y
++CONFIG_PHY_GIGE=y
++CONFIG_DWC_ETH_QOS=y
++CONFIG_DWC_ETH_QOS_IMX=y
++CONFIG_FEC_MXC=y
++CONFIG_MII=y
++CONFIG_PHY=y
++CONFIG_PHY_IMX8MQ_USB=y
++CONFIG_PINCTRL=y
++CONFIG_SPL_PINCTRL=y
++CONFIG_PINCTRL_IMX8M=y
++CONFIG_DM_PMIC=y
++CONFIG_DM_PMIC_PCA9450=y
++CONFIG_SPL_DM_PMIC_PCA9450=y
++CONFIG_DM_REGULATOR=y
++CONFIG_DM_REGULATOR_PCA9450=y
++CONFIG_DM_REGULATOR_FIXED=y
++CONFIG_DM_REGULATOR_GPIO=y
++CONFIG_DM_RTC=y
++CONFIG_RTC_EMULATION=y
++CONFIG_SPECIFY_CONSOLE_INDEX=y
++CONFIG_DM_SERIAL=y
++CONFIG_MXC_UART=y
++CONFIG_SPI=y
++CONFIG_DM_SPI=y
++CONFIG_SYSRESET=y
++CONFIG_SYSRESET_PSCI=y
++CONFIG_TEE=y
++CONFIG_OPTEE=y
++CONFIG_DM_THERMAL=y
++CONFIG_IMX_TMU=y
++CONFIG_USB=y
++CONFIG_DM_USB_GADGET=y
++CONFIG_USB_XHCI_HCD=y
++CONFIG_USB_XHCI_DWC3=y
++CONFIG_USB_DWC3=y
++CONFIG_USB_DWC3_GENERIC=y
++CONFIG_SPL_USB_DWC3_GENERIC=y
++CONFIG_USB_GADGET=y
++CONFIG_USB_GADGET_MANUFACTURER="FSL"
++CONFIG_USB_GADGET_VENDOR_NUM=0x1fc9
++CONFIG_USB_GADGET_PRODUCT_NUM=0x0152
++CONFIG_SPL_RSA=y
++CONFIG_SHA384=y
++CONFIG_LZO=y
++CONFIG_BZIP2=y
+diff --git a/configs/imx8mp_icore_fasteth_4gb_defconfig b/configs/imx8mp_icore_fasteth_4gb_defconfig
+new file mode 100644
+index 00000000000..daa624b1350
+--- /dev/null
++++ b/configs/imx8mp_icore_fasteth_4gb_defconfig
+@@ -0,0 +1,163 @@
++CONFIG_ARM=y
++CONFIG_ARCH_IMX8M=y
++CONFIG_TEXT_BASE=0x40200000
++CONFIG_SYS_MALLOC_LEN=0x2000000
++CONFIG_SPL_GPIO=y
++CONFIG_SPL_LIBCOMMON_SUPPORT=y
++CONFIG_SPL_LIBGENERIC_SUPPORT=y
++CONFIG_NR_DRAM_BANKS=3
++CONFIG_ENV_SIZE=0x4000
++CONFIG_ENV_OFFSET=0x400000
++CONFIG_DM_GPIO=y
++CONFIG_DEFAULT_DEVICE_TREE="imx8mp-icore-fasteth"
++CONFIG_TARGET_IMX8MP_ICORE_FASTETH=y
++CONFIG_OF_LIBFDT_OVERLAY=y
++CONFIG_SYS_MONITOR_LEN=524288
++CONFIG_SPL_SERIAL=y
++CONFIG_SPL_DRIVERS_MISC=y
++CONFIG_SPL_STACK=0x96dff0
++CONFIG_SPL_TEXT_BASE=0x920000
++CONFIG_SPL_HAS_BSS_LINKER_SECTION=y
++CONFIG_SPL_BSS_START_ADDR=0x96e000
++CONFIG_SPL_BSS_MAX_SIZE=0x2000
++CONFIG_SYS_BOOTM_LEN=0x2000000
++CONFIG_SYS_LOAD_ADDR=0x40400000
++CONFIG_SPL=y
++CONFIG_SPL_IMX_ROMAPI_LOADADDR=0x48000000
++CONFIG_OF_BOARD_FIXUP=y
++CONFIG_SYS_MEMTEST_START=0x60000000
++CONFIG_SYS_MEMTEST_END=0xC0000000
++# CONFIG_ANDROID_BOOT_IMAGE is not set
++CONFIG_FIT=y
++CONFIG_FIT_EXTERNAL_OFFSET=0x3000
++CONFIG_FIT_SIGNATURE=y
++CONFIG_SPL_LOAD_FIT=y
++CONFIG_DISTRO_DEFAULTS=y
++CONFIG_OF_BOARD_SETUP=y
++CONFIG_OF_SYSTEM_SETUP=y
++CONFIG_BOOTCOMMAND="run distro_bootcmd;run bsp_bootcmd"
++CONFIG_DEFAULT_FDT_FILE="imx8mp-icore-fasteth-starterkit.dtb"
++CONFIG_SYS_CBSIZE=2048
++CONFIG_SYS_PBSIZE=2074
++# CONFIG_SYS_CONSOLE_IS_IN_ENV is not set
++# CONFIG_SYS_DEVICE_NULLDEV is not set
++CONFIG_BOARD_EARLY_INIT_F=y
++CONFIG_BOARD_LATE_INIT=y
++CONFIG_SPL_MAX_SIZE=0x2c000
++CONFIG_SPL_PAD_TO=0x0
++CONFIG_SPL_BOARD_INIT=y
++CONFIG_SPL_BOOTROM_SUPPORT=y
++# CONFIG_SPL_SHARES_INIT_SP_ADDR is not set
++CONFIG_SPL_SYS_MMCSD_RAW_MODE=y
++CONFIG_SYS_MMCSD_RAW_MODE_U_BOOT_SECTOR=0x300
++CONFIG_SPL_I2C=y
++CONFIG_SPL_POWER=y
++CONFIG_SPL_WATCHDOG=y
++CONFIG_SYS_PROMPT="u-boot=> "
++# CONFIG_BOOTM_NETBSD is not set
++# CONFIG_CMD_EXPORTENV is not set
++# CONFIG_CMD_IMPORTENV is not set
++CONFIG_CMD_ERASEENV=y
++CONFIG_CRC32_VERIFY=y
++CONFIG_CMD_MEMTEST=y
++# CONFIG_CMD_BIND is not set
++CONFIG_CMD_CLK=y
++CONFIG_CMD_DFU=y
++CONFIG_CMD_FUSE=y
++CONFIG_CMD_GPIO=y
++CONFIG_CMD_I2C=y
++CONFIG_CMD_MMC=y
++CONFIG_CMD_OPTEE_RPMB=y
++CONFIG_CMD_POWEROFF=y
++CONFIG_CMD_USB=y
++CONFIG_CMD_SNTP=y
++CONFIG_CMD_CACHE=y
++CONFIG_CMD_RTC=y
++CONFIG_CMD_TIME=y
++CONFIG_CMD_GETTIME=y
++CONFIG_CMD_TIMER=y
++CONFIG_CMD_REGULATOR=y
++CONFIG_CMD_EXT4_WRITE=y
++CONFIG_OF_CONTROL=y
++CONFIG_SPL_OF_CONTROL=y
++CONFIG_ENV_OVERWRITE=y
++CONFIG_ENV_IS_NOWHERE=y
++CONFIG_ENV_IS_IN_MMC=y
++CONFIG_SYS_RELOC_GD_ENV_ADDR=y
++CONFIG_SYS_MMC_ENV_DEV=2
++CONFIG_NET_RANDOM_ETHADDR=y
++CONFIG_SPL_DM=y
++CONFIG_REGMAP=y
++CONFIG_SYSCON=y
++CONFIG_SPL_CLK_COMPOSITE_CCF=y
++CONFIG_CLK_COMPOSITE_CCF=y
++CONFIG_SPL_CLK_IMX8MP=y
++CONFIG_CLK_IMX8MP=y
++CONFIG_IMX8MP_4GB_LPDDR4=y
++CONFIG_DFU_TFTP=y
++CONFIG_DFU_MMC=y
++CONFIG_DFU_RAM=y
++CONFIG_USB_FUNCTION_FASTBOOT=y
++CONFIG_UDP_FUNCTION_FASTBOOT=y
++CONFIG_FASTBOOT_BUF_ADDR=0x42800000
++CONFIG_FASTBOOT_BUF_SIZE=0x40000000
++CONFIG_FASTBOOT_FLASH=y
++CONFIG_MXC_GPIO=y
++CONFIG_DM_PCA953X=y
++CONFIG_DM_I2C=y
++CONFIG_LED=y
++CONFIG_LED_GPIO=y
++CONFIG_SUPPORT_EMMC_RPMB=y
++CONFIG_SUPPORT_EMMC_BOOT=y
++CONFIG_MMC_IO_VOLTAGE=y
++CONFIG_MMC_UHS_SUPPORT=y
++CONFIG_MMC_HS400_ES_SUPPORT=y
++CONFIG_MMC_HS400_SUPPORT=y
++CONFIG_FSL_USDHC=y
++CONFIG_PHY_REALTEK=y
++CONFIG_DM_ETH_PHY=y
++CONFIG_PHY_GIGE=y
++CONFIG_DWC_ETH_QOS=y
++CONFIG_DWC_ETH_QOS_IMX=y
++CONFIG_FEC_MXC=y
++CONFIG_MII=y
++CONFIG_PHY=y
++CONFIG_PHY_IMX8MQ_USB=y
++CONFIG_PINCTRL=y
++CONFIG_SPL_PINCTRL=y
++CONFIG_PINCTRL_IMX8M=y
++CONFIG_DM_PMIC=y
++CONFIG_DM_PMIC_PCA9450=y
++CONFIG_SPL_DM_PMIC_PCA9450=y
++CONFIG_DM_REGULATOR=y
++CONFIG_DM_REGULATOR_PCA9450=y
++CONFIG_DM_REGULATOR_FIXED=y
++CONFIG_DM_REGULATOR_GPIO=y
++CONFIG_DM_RTC=y
++CONFIG_RTC_EMULATION=y
++CONFIG_SPECIFY_CONSOLE_INDEX=y
++CONFIG_DM_SERIAL=y
++CONFIG_MXC_UART=y
++CONFIG_SPI=y
++CONFIG_DM_SPI=y
++CONFIG_SYSRESET=y
++CONFIG_SYSRESET_PSCI=y
++CONFIG_TEE=y
++CONFIG_OPTEE=y
++CONFIG_DM_THERMAL=y
++CONFIG_IMX_TMU=y
++CONFIG_USB=y
++CONFIG_DM_USB_GADGET=y
++CONFIG_USB_XHCI_HCD=y
++CONFIG_USB_XHCI_DWC3=y
++CONFIG_USB_DWC3=y
++CONFIG_USB_DWC3_GENERIC=y
++CONFIG_SPL_USB_DWC3_GENERIC=y
++CONFIG_USB_GADGET=y
++CONFIG_USB_GADGET_MANUFACTURER="FSL"
++CONFIG_USB_GADGET_VENDOR_NUM=0x1fc9
++CONFIG_USB_GADGET_PRODUCT_NUM=0x0152
++CONFIG_SPL_RSA=y
++CONFIG_SHA384=y
++CONFIG_LZO=y
++CONFIG_BZIP2=y
+diff --git a/configs/imx8mp_icore_fasteth_defconfig b/configs/imx8mp_icore_fasteth_defconfig
+new file mode 100644
+index 00000000000..dbb2361cab0
+--- /dev/null
++++ b/configs/imx8mp_icore_fasteth_defconfig
+@@ -0,0 +1,162 @@
++CONFIG_ARM=y
++CONFIG_ARCH_IMX8M=y
++CONFIG_TEXT_BASE=0x40200000
++CONFIG_SYS_MALLOC_LEN=0x2000000
++CONFIG_SPL_GPIO=y
++CONFIG_SPL_LIBCOMMON_SUPPORT=y
++CONFIG_SPL_LIBGENERIC_SUPPORT=y
++CONFIG_NR_DRAM_BANKS=3
++CONFIG_ENV_SIZE=0x4000
++CONFIG_ENV_OFFSET=0x400000
++CONFIG_DM_GPIO=y
++CONFIG_DEFAULT_DEVICE_TREE="imx8mp-icore-fasteth"
++CONFIG_TARGET_IMX8MP_ICORE_FASTETH=y
++CONFIG_OF_LIBFDT_OVERLAY=y
++CONFIG_SYS_MONITOR_LEN=524288
++CONFIG_SPL_SERIAL=y
++CONFIG_SPL_DRIVERS_MISC=y
++CONFIG_SPL_STACK=0x96dff0
++CONFIG_SPL_TEXT_BASE=0x920000
++CONFIG_SPL_HAS_BSS_LINKER_SECTION=y
++CONFIG_SPL_BSS_START_ADDR=0x96e000
++CONFIG_SPL_BSS_MAX_SIZE=0x2000
++CONFIG_SYS_BOOTM_LEN=0x2000000
++CONFIG_SYS_LOAD_ADDR=0x40400000
++CONFIG_SPL=y
++CONFIG_SPL_IMX_ROMAPI_LOADADDR=0x48000000
++CONFIG_OF_BOARD_FIXUP=y
++CONFIG_SYS_MEMTEST_START=0x60000000
++CONFIG_SYS_MEMTEST_END=0xC0000000
++# CONFIG_ANDROID_BOOT_IMAGE is not set
++CONFIG_FIT=y
++CONFIG_FIT_EXTERNAL_OFFSET=0x3000
++CONFIG_FIT_SIGNATURE=y
++CONFIG_SPL_LOAD_FIT=y
++CONFIG_DISTRO_DEFAULTS=y
++CONFIG_OF_BOARD_SETUP=y
++CONFIG_OF_SYSTEM_SETUP=y
++CONFIG_BOOTCOMMAND="run distro_bootcmd;run bsp_bootcmd"
++CONFIG_DEFAULT_FDT_FILE="imx8mp-icore-fasteth-starterkit.dtb"
++CONFIG_SYS_CBSIZE=2048
++CONFIG_SYS_PBSIZE=2074
++# CONFIG_SYS_CONSOLE_IS_IN_ENV is not set
++# CONFIG_SYS_DEVICE_NULLDEV is not set
++CONFIG_BOARD_EARLY_INIT_F=y
++CONFIG_BOARD_LATE_INIT=y
++CONFIG_SPL_MAX_SIZE=0x2c000
++CONFIG_SPL_PAD_TO=0x0
++CONFIG_SPL_BOARD_INIT=y
++CONFIG_SPL_BOOTROM_SUPPORT=y
++# CONFIG_SPL_SHARES_INIT_SP_ADDR is not set
++CONFIG_SPL_SYS_MMCSD_RAW_MODE=y
++CONFIG_SYS_MMCSD_RAW_MODE_U_BOOT_SECTOR=0x300
++CONFIG_SPL_I2C=y
++CONFIG_SPL_POWER=y
++CONFIG_SPL_WATCHDOG=y
++CONFIG_SYS_PROMPT="u-boot=> "
++# CONFIG_BOOTM_NETBSD is not set
++# CONFIG_CMD_EXPORTENV is not set
++# CONFIG_CMD_IMPORTENV is not set
++CONFIG_CMD_ERASEENV=y
++CONFIG_CRC32_VERIFY=y
++CONFIG_CMD_MEMTEST=y
++# CONFIG_CMD_BIND is not set
++CONFIG_CMD_CLK=y
++CONFIG_CMD_DFU=y
++CONFIG_CMD_FUSE=y
++CONFIG_CMD_GPIO=y
++CONFIG_CMD_I2C=y
++CONFIG_CMD_MMC=y
++CONFIG_CMD_OPTEE_RPMB=y
++CONFIG_CMD_POWEROFF=y
++CONFIG_CMD_USB=y
++CONFIG_CMD_SNTP=y
++CONFIG_CMD_CACHE=y
++CONFIG_CMD_RTC=y
++CONFIG_CMD_TIME=y
++CONFIG_CMD_GETTIME=y
++CONFIG_CMD_TIMER=y
++CONFIG_CMD_REGULATOR=y
++CONFIG_CMD_EXT4_WRITE=y
++CONFIG_OF_CONTROL=y
++CONFIG_SPL_OF_CONTROL=y
++CONFIG_ENV_OVERWRITE=y
++CONFIG_ENV_IS_NOWHERE=y
++CONFIG_ENV_IS_IN_MMC=y
++CONFIG_SYS_RELOC_GD_ENV_ADDR=y
++CONFIG_SYS_MMC_ENV_DEV=2
++CONFIG_NET_RANDOM_ETHADDR=y
++CONFIG_SPL_DM=y
++CONFIG_REGMAP=y
++CONFIG_SYSCON=y
++CONFIG_SPL_CLK_COMPOSITE_CCF=y
++CONFIG_CLK_COMPOSITE_CCF=y
++CONFIG_SPL_CLK_IMX8MP=y
++CONFIG_CLK_IMX8MP=y
++CONFIG_DFU_TFTP=y
++CONFIG_DFU_MMC=y
++CONFIG_DFU_RAM=y
++CONFIG_USB_FUNCTION_FASTBOOT=y
++CONFIG_UDP_FUNCTION_FASTBOOT=y
++CONFIG_FASTBOOT_BUF_ADDR=0x42800000
++CONFIG_FASTBOOT_BUF_SIZE=0x40000000
++CONFIG_FASTBOOT_FLASH=y
++CONFIG_MXC_GPIO=y
++CONFIG_DM_PCA953X=y
++CONFIG_DM_I2C=y
++CONFIG_LED=y
++CONFIG_LED_GPIO=y
++CONFIG_SUPPORT_EMMC_RPMB=y
++CONFIG_SUPPORT_EMMC_BOOT=y
++CONFIG_MMC_IO_VOLTAGE=y
++CONFIG_MMC_UHS_SUPPORT=y
++CONFIG_MMC_HS400_ES_SUPPORT=y
++CONFIG_MMC_HS400_SUPPORT=y
++CONFIG_FSL_USDHC=y
++CONFIG_PHY_REALTEK=y
++CONFIG_DM_ETH_PHY=y
++CONFIG_PHY_GIGE=y
++CONFIG_DWC_ETH_QOS=y
++CONFIG_DWC_ETH_QOS_IMX=y
++CONFIG_FEC_MXC=y
++CONFIG_MII=y
++CONFIG_PHY=y
++CONFIG_PHY_IMX8MQ_USB=y
++CONFIG_PINCTRL=y
++CONFIG_SPL_PINCTRL=y
++CONFIG_PINCTRL_IMX8M=y
++CONFIG_DM_PMIC=y
++CONFIG_DM_PMIC_PCA9450=y
++CONFIG_SPL_DM_PMIC_PCA9450=y
++CONFIG_DM_REGULATOR=y
++CONFIG_DM_REGULATOR_PCA9450=y
++CONFIG_DM_REGULATOR_FIXED=y
++CONFIG_DM_REGULATOR_GPIO=y
++CONFIG_DM_RTC=y
++CONFIG_RTC_EMULATION=y
++CONFIG_SPECIFY_CONSOLE_INDEX=y
++CONFIG_DM_SERIAL=y
++CONFIG_MXC_UART=y
++CONFIG_SPI=y
++CONFIG_DM_SPI=y
++CONFIG_SYSRESET=y
++CONFIG_SYSRESET_PSCI=y
++CONFIG_TEE=y
++CONFIG_OPTEE=y
++CONFIG_DM_THERMAL=y
++CONFIG_IMX_TMU=y
++CONFIG_USB=y
++CONFIG_DM_USB_GADGET=y
++CONFIG_USB_XHCI_HCD=y
++CONFIG_USB_XHCI_DWC3=y
++CONFIG_USB_DWC3=y
++CONFIG_USB_DWC3_GENERIC=y
++CONFIG_SPL_USB_DWC3_GENERIC=y
++CONFIG_USB_GADGET=y
++CONFIG_USB_GADGET_MANUFACTURER="FSL"
++CONFIG_USB_GADGET_VENDOR_NUM=0x1fc9
++CONFIG_USB_GADGET_PRODUCT_NUM=0x0152
++CONFIG_SPL_RSA=y
++CONFIG_SHA384=y
++CONFIG_LZO=y
++CONFIG_BZIP2=y
+diff --git a/include/configs/imx8mp_icore.h b/include/configs/imx8mp_icore.h
+index 05f99f2907f..c17d8f2e813 100644
+--- a/include/configs/imx8mp_icore.h
++++ b/include/configs/imx8mp_icore.h
+@@ -48,11 +48,7 @@
+ #define MFG_NAND_PARTITION "mtdparts=gpmi-nand:64m(nandboot),16m(nandfit),32m(nandkernel),16m(nanddtb),8m(nandtee),-(nandrootfs)"
+ #endif
+ 
+-#ifdef CONFIG_IMX8MP_1GB_LPDDR4
+-	#define CMA_VALUE " cma=128M "	
+-#else	
+-	#define CMA_VALUE " "
+-#endif
++#define CMA_VALUE " "
+ 
+ /* Initial environment variables */
+ #define CFG_EXTRA_ENV_SETTINGS		\

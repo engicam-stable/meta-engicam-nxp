@@ -1,0 +1,63 @@
+From 2ebfe7d93853af49732d54c9d8e4c290ec7352c7 Mon Sep 17 00:00:00 2001
+From: engicam <support@engicam.com>
+Date: Thu, 9 Jul 2026 17:24:42 +0200
+Subject: [PATCH] drivers: gpu: drm: panel: panel-simple: add yes7 panel
+Upstream-Status: Inappropriate [For engicam use only]
+
+---
+ drivers/gpu/drm/panel/panel-simple.c | 35 ++++++++++++++++++++++++++++
+ 1 file changed, 35 insertions(+)
+
+diff --git a/drivers/gpu/drm/panel/panel-simple.c b/drivers/gpu/drm/panel/panel-simple.c
+index 15b00e01c4fe..b28c50b73d81 100644
+--- a/drivers/gpu/drm/panel/panel-simple.c
++++ b/drivers/gpu/drm/panel/panel-simple.c
+@@ -1406,6 +1406,38 @@ static const struct panel_desc engicam_starterkit = {
+ 	.connector_type = DRM_MODE_CONNECTOR_LVDS,
+ };
+ 
++static const struct drm_display_mode engicam_yes7_mode = {
++	.clock = 71143,
++	.hdisplay = 1024,
++	.hsync_start = 1024 + 48,
++	.hsync_end = 1024 + 48 + 32,
++	.htotal = 1024 + 48 + 32 + 80,
++	.vdisplay = 600,
++	.vsync_start = 600 + 3,
++	.vsync_end = 600 + 3 + 6,
++	.vtotal = 600 + 3 + 6 + 14,
++};
++
++static const struct panel_desc engicam_yes7 = {
++	.modes = &engicam_yes7_mode,
++	.num_modes = 1,
++	.bpc = 8,
++	.size = {
++		.width = 261,
++		.height = 163,
++	},
++	.delay = {
++		.prepare = 8,
++		.enable = 300,
++		.unprepare = 300,
++		.disable = 60,
++	},
++	.bus_format = MEDIA_BUS_FMT_RGB888_1X7X4_SPWG,
++	.bus_flags = DRM_BUS_FLAG_DE_HIGH,
++	.connector_type = DRM_MODE_CONNECTOR_LVDS,
++};
++
++
+ static const struct drm_display_mode boe_bp101wx1_100_mode = {
+ 	.clock = 78945,
+ 	.hdisplay = 1280,
+@@ -4789,6 +4821,9 @@ static const struct of_device_id platform_of_match[] = {
+ 	}, {
+ 		.compatible = "engicam_starterkit",
+ 		.data = &engicam_starterkit,
++	}, {
++		.compatible = "engicam,yes7",
++		.data = &engicam_yes7,
+ 	}, {
+ 		.compatible = "boe,bp082wx1-100",
+ 		.data = &boe_bp082wx1_100,

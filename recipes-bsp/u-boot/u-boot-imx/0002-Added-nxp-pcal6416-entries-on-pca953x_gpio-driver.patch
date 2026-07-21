@@ -1,0 +1,21 @@
+From 2c5bbbfb8678359c4c543b6469b7db7f847ed831 Mon Sep 17 00:00:00 2001
+From: Matteo Lisi <matteo.lisi@engicam.com>
+Date: Wed, 14 Jan 2026 10:05:08 +0100
+Subject: [PATCH] Added nxp,pcal6416 entries on pca953x_gpio driver
+Upstream-Status: Pending
+---
+ drivers/gpio/pca953x_gpio.c | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/drivers/gpio/pca953x_gpio.c b/drivers/gpio/pca953x_gpio.c
+index e84038f312e..68326ab80d4 100644
+--- a/drivers/gpio/pca953x_gpio.c
++++ b/drivers/gpio/pca953x_gpio.c
+@@ -393,6 +393,7 @@ static const struct udevice_id pca953x_ids[] = {
+ 	{ .compatible = "nxp,pca9575", .data = OF_957X(16, PCA_INT), },
+ 	{ .compatible = "nxp,pca9698", .data = OF_953X(40, 0), },
+ 
++	{ .compatible = "nxp,pcal6416", .data = OF_953X(16, PCA_LATCH_INT), },
+ 	{ .compatible = "nxp,pcal6524", .data = OF_953X(24, PCA_LATCH_INT), },
+ 
+ 	{ .compatible = "maxim,max7310", .data = OF_953X(8, 0), },

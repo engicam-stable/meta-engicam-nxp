@@ -1,0 +1,55 @@
+From e7e736deb311f6916f976ddb2506819563edc0bf Mon Sep 17 00:00:00 2001
+From: Matteo Lisi <matteo.lisi@engicam.com>
+Date: Tue, 3 Feb 2026 09:53:27 +0100
+Subject: [PATCH] m33 debug port works
+Upstream-Status: Pending
+---
+ boards/mcimx95evk/pin_mux.c    | 7 +++++++
+ configs/mx95evk.cfg            | 2 +-
+ configs/mx95evk/config_board.h | 2 +-
+ 3 files changed, 9 insertions(+), 2 deletions(-)
+
+diff --git a/boards/mcimx95evk/pin_mux.c b/boards/mcimx95evk/pin_mux.c
+index d98df87..88bbb7d 100755
+--- a/boards/mcimx95evk/pin_mux.c
++++ b/boards/mcimx95evk/pin_mux.c
+@@ -29,6 +29,13 @@ void BOARD_InitPins(void)
+ 
+     IOMUXC_SetPinMux(IOMUXC_PAD_UART2_TXD__LPUART2_TX, 0);
+     IOMUXC_SetPinConfig(IOMUXC_PAD_UART2_TXD__LPUART2_TX, IOMUXC_PAD_DSE(0xFU));
++#elif (BOARD_DEBUG_UART_INSTANCE == 6U)
++    /* Configure LPUART 6 */
++    IOMUXC_SetPinMux(IOMUXC_PAD_GPIO_IO33__LPUART6_RX, 0U);
++    IOMUXC_SetPinConfig(IOMUXC_PAD_GPIO_IO33__LPUART6_RX, IOMUXC_PAD_PD(1U));
++
++    IOMUXC_SetPinMux(IOMUXC_PAD_GPIO_IO32__LPUART6_TX, 0);
++    IOMUXC_SetPinConfig(IOMUXC_PAD_GPIO_IO32__LPUART6_TX, IOMUXC_PAD_DSE(0xFU));
+ #endif
+ 
+ #if (BOARD_I2C_INSTANCE == 1U)
+diff --git a/configs/mx95evk.cfg b/configs/mx95evk.cfg
+index 9250d02..7ad5cf8 100755
+--- a/configs/mx95evk.cfg
++++ b/configs/mx95evk.cfg
+@@ -41,7 +41,7 @@ include ../devices/MIMX95/configtool/device.cfg
+ # Board                                                                    #
+ #==========================================================================#
+ 
+-BOARD               DEBUG_UART_INSTANCE=2
++BOARD               DEBUG_UART_INSTANCE=6
+ BOARD               DEBUG_UART_BAUDRATE=115200
+ 
+ BOARD               I2C_INSTANCE=1
+diff --git a/configs/mx95evk/config_board.h b/configs/mx95evk/config_board.h
+index 1a6cb65..70dff9d 100755
+--- a/configs/mx95evk/config_board.h
++++ b/configs/mx95evk/config_board.h
+@@ -54,7 +54,7 @@
+ /* Defines */
+ 
+ /*! Config for UART instance */
+-#define BOARD_DEBUG_UART_INSTANCE    2U
++#define BOARD_DEBUG_UART_INSTANCE    6U
+ /*! Config for UART baudrate */
+ #define BOARD_DEBUG_UART_BAUDRATE    115200U
+ 

@@ -1,0 +1,22 @@
+From 41388d6241875eca978d45b0be433109c470a0e8 Mon Sep 17 00:00:00 2001
+From: engicam <support@engicam.com>
+Date: Fri, 10 Jul 2026 09:40:16 +0200
+Subject: [PATCH] plat: imx: imx8m: imx8mm: remove UART4 from M4
+Upstream-Status: Inappropriate [for engicam use only]
+
+---
+ plat/imx/imx8m/imx8mm/imx8mm_bl31_setup.c | 1 -
+ 1 file changed, 1 deletion(-)
+
+diff --git a/plat/imx/imx8m/imx8mm/imx8mm_bl31_setup.c b/plat/imx/imx8m/imx8mm/imx8mm_bl31_setup.c
+index 4bb76c12e..e31a357b3 100644
+--- a/plat/imx/imx8m/imx8mm/imx8mm_bl31_setup.c
++++ b/plat/imx/imx8m/imx8mm/imx8mm_bl31_setup.c
+@@ -118,7 +118,6 @@ static struct imx_rdc_cfg rdc[] = {
+ 	RDC_MDAn(RDC_MDA_M4, DID1),
+ 
+ 	/* peripherals domain permission */
+-	RDC_PDAPn(RDC_PDAP_UART4, D1R | D1W),
+ 	RDC_PDAPn(RDC_PDAP_UART2, D0R | D0W),
+ 	RDC_PDAPn(RDC_PDAP_UART1, D0R | D0W),
+ 

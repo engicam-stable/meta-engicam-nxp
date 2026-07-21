@@ -1,0 +1,57 @@
+From b3b49845dbc56e7337118f51adcd655c39352f60 Mon Sep 17 00:00:00 2001
+From: engicam <support@engicam.com>
+Date: Thu, 9 Jul 2026 17:20:40 +0200
+Subject: [PATCH] drivers: gpu: drm: panel-simple.c: add Winstar WF50 support
+Upstream-Status: Inappropriate [For engicam use only]
+
+---
+ drivers/gpu/drm/panel/panel-simple.c | 29 ++++++++++++++++++++++++++++
+ 1 file changed, 29 insertions(+)
+
+diff --git a/drivers/gpu/drm/panel/panel-simple.c b/drivers/gpu/drm/panel/panel-simple.c
+index 82e8b160291d..15b00e01c4fe 100644
+--- a/drivers/gpu/drm/panel/panel-simple.c
++++ b/drivers/gpu/drm/panel/panel-simple.c
+@@ -4610,6 +4610,32 @@ static const struct panel_desc winstar_wf35ltiacd = {
+ 	.bus_format = MEDIA_BUS_FMT_RGB888_1X24,
+ };
+ 
++static const struct display_timing winstar_wf50ftwagdng0_timing = {
++	.pixelclock = { 23000000, 25000000, 27000000 },
++	.hactive = { 800, 800, 800 },
++	.hfront_porch = { 4, 8, 48 },
++	.hback_porch = { 4, 8, 48 },
++	.hsync_len = { 2, 4, 8 },
++	.vactive = { 480, 480, 480 },
++	.vfront_porch = { 6, 8, 12 },
++	.vback_porch = { 6, 8, 12 },
++	.vsync_len = { 2, 4, 8 },
++	.flags = DISPLAY_FLAGS_HSYNC_LOW | DISPLAY_FLAGS_VSYNC_LOW |
++		 DISPLAY_FLAGS_DE_HIGH | DISPLAY_FLAGS_PIXDATA_NEGEDGE,
++};
++
++static const struct panel_desc winstar_wf50ftwagdng0 = {
++	.timings = &winstar_wf50ftwagdng0_timing,
++	.num_timings = 1,
++	.bpc = 8,
++	.size = {
++		.width = 108,
++		.height = 64,
++	},
++	.bus_flags = DRM_BUS_FLAG_DE_HIGH | DRM_BUS_FLAG_PIXDATA_SAMPLE_NEGEDGE,
++	.bus_format = MEDIA_BUS_FMT_RGB888_1X24,
++};
++
+ static const struct drm_display_mode yes_optoelectronics_ytc700tlag_05_201c_mode = {
+ 	.clock = 51200,
+ 	.hdisplay = 1024,
+@@ -5147,6 +5173,9 @@ static const struct of_device_id platform_of_match[] = {
+ 	}, {
+ 		.compatible = "winstar,wf35ltiacd",
+ 		.data = &winstar_wf35ltiacd,
++	}, {
++		.compatible = "winstar,wf50ftwagdng0",
++		.data = &winstar_wf50ftwagdng0,
+ 	}, {
+ 		.compatible = "yes-optoelectronics,ytc700tlag-05-201c",
+ 		.data = &yes_optoelectronics_ytc700tlag_05_201c,

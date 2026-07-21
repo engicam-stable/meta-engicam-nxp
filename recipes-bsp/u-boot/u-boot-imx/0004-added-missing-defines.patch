@@ -1,0 +1,25 @@
+From 793aa8ca6892849f34151b74cb33cef0dc163552 Mon Sep 17 00:00:00 2001
+From: Matteo Lisi <matteo.lisi@engicam.com>
+Date: Tue, 10 Feb 2026 18:12:23 +0100
+Subject: [PATCH] added missing defines
+
+Upstream-Status: Pending
+
+---
+ include/configs/imx95_smarcore.h | 3 +++
+ 1 file changed, 3 insertions(+)
+
+diff --git a/include/configs/imx95_smarcore.h b/include/configs/imx95_smarcore.h
+index 132f9f588c0..1347ec11e2b 100644
+--- a/include/configs/imx95_smarcore.h
++++ b/include/configs/imx95_smarcore.h
+@@ -21,6 +21,9 @@
+ 
+ #define WDOG_BASE_ADDR			WDG3_BASE_ADDR
+ 
++#define CFG_SYS_SECURE_SDRAM_BASE       0x8A000000 /* Secure DDR region for A55, SPL could use first 2MB */
++#define CFG_SYS_SECURE_SDRAM_SIZE       0x06000000
++
+ #ifdef CONFIG_ANDROID_SUPPORT
+ #include "imx95_evk_android.h"
+ #endif

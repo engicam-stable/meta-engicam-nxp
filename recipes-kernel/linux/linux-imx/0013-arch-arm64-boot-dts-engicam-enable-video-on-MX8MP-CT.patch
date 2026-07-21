@@ -1,0 +1,326 @@
+From 2e13d99967fe0031999c16b3298099cbd18f5604 Mon Sep 17 00:00:00 2001
+From: engicam <support@engicam.com>
+Date: Thu, 9 Jul 2026 17:08:42 +0200
+Subject: [PATCH] arch: arm64: boot: dts: engicam: enable video on MX8MP +
+ CTOUCH 3.1
+Upstream-Status: Inappropriate [For engicam use only]
+
+---
+ arch/arm64/boot/dts/engicam/Makefile          |   3 +
+ .../engicam/imx8mp-icore-ctouch3.1-yes7.dts   | 127 +++++++++++++++++
+ .../dts/engicam/imx8mp-icore-ctouch3.1.dts    | 131 ++++++++++++++++--
+ 3 files changed, 250 insertions(+), 11 deletions(-)
+ create mode 100644 arch/arm64/boot/dts/engicam/imx8mp-icore-ctouch3.1-yes7.dts
+
+diff --git a/arch/arm64/boot/dts/engicam/Makefile b/arch/arm64/boot/dts/engicam/Makefile
+index ef0db636ba08..c7bf79ea9756 100644
+--- a/arch/arm64/boot/dts/engicam/Makefile
++++ b/arch/arm64/boot/dts/engicam/Makefile
+@@ -9,3 +9,6 @@ dtb-$(CONFIG_ARCH_MXC) += \
+ 			  imx8mp-icore-fasteth-ctouch3.1.dtb \
+ 			  imx8mp-icore-fasteth-ctouch3.1-yes7.dtb \
+ 			  imx8mp-icore-fasteth-starterkit.dtb \
++			  imx8mp-icore-ctouch2.dtb \
++			  imx8mp-icore-ctouch3.1-yes7.dtb \
++			  
+\ No newline at end of file
+diff --git a/arch/arm64/boot/dts/engicam/imx8mp-icore-ctouch3.1-yes7.dts b/arch/arm64/boot/dts/engicam/imx8mp-icore-ctouch3.1-yes7.dts
+new file mode 100644
+index 000000000000..0b00f2fd9109
+--- /dev/null
++++ b/arch/arm64/boot/dts/engicam/imx8mp-icore-ctouch3.1-yes7.dts
+@@ -0,0 +1,127 @@
++// SPDX-License-Identifier: (GPL-2.0+ OR MIT)
++/*
++ * Copyright 2022, 2025 Engicam
++ */
++
++/dts-v1/;
++
++#include <dt-bindings/usb/pd.h>
++#include <dt-bindings/interrupt-controller/irq.h>
++#include "imx8mp-icore-ctouch3.1.dts"
++
++/ {
++	model = "Engicam i.Core i.MX8MPlus CTouch 3.1 + Yes 7 Touch Panel";
++
++	lvds_backlight: lvds_backlight {
++		compatible = "pwm-backlight";
++		pwms = <&pwm2 0 100000 0>;
++		status = "okay";
++
++		brightness-levels = < 0  1  2  3  4  5  6  7  8  9
++				     10 11 12 13 14 15 16 17 18 19
++				     20 21 22 23 24 25 26 27 28 29
++				     30 31 32 33 34 35 36 37 38 39
++				     40 41 42 43 44 45 46 47 48 49
++				     50 51 52 53 54 55 56 57 58 59
++				     60 61 62 63 64 65 66 67 68 69
++				     70 71 72 73 74 75 76 77 78 79
++				     80 81 82 83 84 85 86 87 88 89
++				     90 91 92 93 94 95 96 97 98 99
++				    100>;
++		default-brightness-level = <80>;
++	};
++
++	panel_lvds: panel-lvds {
++		compatible = "panel-lvds";
++
++		width-mm = <210>;
++		height-mm = <158>;
++		data-mapping = "vesa-24";
++		status = "okay";
++
++		panel-timing {
++			/* 1024x600 @65Hz */
++			clock-frequency = <65000000>;
++			hactive = <1024>;
++			vactive = <600>;
++			hsync-len = <136>;
++			hfront-porch = <20>;
++			hback-porch = <160>;
++			vfront-porch = <3>;
++			vback-porch = <29>;
++			vsync-len = <6>;
++			de-active = <1>;
++		};
++
++		port {
++			panel_in_lvds: endpoint {
++				remote-endpoint = <&lvds0_out>;
++			};
++		};
++	};
++};
++
++&pwm2 {
++	pinctrl-names = "default";
++	pinctrl-0 = <&pinctrl_pwm2>;
++	status = "okay";
++};
++
++/* LVDS */
++&lcdif2 {
++	status = "okay";
++};
++
++&ldb {
++	status = "okay";
++
++	lvds-channel@0 {
++		status = "okay";
++
++		port@1 {
++			reg = <1>;
++
++			lvds0_out: endpoint {
++				remote-endpoint = <&panel_in_lvds>;
++			};
++		};
++	};
++};
++
++&ldb_phy {
++	status = "okay";
++};
++
++&i2c2 {
++	polytouch: edt-ft5x26@38 {
++		compatible = "edt,edt-ft5x26";
++		reg = <0x38>;
++		pinctrl-names = "default";
++		pinctrl-0 = <&pinctrl_edt_ft5x06_pins>;
++		interrupt-parent = <&gpio1>;
++		interrupts = <0 IRQ_TYPE_EDGE_FALLING>;
++		reset-gpios= <&gpio4 27 GPIO_ACTIVE_LOW>;
++	};
++};
++
++&iomuxc {
++	pinctrl_edt_ft5x06_pins: edt-ft5x06-pins-grp {
++		fsl,pins = <
++			MX8MP_IOMUXC_GPIO1_IO00__GPIO1_IO00	0x41 /* Touch Int */
++			MX8MP_IOMUXC_SAI2_MCLK__GPIO4_IO27	0x41 /* Touch Rst */
++		>;
++	};
++
++	pinctrl_pwm2: pwm2grp {
++		fsl,pins = <
++			MX8MP_IOMUXC_GPIO1_IO11__PWM2_OUT	0x116
++		>;
++	};
++};
++
++&gpio4 {
++	LCD_PWR_EN {
++		output-high;
++		/delete-property/ output-low;
++	};
++};
+diff --git a/arch/arm64/boot/dts/engicam/imx8mp-icore-ctouch3.1.dts b/arch/arm64/boot/dts/engicam/imx8mp-icore-ctouch3.1.dts
+index 3868ac6a0324..317343d9c44c 100644
+--- a/arch/arm64/boot/dts/engicam/imx8mp-icore-ctouch3.1.dts
++++ b/arch/arm64/boot/dts/engicam/imx8mp-icore-ctouch3.1.dts
+@@ -32,7 +32,6 @@ reg_usdhc2_vmmc: regulator-usdhc2 {
+ 		regulator-name = "VSD_3V3";
+ 		regulator-min-microvolt = <3300000>;
+ 		regulator-max-microvolt = <3300000>;
+-		gpio = <&gpio2 19 GPIO_ACTIVE_HIGH>;
+ 		enable-active-high;
+ 		startup-delay-us = <100>;
+ 		off-on-delay-us = <12000>;
+@@ -58,6 +57,21 @@ simple-audio-card,codec {
+ 			sound-dai = <&tas2780>;
+ 		};
+ 	};
++
++	sound-hdmi {
++		compatible = "fsl,imx-audio-hdmi";
++		model = "audio-hdmi";
++		audio-cpu = <&aud2htx>;
++		hdmi-out;
++		constraint-rate = <44100>,
++				<88200>,
++				<176400>,
++				<32000>,
++				<48000>,
++				<96000>,
++				<192000>;
++		status = "okay";
++	};
+ };
+ 
+ &A53_0 {
+@@ -80,6 +94,10 @@ &dsp {
+ 	status = "okay";
+ };
+ 
++&aud2htx {
++	status = "okay";
++};
++
+ &eqos {
+ 	pinctrl-names = "default";
+ 	pinctrl-0 = <&pinctrl_eqos>;
+@@ -436,16 +454,15 @@ pinctrl_hog: hoggrp {
+ 		fsl,pins = <
+ 			MX8MP_IOMUXC_HDMI_DDC_SCL__HDMIMIX_HDMI_SCL	0x400001c3
+ 			MX8MP_IOMUXC_HDMI_DDC_SDA__HDMIMIX_HDMI_SDA	0x400001c3
+-			MX8MP_IOMUXC_HDMI_HPD__HDMIMIX_HDMI_HPD		0x40000119
+-			MX8MP_IOMUXC_HDMI_CEC__HDMIMIX_HDMI_CEC		0x40000149
+-		//	MX8MP_IOMUXC_SAI2_MCLK__GPIO4_IO27 0x119 // LCD ENABLE
+-		//	MX8MP_IOMUXC_SAI2_RXC__GPIO4_IO22 0x19 // HUB RESET
+-
+-						/* PIN TO BE MANAGED OR NC */
+-			MX8MP_IOMUXC_NAND_DATA00__GPIO3_IO06	0x140 /* RGMII_INT */
+-			MX8MP_IOMUXC_SD1_RESET_B__GPIO2_IO10	0x140 /* UART3_RTS_IN */
+-			MX8MP_IOMUXC_I2C4_SDA__I2C4_SDA			0x1C2 /* I2C4_SDA */
+-			MX8MP_IOMUXC_I2C4_SCL__I2C4_SCL			0x1C2 /* I2C4_SCL */
++			MX8MP_IOMUXC_HDMI_HPD__HDMIMIX_HDMI_HPD		0x40000019
++			MX8MP_IOMUXC_HDMI_CEC__HDMIMIX_HDMI_CEC		0x40000019
++
++			MX8MP_IOMUXC_SAI1_RXD7__GPIO4_IO09 		0x119 /* LCD ENABLE */
++			MX8MP_IOMUXC_SAI2_RXC__GPIO4_IO22 		0x19 /* HUB RESET */
++
++			MX8MP_IOMUXC_NAND_DATA00__GPIO3_IO06		0x140 /* RGMII_INT */
++			MX8MP_IOMUXC_I2C4_SDA__I2C4_SDA			0x1c2 /* I2C4_SDA */
++			MX8MP_IOMUXC_I2C4_SCL__I2C4_SCL			0x1c2 /* I2C4_SCL */
+ 		>;
+ 	};
+ 
+@@ -638,3 +655,95 @@ MX8MP_IOMUXC_GPIO1_IO02__WDOG1_WDOG_B	0xc6
+ 		>;
+ 	};
+ };
++
++&vpu_g1 {
++	status = "okay";
++};
++
++&vpu_g2 {
++	status = "okay";
++};
++
++&vpu_vc8000e {
++	status = "okay";
++};
++
++&vpu_v4l2 {
++	status = "okay";
++};
++
++&gpu_3d {
++	status = "okay";
++};
++
++&gpu_2d {
++	status = "okay";
++};
++
++&ml_vipsi {
++	status = "okay";
++};
++
++&mix_gpu_ml {
++	status = "okay";
++	/delete-property/ memory-region;
++};
++
++&irqsteer_hdmi {
++	status = "ok";
++};
++
++&hdmi_blk_ctrl {
++	status = "ok";
++};
++
++&hdmi_pavi {
++	status = "ok";
++};
++
++&hdmi {
++	status = "ok";
++};
++
++&hdmiphy {
++	status = "ok";
++};
++
++/* HDMI */
++&lcdif3 {
++	status = "ok";
++	thres-low  = <1 2>;             /* (FIFO * 1 / 2) */
++	thres-high = <3 4>;             /* (FIFO * 3 / 4) */
++};
++
++&gpio3 {
++	gpio-lines = "", "", "", "", "", "", "", "RGMII_nRST",
++		     "", "", "", "", "", "", "", "",
++		     "", "", "", "", "", "", "", "",
++		     "", "", "", "", "", "", "", "";
++
++	RGMII_nRST {
++		gpio-hog;
++		gpios = <7 0>;
++		output-high;
++	};
++};
++
++&gpio4 {
++	gpio-lines = "", "", "", "", "", "", "", "",
++		     "", "LCD_PWR_EN", "", "", "", "", "", "",
++		     "", "", "", "", "", "", "USB_HUB_RESET", "",
++		     "", "", "", "", "", "", "", "";
++
++	LCD_PWR_EN {
++		gpio-hog;
++		gpios = <9 0>;
++		output-low;
++	};
++
++	USB_HUB_RESET {
++		gpio-hog;
++		gpios = <22 0>;
++		output-high;
++	};
++};

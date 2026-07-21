@@ -1,0 +1,149 @@
+From 5102a36b60cf5c15a0384b8d06c54c77655bff6e Mon Sep 17 00:00:00 2001
+From: Matteo Lisi <matteo.lisi@engicam.com>
+Date: Wed, 4 Feb 2026 16:02:11 +0100
+Subject: [PATCH] system boots
+Upstream-Status: Pending
+---
+ boards/mcimx95evk/pin_mux.c            | 4 ----
+ boards/mcimx95evk/sm/brd_sm_handlers.c | 8 ++++++--
+ configs/mx95evk.cfg                    | 3 ++-
+ configs/mx95evk/config_scmi.h          | 2 ++
+ configs/mx95evk/config_trdc.h          | 2 +-
+ devices/MIMX95/sm/dev_sm_rdc.c         | 1 +
+ 6 files changed, 12 insertions(+), 8 deletions(-)
+
+diff --git a/boards/mcimx95evk/pin_mux.c b/boards/mcimx95evk/pin_mux.c
+index 88bbb7d..bb96e49 100755
+--- a/boards/mcimx95evk/pin_mux.c
++++ b/boards/mcimx95evk/pin_mux.c
+@@ -57,9 +57,5 @@ void BOARD_InitPins(void)
+     IOMUXC_SetPinConfig(IOMUXC_PAD_I2C2_SDA__LPI2C2_SDA, IOMUXC_PAD_DSE(0xFU)
+         | IOMUXC_PAD_FSEL1(0x3U) | IOMUXC_PAD_PU(0x1U) | IOMUXC_PAD_OD(0x1U));
+ #endif
+-
+-    /* Configure GPIO1-10 (INT from the PCAL6408A) */
+-    IOMUXC_SetPinMux(IOMUXC_PAD_PDM_BIT_STREAM1__GPIO1_IO_BIT10, 0U);
+-    IOMUXC_SetPinConfig(IOMUXC_PAD_PDM_BIT_STREAM1__GPIO1_IO_BIT10, 0U);
+ }
+ 
+diff --git a/boards/mcimx95evk/sm/brd_sm_handlers.c b/boards/mcimx95evk/sm/brd_sm_handlers.c
+index a96f6ce..92ffa46 100755
+--- a/boards/mcimx95evk/sm/brd_sm_handlers.c
++++ b/boards/mcimx95evk/sm/brd_sm_handlers.c
+@@ -96,7 +96,8 @@ int32_t BRD_SM_SerialDevicesInit(void)
+ {
+     int32_t status = SM_ERR_SUCCESS;
+     LPI2C_Type *const s_i2cBases[] = LPI2C_BASE_PTRS;
+-    pcal6408a_config_t pcal6408Config;
++#if 0
++	pcal6408a_config_t pcal6408Config;
+ 
+     /* Fill in PCAL6408A dev */
+     g_pcal6408aDev.i2cBase = s_i2cBases[BOARD_I2C_INSTANCE];
+@@ -116,6 +117,7 @@ int32_t BRD_SM_SerialDevicesInit(void)
+             status = SM_ERR_HARDWARE_ERROR;
+         }
+     }
++#endif
+ 
+     if (status == SM_ERR_SUCCESS)
+     {
+@@ -254,6 +256,7 @@ int32_t BRD_SM_SerialDevicesInit(void)
+         }
+     }
+ 
++#if 0
+     if (status == SM_ERR_SUCCESS)
+     {
+         rgpio_pin_config_t gpioConfig =
+@@ -267,8 +270,9 @@ int32_t BRD_SM_SerialDevicesInit(void)
+         RGPIO_SetPinInterruptConfig(GPIO1, 10U, kRGPIO_InterruptOutput0,
+             kRGPIO_InterruptLogicZero);
+     }
+-
++#endif
+     /* Return status */
++	
+     return status;
+ }
+ 
+diff --git a/configs/mx95evk.cfg b/configs/mx95evk.cfg
+index 7ad5cf8..73bc219 100755
+--- a/configs/mx95evk.cfg
++++ b/configs/mx95evk.cfg
+@@ -221,7 +221,6 @@ ELE                 OWNER
+ FSB                 READONLY
+ GIC                 ACCESS
+ GPC                 OWNER
+-GPIO1               OWNER
+ GPR0                OWNER
+ GPR1                OWNER
+ GPR2                OWNER
+@@ -497,6 +496,7 @@ PERLPI_CAN2         ALL
+ PERLPI_CAN3         ALL
+ PERLPI_CAN4         ALL
+ PERLPI_CAN5         ALL
++PERLPI_GPIO1        ALL
+ PERLPI_GPIO2        ALL
+ PERLPI_GPIO3        ALL
+ PERLPI_GPIO4        ALL
+@@ -740,6 +740,7 @@ FLEXIO2             OWNER
+ FLEXSPI1            OWNER
+ FSB                 READONLY
+ GIC                 OWNER
++GPIO1               OWNER
+ GPIO2               OWNER
+ GPIO3               OWNER
+ GPIO4               OWNER
+diff --git a/configs/mx95evk/config_scmi.h b/configs/mx95evk/config_scmi.h
+index 2c92123..8df9484 100755
+--- a/configs/mx95evk/config_scmi.h
++++ b/configs/mx95evk/config_scmi.h
+@@ -182,6 +182,7 @@
+         .perlpiPerms[DEV_SM_PERLPI_CAN3] = SM_SCMI_PERM_ALL, \
+         .perlpiPerms[DEV_SM_PERLPI_CAN4] = SM_SCMI_PERM_ALL, \
+         .perlpiPerms[DEV_SM_PERLPI_CAN5] = SM_SCMI_PERM_ALL, \
++        .perlpiPerms[DEV_SM_PERLPI_GPIO1] = SM_SCMI_PERM_ALL, \
+         .perlpiPerms[DEV_SM_PERLPI_GPIO2] = SM_SCMI_PERM_ALL, \
+         .perlpiPerms[DEV_SM_PERLPI_GPIO3] = SM_SCMI_PERM_ALL, \
+         .perlpiPerms[DEV_SM_PERLPI_GPIO4] = SM_SCMI_PERM_ALL, \
+@@ -465,6 +466,7 @@
+         .perlpiPerms[DEV_SM_PERLPI_CAN3] = SM_SCMI_PERM_ALL, \
+         .perlpiPerms[DEV_SM_PERLPI_CAN4] = SM_SCMI_PERM_ALL, \
+         .perlpiPerms[DEV_SM_PERLPI_CAN5] = SM_SCMI_PERM_ALL, \
++        .perlpiPerms[DEV_SM_PERLPI_GPIO1] = SM_SCMI_PERM_ALL, \
+         .perlpiPerms[DEV_SM_PERLPI_GPIO2] = SM_SCMI_PERM_ALL, \
+         .perlpiPerms[DEV_SM_PERLPI_GPIO3] = SM_SCMI_PERM_ALL, \
+         .perlpiPerms[DEV_SM_PERLPI_GPIO4] = SM_SCMI_PERM_ALL, \
+diff --git a/configs/mx95evk/config_trdc.h b/configs/mx95evk/config_trdc.h
+index aa4118b..311de0f 100755
+--- a/configs/mx95evk/config_trdc.h
++++ b/configs/mx95evk/config_trdc.h
+@@ -116,7 +116,6 @@
+         SM_CFG_W1(0x00010470U), 0x33333333U, \
+         SM_CFG_W1(0x00010474U), 0x00003000U, \
+         SM_CFG_W1(0x00010580U), 0x000003C0U, \
+-        SM_CFG_W1(0x000105a8U), 0x00000003U, \
+         SM_CFG_W1(0x00010640U), 0x99999999U, \
+         SM_CFG_W1(0x00010644U), 0x99999999U, \
+         SM_CFG_W1(0x00010648U), 0x99999999U, \
+@@ -129,6 +128,7 @@
+         SM_CFG_W1(0x0001066cU), 0x90909000U, \
+         SM_CFG_W1(0x00010670U), 0x00009000U, \
+         SM_CFG_W1(0x00010780U), 0x099330C0U, \
++        SM_CFG_W1(0x000107a8U), 0x00000009U, \
+         SM_CFG_Z1(0x00010850U), \
+         SM_CFG_W1(0x00010854U), 0x9000C000U, \
+         SM_CFG_W1(0x00010858U), 0x00000099U, \
+diff --git a/devices/MIMX95/sm/dev_sm_rdc.c b/devices/MIMX95/sm/dev_sm_rdc.c
+index ce2127b..10606a9 100755
+--- a/devices/MIMX95/sm/dev_sm_rdc.c
++++ b/devices/MIMX95/sm/dev_sm_rdc.c
+@@ -177,6 +177,7 @@ int32_t DEV_SM_RdcLoad(uint32_t rdcId)
+ {
+     int32_t status = SM_ERR_NOT_FOUND;
+ 
++	if (rdcId==2) return SM_ERR_SUCCESS;
+     /* Check ID */
+     if (rdcId < DEV_SM_NUM_RDC)
+     {

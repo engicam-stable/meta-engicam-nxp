@@ -1,0 +1,157 @@
+From 75ea120071a669b882e3bc3dfe3cbbfdcbd45bea Mon Sep 17 00:00:00 2001
+From: engicam <support@engicam.com>
+Date: Tue, 30 Jun 2026 17:02:59 +0200
+Subject: [PATCH] imx95 smarcore: enabled mipi_csi and fixed problem detect sd
+ card
+Upstream-Status: Pending
+
+---
+ .../engicam/imx95-smarcore-smarcore-evb.dts   | 64 +++++++++----------
+ 1 file changed, 30 insertions(+), 34 deletions(-)
+
+diff --git a/arch/arm64/boot/dts/engicam/imx95-smarcore-smarcore-evb.dts b/arch/arm64/boot/dts/engicam/imx95-smarcore-smarcore-evb.dts
+index 7ce59aadbe94..041c3f50000c 100644
+--- a/arch/arm64/boot/dts/engicam/imx95-smarcore-smarcore-evb.dts
++++ b/arch/arm64/boot/dts/engicam/imx95-smarcore-smarcore-evb.dts
+@@ -402,22 +402,22 @@ &lpi2c4 {
+ 
+ 	ov5640_0: ov5640_mipi@3c {
+ 		compatible = "ovti,ov5640";
+-		reg = <0x3c>;
+-		pinctrl-names = "default";
+-		pinctrl-0 = <&pinctrl_csi0>;
+-		clocks = <&clk_ov5640_fixed>;
+-		clock-names = "xclk";
++ 		reg = <0x3c>;
++ 		pinctrl-names = "default";
++ 		pinctrl-0 = <&pinctrl_csi0>;
++ 		clocks = <&clk_ov5640_fixed>;
++ 		clock-names = "xclk";
+ 		assigned-clock-rates = <24000000>;
+-		powerdown-gpios = <&gpio5 8 GPIO_ACTIVE_HIGH>;
+-		reset-gpios = <&gpio5 10 GPIO_ACTIVE_LOW>;
+-		status = "okay";
+-
+-		port {
+-			ov5640_mipi_0_ep: endpoint {
+-				remote-endpoint = <&mipi_csi0_ep>;
+-				data-lanes = <1 2>;
+-				clock-lanes = <0>;
+-			};
++		powerdown-gpios = <&i2c6_gpio_expander_21 4 GPIO_ACTIVE_HIGH>;
++ 		reset-gpios = <&gpio5 10 GPIO_ACTIVE_LOW>;
++ 		status = "okay";
++ 
++ 		port {
++			ov5640_mipi_1_ep: endpoint {
++				remote-endpoint = <&mipi_csi1_ep>;
++ 				data-lanes = <1 2>;
++ 				clock-lanes = <0>;
++ 			};
+ 		};
+ 	};
+ };
+@@ -430,7 +430,7 @@ &combo_rx {
+ 	status = "okay";
+ };
+ 
+-&mipi_csi0 {
++&mipi_csi1 {
+ 	status = "okay";
+ 
+ 	ports {
+@@ -439,8 +439,8 @@ ports {
+ 
+ 		port@0 {
+ 			reg = <0>;
+-			mipi_csi0_ep: endpoint {
+-				remote-endpoint = <&ov5640_mipi_0_ep>;
++			mipi_csi1_ep: endpoint {
++				remote-endpoint = <&ov5640_mipi_1_ep>;
+ 				data-lanes = <1 2>;
+ 				clock-lanes = <0>;
+ 			};
+@@ -448,14 +448,14 @@ mipi_csi0_ep: endpoint {
+ 
+ 		port@1 {
+ 			reg = <1>;
+-				mipi_csi0_out: endpoint {
+-				remote-endpoint = <&formatter_0_in>;
++				mipi_csi1_out: endpoint {
++				remote-endpoint = <&formatter_1_in>;
+ 			};
+ 		};
+ 	};
+ };
+ 
+-&csi_pixel_formatter_0 {
++&csi_pixel_formatter_1 {
+ 	status = "okay";
+ 
+ 	ports {
+@@ -465,16 +465,16 @@ ports {
+ 		port@0 {
+ 			reg = <0>;
+ 
+-			formatter_0_in: endpoint {
+-				remote-endpoint = <&mipi_csi0_out>;
++			formatter_1_in: endpoint {
++				remote-endpoint = <&mipi_csi1_out>;
+ 			};
+ 		};
+ 
+ 		port@1 {
+ 			reg = <1>;
+ 
+-			formatter_0_out: endpoint {
+-				remote-endpoint = <&isi_in_2>;
++			formatter_1_out: endpoint {
++				remote-endpoint = <&isi_in_3>;
+ 			};
+ 		};
+ 	};
+@@ -487,11 +487,11 @@ ports {
+ 		#address-cells = <1>;
+ 		#size-cells = <0>;
+ 
+-		port@2 {
+-			reg = <2>;
++		port@3 {
++			reg = <3>;
+ 
+-			isi_in_2: endpoint {
+-				remote-endpoint = <&formatter_0_out>;
++			isi_in_3: endpoint {
++				remote-endpoint = <&formatter_1_out>;
+ 			};
+ 		};
+ 	};
+@@ -590,7 +590,7 @@ i2c6_gpio_expander_21: i2c6-gpio-expander@21 {
+ 		pinctrl-0 = <&pinctrl_pcal6416_21>;
+ 		vcc-supply = <&reg_3p3v>;
+ 		gpio-line-names = "lcd1_bklt_en", "lcd_bklt_en", "lcd1_vdd_en", "lcd_vdd_en",
+-							"se050_en", "wifi-bt_disable", "", "", "",
++							"", "wifi-bt_disable", "", "", "",
+ 							"", "", "M2B_W_DISABLE_N", "", "",	"", "", "", "", "", "", "",
+ 							"", "", "";
+ 
+@@ -660,7 +660,6 @@ &usdhc1 {
+ 	vmmc-supply = <&reg_3p3v>;
+ 	vqmmc-supply = <&reg_1p8v>;
+ 	non-removable;
+-	iommus = <&smmu 0x1>;
+ 	no-sdio;
+ 	no-sd;
+ 	status = "okay";
+@@ -674,11 +673,8 @@ &usdhc2 {
+ 	pinctrl-3 = <&pinctrl_usdhc2>, <&pinctrl_usdhc2_gpio>;
+ 	cd-gpios = <&gpio3 0 GPIO_ACTIVE_LOW>;
+ 	vmmc-supply = <&reg_usdhc2_vmmc>;
+-	vqmmc-supply = <&reg_usdhc2_vmmc>;
+-	no-1-8-v;
+ 	max-frequency = <25000000>;
+ 	bus-width = <4>;
+-	iommus = <&smmu 0x1>;
+ 	status = "okay";
+ };
+ 

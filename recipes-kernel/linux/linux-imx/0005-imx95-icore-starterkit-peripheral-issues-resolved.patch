@@ -1,0 +1,105 @@
+From c8a0672e90b1a489fff9a9631013087c848e68e3 Mon Sep 17 00:00:00 2001
+From: engicam <support@engicam.com>
+Date: Thu, 2 Jul 2026 09:25:25 +0200
+Subject: [PATCH] imx95 icore starterkit: peripheral issues resolved
+Upstream-Status: Pending
+---
+ arch/arm64/boot/dts/engicam/imx95-icore-starterkit.dts | 8 +++-----
+ arch/arm64/configs/imx_v8_defconfig                    | 5 ++++-
+ drivers/input/touchscreen/edt-ft5x06.c                 | 6 ++----
+ 3 files changed, 9 insertions(+), 10 deletions(-)
+
+diff --git a/arch/arm64/boot/dts/engicam/imx95-icore-starterkit.dts b/arch/arm64/boot/dts/engicam/imx95-icore-starterkit.dts
+index d6048af36636..9f2cb4680685 100644
+--- a/arch/arm64/boot/dts/engicam/imx95-icore-starterkit.dts
++++ b/arch/arm64/boot/dts/engicam/imx95-icore-starterkit.dts
+@@ -404,13 +404,13 @@ sgtl5000: codec@a {
+         clocks = <&scmi_clk IMX95_CLK_SAI3>;
+ 		clock-names = "mclk";
+ 		assigned-clock-rates = <12288000>, <12288000>;
+-		VDDA-supply = <&reg_1v8_sgtl>;
+-		VDDIO-supply = <&reg_1v8_sgtl>;
++		VDDA-supply = <&reg_3v3_sgtl>;
++		VDDIO-supply = <&reg_3v3_sgtl>;
+ 		VDDD-supply = <&reg_1v8_sgtl>;
+     };
+ 
+ 	polytouch: edt-ft5x26@38 {
+-		compatible = "edt,edt-ft5x26";
++		compatible = "edt-ft5x06";
+ 		reg = <0x38>;
+ 		pinctrl-names = "default";
+ 		pinctrl-0 = <&pinctrl_edt_ft5x06_pins>;
+@@ -846,7 +846,6 @@ IMX95_PAD_ENET1_RD1__NETCMIX_TOP_ETH0_RGMII_RD1		0x57e
+ 			IMX95_PAD_ENET1_RD2__NETCMIX_TOP_ETH0_RGMII_RD2		0x57e
+ 			IMX95_PAD_ENET1_RD3__NETCMIX_TOP_ETH0_RGMII_RD3		0x57e
+ 			IMX95_PAD_GPIO_IO24__GPIO2_IO_BIT24					0x57e /* ENET1_INT_B */
+-			IMX95_PAD_SAI1_TXFS__AONMIX_TOP_GPIO1_IO_BIT11		0x31e /* ENET1_RST_N */
+ 		>;
+ 	};
+ 
+@@ -865,7 +864,6 @@ IMX95_PAD_ENET2_RD1__NETCMIX_TOP_ETH1_RGMII_RD1		0x57e
+ 			IMX95_PAD_ENET2_RD2__NETCMIX_TOP_ETH1_RGMII_RD2		0x57e
+ 			IMX95_PAD_ENET2_RD3__NETCMIX_TOP_ETH1_RGMII_RD3		0x57e
+ 			IMX95_PAD_GPIO_IO25__GPIO2_IO_BIT25					0x57e /* ENET2_INT_B */
+-			IMX95_PAD_SAI1_TXD0__AONMIX_TOP_GPIO1_IO_BIT13		0x31e /* ENET2_RST_N */
+ 		>;
+ 	};
+ 
+diff --git a/arch/arm64/configs/imx_v8_defconfig b/arch/arm64/configs/imx_v8_defconfig
+index 0e9e6dfe63d0..f4a25a9593ed 100644
+--- a/arch/arm64/configs/imx_v8_defconfig
++++ b/arch/arm64/configs/imx_v8_defconfig
+@@ -325,6 +325,7 @@ CONFIG_BCM54140_PHY=m
+ CONFIG_MARVELL_PHY=m
+ CONFIG_MARVELL_10G_PHY=m
+ CONFIG_MAXLINEAR_GPHY=y
++CONFIG_MAXLINEAR_8611X_PHY=y
+ CONFIG_MICREL_PHY=y
+ CONFIG_MICROSEMI_PHY=y
+ CONFIG_MOTORCOMM_PHY=y
+@@ -357,6 +358,7 @@ CONFIG_USB_NET_PLUSB=m
+ CONFIG_USB_NET_MCS7830=m
+ CONFIG_USB_NET_CDC_SUBSET=m
+ CONFIG_USB_NET_ZAURUS=m
++CONFIG_BRCMFMAC=m
+ CONFIG_WL18XX=m
+ CONFIG_WLCORE_SDIO=m
+ CONFIG_XEN_NETDEV_BACKEND=m
+@@ -373,7 +375,7 @@ CONFIG_TOUCHSCREEN_ATMEL_MXT=m
+ CONFIG_TOUCHSCREEN_EXC3000=y
+ CONFIG_TOUCHSCREEN_GOODIX=m
+ CONFIG_TOUCHSCREEN_ILITEK=y
+-CONFIG_TOUCHSCREEN_EDT_FT5X06=m
++CONFIG_TOUCHSCREEN_EDT_FT5X06=y
+ CONFIG_TOUCHSCREEN_FTS=m
+ CONFIG_TOUCHSCREEN_SYNAPTICS_DSX_I2C=m
+ CONFIG_INPUT_MISC=y
+@@ -855,6 +857,7 @@ CONFIG_RTC_CLASS=y
+ CONFIG_RTC_DRV_DS1307=m
+ CONFIG_RTC_DRV_HYM8563=m
+ CONFIG_RTC_DRV_MAX77686=y
++CONFIG_RTC_DRV_PCF8523=y
+ CONFIG_RTC_DRV_PCF85363=m
+ CONFIG_RTC_DRV_M41T80=m
+ CONFIG_RTC_DRV_RX8581=m
+diff --git a/drivers/input/touchscreen/edt-ft5x06.c b/drivers/input/touchscreen/edt-ft5x06.c
+index 85c6d8ce003f..88b4c8d66f9d 100644
+--- a/drivers/input/touchscreen/edt-ft5x06.c
++++ b/drivers/input/touchscreen/edt-ft5x06.c
+@@ -1318,10 +1318,8 @@ static int edt_ft5x06_ts_probe(struct i2c_client *client)
+ 	input->id.bustype = BUS_I2C;
+ 	input->dev.parent = &client->dev;
+ 
+-	input_set_abs_params(input, ABS_MT_POSITION_X,
+-			     0, tsdata->num_x * 64 - 1, 0, 0);
+-	input_set_abs_params(input, ABS_MT_POSITION_Y,
+-			     0, tsdata->num_y * 64 - 1, 0, 0);
++    input_set_abs_params(input, ABS_MT_POSITION_X,0, 1024, 0, 0);
++    input_set_abs_params(input, ABS_MT_POSITION_Y,0, 600, 0, 0);
+ 
+ 	touchscreen_parse_properties(input, true, &tsdata->prop);
+ 
+-- 
+2.43.0
+

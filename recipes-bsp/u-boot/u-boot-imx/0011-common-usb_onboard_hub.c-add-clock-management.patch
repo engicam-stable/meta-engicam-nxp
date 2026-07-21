@@ -1,0 +1,94 @@
+From 5526a79f42d272ad602ddc6fc0f56700f6d5f2cc Mon Sep 17 00:00:00 2001
+From: engicam <support@engicam.com>
+Date: Thu, 9 Jul 2026 14:48:35 +0200
+Subject: [PATCH] common: usb_onboard_hub.c: add clock management
+Upstream-Status: Inappropriate [for engicam use only]
+
+---
+ common/usb_onboard_hub.c | 38 ++++++++++++++++++++++++++++++++++++++
+ 1 file changed, 38 insertions(+)
+
+diff --git a/common/usb_onboard_hub.c b/common/usb_onboard_hub.c
+index 7fe62b043e6..23af8b1c341 100644
+--- a/common/usb_onboard_hub.c
++++ b/common/usb_onboard_hub.c
+@@ -8,6 +8,7 @@
+  */
+ 
+ #include <asm/gpio.h>
++#include <clk.h>
+ #include <dm.h>
+ #include <dm/device_compat.h>
+ #include <i2c.h>
+@@ -22,6 +23,9 @@
+ struct onboard_hub {
+ 	struct udevice *vdd;
+ 	struct gpio_desc *reset_gpio;
++#if CONFIG_IS_ENABLED(CLK)
++	struct clk *clk;
++#endif
+ };
+ 
+ struct onboard_hub_data {
+@@ -110,6 +114,27 @@ static int usb5744_i2c_init(struct udevice *dev)
+ 	return 0;
+ }
+ 
++int usb_onboard_hub_clk_prepare(struct udevice *dev)
++{
++	struct onboard_hub *hub = dev_get_priv(dev);
++	int ret;
++
++	hub->clk = devm_clk_get_optional(dev, NULL);
++	if (IS_ERR(hub->clk)) {
++		/* optional */
++		printf("No hub clk found...\n");
++		return 0;
++	}
++
++	ret = clk_enable(hub->clk);
++	if (ret) {
++		printf("Failed to enable hub clk\n");
++		return ret;
++	}
++
++	return 0;
++}
++
+ int usb_onboard_hub_reset(struct udevice *dev)
+ {
+ 	struct onboard_hub_data *data =
+@@ -159,6 +184,12 @@ static int usb_onboard_hub_probe(struct udevice *dev)
+ 		}
+ 	}
+ 
++#if CONFIG_IS_ENABLED(CLK)
++	ret = usb_onboard_hub_clk_prepare(dev);
++	if (ret)
++		return ret;
++#endif
++
+ 	ret = usb_onboard_hub_reset(dev);
+ 	if (ret)
+ 		return ret;
+@@ -172,6 +203,9 @@ static int usb_onboard_hub_probe(struct udevice *dev)
+ 	}
+ 	return 0;
+ err:
++#if CONFIG_IS_ENABLED(CLK)
++	clk_disable(hub->clk);
++#endif
+ 	dm_gpio_set_value(hub->reset_gpio, 0);
+ 	return ret;
+ }
+@@ -206,6 +240,10 @@ static int usb_onboard_hub_remove(struct udevice *dev)
+ 	struct onboard_hub *hub = dev_get_priv(dev);
+ 	int ret;
+ 
++#if CONFIG_IS_ENABLED(CLK)
++	clk_disable(hub->clk);
++#endif
++
+ 	if (hub->reset_gpio)
+ 		dm_gpio_free(hub->reset_gpio->dev, hub->reset_gpio);
+ 

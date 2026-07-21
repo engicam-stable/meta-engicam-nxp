@@ -1,0 +1,23 @@
+From e6aeca1381b9d70c2b8444e1f2fda1a64701d0d8 Mon Sep 17 00:00:00 2001
+From: engicam <support@engicam.com>
+Date: Thu, 9 Jul 2026 14:46:23 +0200
+Subject: [PATCH] include: configs: microgea-mx6ull.h: remove cma size boot
+Upstream-Status: Inappropriate [for engicam use only]
+
+---
+ include/configs/microgea-mx6ull.h | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/include/configs/microgea-mx6ull.h b/include/configs/microgea-mx6ull.h
+index ef85e0d6d7d..af9a1331407 100644
+--- a/include/configs/microgea-mx6ull.h
++++ b/include/configs/microgea-mx6ull.h
+@@ -16,7 +16,7 @@
+ #include <env/nxp/imx_env.h>
+ 
+ #define PHYS_SDRAM_SIZE	SZ_512M
+-#define BOOTARGS_CMA_SIZE   "cma=16M "
++#define BOOTARGS_CMA_SIZE   ""
+ 
+ #if defined(CONFIG_FIT)
+ #define BOOT_FDT "no"

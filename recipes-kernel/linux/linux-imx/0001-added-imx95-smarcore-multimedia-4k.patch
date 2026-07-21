@@ -1,0 +1,6873 @@
+From 34880f25ebeaaa44f504fc6762cf2dbafe0526ce Mon Sep 17 00:00:00 2001
+From: engicam <support@engicam.com>
+Date: Tue, 19 May 2026 15:12:16 +0200
+Subject: [PATCH] added imx95 smarcore multimedia 4k
+Upstream-Status: Pending
+---
+ arch/arm64/boot/dts/Makefile                  |    1 +
+ arch/arm64/boot/dts/engicam/Makefile          |    5 +
+ .../engicam/imx95-smarcore-multimedia-4k.dts  | 1181 ++++++++++
+ .../engicam/imx95-smarcore-smarcore-evb.dts   | 1247 ++++++++++
+ .../dts/engicam/imx95-smarcore-xtouch2.dts    |  997 ++++++++
+ arch/arm64/configs/imx95_smarcore_defconfig   | 1210 ++++++++++
+ drivers/net/phy/Kconfig                       |    6 +
+ drivers/net/phy/Makefile                      |    1 +
+ drivers/net/phy/mxl-8611x.c                   | 2093 +++++++++++++++++
+ include/dt-bindings/net/mxl-8611x.h           |   27 +
+ 10 files changed, 6768 insertions(+)
+ create mode 100644 arch/arm64/boot/dts/engicam/Makefile
+ create mode 100755 arch/arm64/boot/dts/engicam/imx95-smarcore-multimedia-4k.dts
+ create mode 100644 arch/arm64/boot/dts/engicam/imx95-smarcore-smarcore-evb.dts
+ create mode 100644 arch/arm64/boot/dts/engicam/imx95-smarcore-xtouch2.dts
+ create mode 100644 arch/arm64/configs/imx95_smarcore_defconfig
+ create mode 100644 drivers/net/phy/mxl-8611x.c
+ create mode 100644 include/dt-bindings/net/mxl-8611x.h
+
+diff --git a/arch/arm64/boot/dts/Makefile b/arch/arm64/boot/dts/Makefile
+index 21cd3a87f385..4482fd32d849 100644
+--- a/arch/arm64/boot/dts/Makefile
++++ b/arch/arm64/boot/dts/Makefile
+@@ -12,6 +12,7 @@ subdir-y += arm
+ subdir-y += bitmain
+ subdir-y += broadcom
+ subdir-y += cavium
++subdir-y += engicam
+ subdir-y += exynos
+ subdir-y += freescale
+ subdir-y += hisilicon
+diff --git a/arch/arm64/boot/dts/engicam/Makefile b/arch/arm64/boot/dts/engicam/Makefile
+new file mode 100644
+index 000000000000..0a0f496dd060
+--- /dev/null
++++ b/arch/arm64/boot/dts/engicam/Makefile
+@@ -0,0 +1,5 @@
++# SPDX-License-Identifier: GPL-2.0
++
++dtb-$(CONFIG_ARCH_MXC) += \
++			  imx95-smarcore-smarcore-evb.dtb \
++			  imx95-smarcore-multimedia-4k.dtb
+diff --git a/arch/arm64/boot/dts/engicam/imx95-smarcore-multimedia-4k.dts b/arch/arm64/boot/dts/engicam/imx95-smarcore-multimedia-4k.dts
+new file mode 100755
+index 000000000000..25b609afdced
+--- /dev/null
++++ b/arch/arm64/boot/dts/engicam/imx95-smarcore-multimedia-4k.dts
+@@ -0,0 +1,1181 @@
++// SPDX-License-Identifier: (GPL-2.0+ OR MIT)
++/*
++ * Copyright 2023 NXP
++ */
++
++/dts-v1/;
++
++#include <dt-bindings/phy/phy-imx8-pcie.h>
++#include <dt-bindings/pwm/pwm.h>
++#include <dt-bindings/usb/pd.h>
++#include <dt-bindings/gpio/gpio.h>
++#include <dt-bindings/interrupt-controller/irq.h>
++#include <dt-bindings/net/mxl-8611x.h>
++#include "../freescale/imx95.dtsi"
++
++#define FALLING_EDGE		BIT(0)
++#define RISING_EDGE		BIT(1)
++
++/ {
++	model = "NXP i.MX95 Smarcore - Starterkit 4K";
++	compatible = "fsl,imx95-19x19-evk", "fsl,imx95";
++
++	aliases {
++		ethernet0 = &enetc_port0;
++		ethernet1 = &enetc_port1;
++	};
++
++	chosen {
++		stdout-path = &lpuart1;
++		#address-cells = <2>;
++		#size-cells = <2>;
++	};
++
++	memory@80000000 {
++		device_type = "memory";
++		reg = <0x0 0x80000000 0 0x80000000>;
++	};
++
++	reserved-memory {
++		#address-cells = <2>;
++		#size-cells = <2>;
++		ranges;
++
++		linux_cma: linux,cma {
++			compatible = "shared-dma-pool";
++			reusable;
++			size = <0 0x3c000000>;
++			alloc-ranges = <0 0x80000000 0 0x7F000000>;
++			linux,cma-default;
++		};
++
++		vpu_boot: vpu_boot@a0000000 {
++			reg = <0 0xa0000000 0 0x100000>;
++			no-map;
++		};
++
++		vdev0vring0: vdev0vring0@88000000 {
++			reg = <0 0x88000000 0 0x8000>;
++			no-map;
++		};
++
++		vdev0vring1: vdev0vring1@88008000 {
++			reg = <0 0x88008000 0 0x8000>;
++			no-map;
++		};
++
++		vdev1vring0: vdev1vring0@88010000 {
++			reg = <0 0x88010000 0 0x8000>;
++			no-map;
++		};
++
++		vdev1vring1: vdev1vring1@88018000 {
++			reg = <0 0x88018000 0 0x8000>;
++			no-map;
++		};
++
++		rsc_table: rsc-table@88220000 {
++			reg = <0 0x88220000 0 0x1000>;
++			no-map;
++		};
++
++		vdevbuffer: vdevbuffer@88020000 {
++			compatible = "shared-dma-pool";
++			reg = <0 0x88020000 0 0x100000>;
++			no-map;
++		};
++	};
++
++	clk_ov5640_fixed: clock {
++		#clock-cells = <0>;
++		compatible = "fixed-clock";
++		clock-frequency = <24000000>;
++	};
++
++	reg_3v3_sgtl: reg_3v3_sgtl_regulator {
++		compatible = "regulator-fixed";
++		regulator-name = "3v3_sgtl";
++		regulator-min-microvolt = <3300000>;
++		regulator-max-microvolt = <3300000>;
++		always-on;
++	};
++
++	reg_1v8_sgtl: reg_1v8_sgtl_regulator {
++		compatible = "regulator-fixed";
++		regulator-name = "1v8_sgtl";
++		regulator-min-microvolt = <1800000>;
++		regulator-max-microvolt = <1800000>;
++		always-on;
++	};
++
++	reg_3p3v: regulator-3p3v {
++		compatible = "regulator-fixed";
++		regulator-max-microvolt = <3300000>;
++		regulator-min-microvolt = <3300000>;
++		regulator-name = "+V3.3_SW";
++	};
++
++	reg_usdhc2_vmmc: regulator-usdhc2 {
++		compatible = "regulator-fixed";
++		pinctrl-names = "default";
++		pinctrl-0 = <&pinctrl_reg_usdhc2_vmmc>;
++		regulator-name = "VDD_SD2_3V3";
++		regulator-min-microvolt = <3300000>;
++		regulator-max-microvolt = <3300000>;
++		gpio = <&gpio3 7 GPIO_ACTIVE_HIGH>;
++		off-on-delay-us = <12000>;
++		enable-active-high;
++	};
++
++	reg_usdhc3_vmmc: regulator-usdhc3 {
++		compatible = "regulator-fixed";
++		regulator-name = "WIFI-BT_DISABLE";
++		pinctrl-names = "default";
++		regulator-min-microvolt = <1800000>;
++		regulator-max-microvolt = <1800000>;
++		gpio = <&i2c6_gpio_expander_21 5 GPIO_ACTIVE_HIGH>;
++		enable-active-high;
++	};
++
++	reg_pcie0: regulator-pcie {
++		compatible = "regulator-fixed";
++		regulator-name = "PCIE_WLAN_EN";
++		regulator-min-microvolt = <3300000>;
++		regulator-max-microvolt = <3300000>;
++		vin-supply = <&reg_m2_pwr>;
++		//gpio = <&i2c7_pcal6524 6 GPIO_ACTIVE_HIGH>;
++		enable-active-high;
++		regulator-always-on;
++	};
++
++	reg_vref_1v8: regulator-adc-vref {
++		compatible = "regulator-fixed";
++		regulator-name = "vref_1v8";
++		regulator-min-microvolt = <1800000>;
++		regulator-max-microvolt = <1800000>;
++	};
++
++	reg_usb_vbus: regulator-vbus {
++		compatible = "regulator-fixed";
++		regulator-name = "USB_VBUS";
++		regulator-min-microvolt = <5000000>;
++		regulator-max-microvolt = <5000000>;
++		//gpio = <&i2c7_pcal6524 3 GPIO_ACTIVE_HIGH>;
++		enable-active-high;
++		regulator-always-on;
++	};
++
++	reg_m2_pwr: regulator-m2-pwr {
++		compatible = "regulator-fixed";
++		regulator-name = "M.2-power";
++		regulator-min-microvolt = <3300000>;
++		regulator-max-microvolt = <3300000>;
++		//gpio = <&i2c7_pcal6524 20 GPIO_ACTIVE_HIGH>;
++		enable-active-high;
++	};
++
++	reg_slot_pwr: regulator-slot-pwr {
++		compatible = "regulator-fixed";
++		regulator-name = "PCIe slot-power";
++		regulator-min-microvolt = <3300000>;
++		regulator-max-microvolt = <3300000>;
++		//gpio = <&i2c7_pcal6524 14 GPIO_ACTIVE_HIGH>;
++		enable-active-high;
++		regulator-always-on;
++	};
++
++	reg_aqr_stby: regulator-aqr-stby {
++		compatible = "regulator-fixed";
++		regulator-name = "aqr-stby";
++		regulator-min-microvolt = <3300000>;
++		regulator-max-microvolt = <3300000>;
++		//gpio = <&i2c5_gpio_expander_21 1 GPIO_ACTIVE_HIGH>;
++		enable-active-high;
++	};
++
++	cm7: imx95-cm7 {
++		compatible = "fsl,imx95-cm7";
++		mbox-names = "tx", "rx", "rxdb";
++		mboxes = <&mu7 0 1
++			  &mu7 1 1
++			  &mu7 3 1>;
++		memory-region = <&vdevbuffer>, <&vdev0vring0>, <&vdev0vring1>,
++				<&vdev1vring0>, <&vdev1vring1>, <&rsc_table>;
++		fsl,startup-delay-ms = <50>;
++		status = "okay";
++	};
++
++	sound {
++	    compatible = "simple-audio-card";
++	    simple-audio-card,name = "imx95-sgtl5000";
++	    simple-audio-card,format = "i2s";
++	    simple-audio-card,bitclock-master = <&dailink_master>;
++	    simple-audio-card,frame-master = <&dailink_master>;
++
++	    simple-audio-card,cpu {
++	        sound-dai = <&sai3>;
++	    };
++
++	    dailink_master: simple-audio-card,codec {
++	        sound-dai = <&sgtl5000>;
++	        clocks = <&scmi_clk IMX95_CLK_SAI3>;
++	    };
++	};
++
++	lvds0_panel {
++		compatible = "ampire,am-1280800n3tzqw-t00h";
++
++		port {
++			panel_in: endpoint {
++				remote-endpoint = <&lvds0_out>;
++			};
++		};
++	};
++
++	lvds_backlight: backlight {
++		compatible = "pwm-backlight";
++		pwms = <&tpm6 3 100000 0>;
++		brightness-levels = < 0  1  2  3  4  5  6  7  8  9
++							10 11 12 13 14 15 16 17 18 19
++							20 21 22 23 24 25 26 27 28 29
++							30 31 32 33 34 35 36 37 38 39
++							40 41 42 43 44 45 46 47 48 49
++							50 51 52 53 54 55 56 57 58 59
++							60 61 62 63 64 65 66 67 68 69
++							70 71 72 73 74 75 76 77 78 79
++							80 81 82 83 84 85 86 87 88 89
++							90 91 92 93 94 95 96 97 98 99
++							100>;
++		default-brightness-level = <80>;
++		pinctrl-names = "default";
++	};
++};
++
++&display_pixel_link {
++	status = "okay";
++};
++
++&ldb {
++	#address-cells = <1>;
++	#size-cells = <0>;
++	assigned-clocks = <&scmi_clk IMX95_CLK_LDBPLL_VCO>,
++			  <&scmi_clk IMX95_CLK_LDBPLL>;
++	assigned-clock-rates = <2986200000>, <497700000>;
++	status = "okay";
++
++	channel@0 {
++		#address-cells = <1>;
++		#size-cells = <0>;
++		reg = <0>;
++		status = "okay";
++
++		port@1 {
++			reg = <1>;
++
++			lvds0_out: endpoint {
++				remote-endpoint = <&panel_in>;
++			};
++		};
++	};
++};
++
++&ldb0_phy {
++	status = "okay";
++};
++
++&pixel_interleaver {
++	#address-cells = <1>;
++	#size-cells = <0>;
++	status = "okay";
++
++	channel@0 {
++		reg = <0>;
++		status = "okay";
++	};
++};
++
++&adc1 {
++	vref-supply = <&reg_vref_1v8>;
++	status = "okay";
++};
++
++&displaymix_irqsteer {
++	status = "okay";
++};
++
++&dpu {
++	status = "okay";
++};
++
++/* pin conflict with PDM ??*/
++&flexcan1 {
++	pinctrl-names = "default";
++	pinctrl-0 = <&pinctrl_flexcan1>;
++	status = "okay";
++};
++
++&flexcan3 {
++	pinctrl-names = "default";
++	pinctrl-0 = <&pinctrl_flexcan3>;
++	status = "okay";
++};
++
++&lpi2c1 {
++	/* I2C1 is used for the PMIC? */
++	#address-cells = <1>;
++	#size-cells = <0>;
++	clock-frequency = <400000>;
++	pinctrl-names = "default";
++	pinctrl-0 = <&pinctrl_lpi2c1>;
++	status = "disabled";
++};
++
++&lpi2c2 {
++	#address-cells = <1>;
++	#size-cells = <0>;
++	clock-frequency = <400000>;
++	pinctrl-names = "default";
++	pinctrl-0 = <&pinctrl_lpi2c2>;
++	status = "okay";
++
++    sgtl5000: codec@a {
++        compatible = "fsl,sgtl5000";
++		status = "okay";
++		#sound-dai-cells = <0>;
++        reg = <0x0a>;
++        clocks = <&scmi_clk IMX95_CLK_SAI3>;
++		clock-names = "mclk";
++		assigned-clock-rates = <24576000>;
++		VDDA-supply = <&reg_1v8_sgtl>;
++		VDDIO-supply = <&reg_1v8_sgtl>;
++		VDDD-supply = <&reg_1v8_sgtl>;
++    };
++};
++
++&lpi2c4 {
++	#address-cells = <1>;
++	#size-cells = <0>;
++	clock-frequency = <400000>;
++	pinctrl-names = "default";
++	pinctrl-0 = <&pinctrl_lpi2c4>;
++	status = "okay";
++
++	ov5640_0: ov5640_mipi@3c {
++		compatible = "ovti,ov5640";
++		reg = <0x3c>;
++		pinctrl-names = "default";
++		pinctrl-0 = <&pinctrl_csi0>;
++		clocks = <&clk_ov5640_fixed>;
++		clock-names = "xclk";
++		assigned-clock-rates = <24000000>;
++		powerdown-gpios = <&i2c6_gpio_expander_21 4 GPIO_ACTIVE_HIGH>;
++		reset-gpios = <&gpio5 10 GPIO_ACTIVE_LOW>;
++		status = "okay";
++
++		port {
++			ov5640_mipi_1_ep: endpoint {
++				remote-endpoint = <&mipi_csi1_ep>;
++				data-lanes = <1 2>;
++				clock-lanes = <0>;
++			};
++		};
++	};
++};
++
++&dphy_rx {
++	status = "okay";
++};
++
++&combo_rx {
++	status = "okay";
++};
++
++&mipi_csi1 {
++	status = "okay";
++
++	ports {
++		#address-cells = <1>;
++		#size-cells = <0>;
++
++		port@0 {
++			reg = <0>;
++			mipi_csi1_ep: endpoint {
++				remote-endpoint = <&ov5640_mipi_1_ep>;
++				data-lanes = <1 2>;
++				clock-lanes = <0>;
++			};
++		};
++
++		port@1 {
++			reg = <1>;
++				mipi_csi1_out: endpoint {
++				remote-endpoint = <&formatter_1_in>;
++			};
++		};
++	};
++};
++
++&csi_pixel_formatter_1 {
++	status = "okay";
++
++	ports {
++		#address-cells = <1>;
++		#size-cells = <0>;
++
++		port@0 {
++			reg = <0>;
++
++			formatter_1_in: endpoint {
++				remote-endpoint = <&mipi_csi1_out>;
++			};
++		};
++
++		port@1 {
++			reg = <1>;
++
++			formatter_1_out: endpoint {
++				remote-endpoint = <&isi_in_3>;
++			};
++		};
++	};
++};
++
++&isi {
++	status = "okay";
++
++	ports {
++		#address-cells = <1>;
++		#size-cells = <0>;
++
++		port@3 {
++			reg = <3>;
++
++			isi_in_3: endpoint {
++				remote-endpoint = <&formatter_1_out>;
++			};
++		};
++	};
++};
++
++
++&lpi2c6 {
++	#address-cells = <1>;
++	#size-cells = <0>;
++	clock-frequency = <100000>;
++	pinctrl-names = "default";
++	pinctrl-0 = <&pinctrl_lpi2c6>;
++	status = "okay";
++
++	i2c6_gpio_expander_20: i2c6-gpio-expander@20 {
++		compatible = "nxp,pcal6416";
++		reg = <0x20>;
++		gpio-controller;
++		#gpio-cells = <2>;
++		vcc-supply = <&reg_3p3v>;
++		gpio-line-names = "pf53_soc_pg", "pf53_arm_pg", "soc_usb1_en", "soc_usb1_oc",
++							"soc_usb2_en", "soc_usb2_oc", "enet1_rst_n", "enet2_rst_n",
++							"hub_usb_reset_b", "usb_type_sel", "eth_clk_en", "pcie_a_rst",
++							"pcie_b_rst", "pcie_a_req",	"pcie_b_req", "pcie_ckgen_pd_n";
++
++		pin_soc_usb1_en{
++			gpio-hog;
++			gpios = <2 0>;
++			output-high;
++		};
++		
++		pin_soc_usb2_en{
++			gpio-hog;
++			gpios = <4 0>;
++			output-high;
++		};
++		
++		pin_enet1_rst_n{
++			gpio-hog;
++			gpios = <6 0>;
++			output-high;
++		};
++
++		pin_enet2_rst_n{
++			gpio-hog;
++			gpios = <7 0>;
++			output-high;
++		};
++
++		pin_hub_usb_reset_b{
++			gpio-hog;
++			gpios = <8 0>;
++			output-high;
++		};
++
++		pin_usb_type_sel{
++			gpio-hog;
++			gpios = <9 0>;
++			output-low;
++		};
++
++		pin_eth_clk_en{
++			gpio-hog;
++			gpios = <10 0>;
++			output-high;
++		};
++
++		pin_pcie_a_req{
++			gpio-hog;
++			gpios = <13 0>;
++			output-low;
++		};
++
++		pin_pcie_b_req{
++			gpio-hog;
++			gpios = <14 0>;
++			output-low;
++		};
++
++		pin_pcie_ckgen_pd_n{
++			gpio-hog;
++			gpios = <15 0>;
++			output-high;
++		};
++	};
++
++	i2c6_gpio_expander_21: i2c6-gpio-expander@21 {
++		compatible = "nxp,pcal6416";
++		#gpio-cells = <2>;
++		gpio-controller;
++		reg = <0x21>;
++		interrupt-controller;
++		#interrupt-cells = <2>;
++		interrupt-parent = <&gpio5>;
++		interrupts = <3 IRQ_TYPE_LEVEL_LOW>;
++		pinctrl-names = "default";
++		pinctrl-0 = <&pinctrl_pcal6416_21>;
++		vcc-supply = <&reg_3p3v>;
++		gpio-line-names = "lcd1_bklt_en", "lcd_bklt_en", "lcd1_vdd_en", "lcd_vdd_en",
++							"", "wifi-bt_disable", "", "", "",
++							"", "", "", "", "",	"", "", "", "", "", "", "",
++							"", "", "";
++
++		pin_lcd_bklt_en{
++			gpio-hog;
++			gpios = <1 0>;
++			output-high;
++		};
++
++		pin_lcd_vdd_en{
++			gpio-hog;
++			gpios = <3 0>;
++			output-high;
++		};
++	};
++
++	pcf8523: rtc@68 {
++		compatible = "nxp,pcf8523";
++		reg = <0x68>;
++	};
++};
++
++&lpuart1 {
++	/* Debug Console J29 */
++	pinctrl-names = "default";
++	pinctrl-0 = <&pinctrl_uart1>;
++	status = "okay";
++};
++
++&lpuart3 {
++	/* RS232 J15 -> M7 Console pins */
++	pinctrl-names = "default";
++	pinctrl-0 = <&pinctrl_uart3>;
++	status = "okay";
++};
++
++&lpuart5 {
++	/* RS232 J14*/
++	pinctrl-names = "default";
++	pinctrl-0 = <&pinctrl_uart5>;
++	status = "okay";
++};
++
++&lpuart6 {
++	/* RS232 J28 */
++	pinctrl-names = "default";
++	pinctrl-0 = <&pinctrl_uart6>;
++	status = "disabled";
++};
++
++&lpuart8 {
++	/* BT */
++	pinctrl-names = "default";
++	pinctrl-0 = <&pinctrl_uart8>;
++	status = "disabled";
++
++	bluetooth {
++		compatible = "ti,cc33xx-bt";
++		cc33xx-supply = <&reg_usdhc3_vmmc>;
++		max-speed = <115200>;
++	};
++};
++
++&mu7 {
++	status = "okay";
++};
++
++&usdhc1 {
++	pinctrl-names = "default", "state_100mhz", "state_200mhz", "sleep";
++	pinctrl-0 = <&pinctrl_usdhc1>;
++	pinctrl-1 = <&pinctrl_usdhc1_100mhz>;
++	pinctrl-2 = <&pinctrl_usdhc1_200mhz>;
++	pinctrl-3 = <&pinctrl_usdhc1>;
++	bus-width = <8>;
++	non-removable;
++	no-sdio;
++	no-sd;
++	status = "okay";
++};
++
++&usdhc2 {
++	pinctrl-names = "default", "state_100mhz", "state_200mhz", "sleep";
++	pinctrl-0 = <&pinctrl_usdhc2>, <&pinctrl_usdhc2_gpio>;
++	pinctrl-1 = <&pinctrl_usdhc2_100mhz>, <&pinctrl_usdhc2_gpio>;
++	pinctrl-2 = <&pinctrl_usdhc2_200mhz>, <&pinctrl_usdhc2_gpio>;
++	pinctrl-3 = <&pinctrl_usdhc2>, <&pinctrl_usdhc2_gpio>;
++	cd-gpios = <&gpio3 00 GPIO_ACTIVE_LOW>;
++	vmmc-supply = <&reg_usdhc2_vmmc>;
++	max-frequency = <10000000>;
++	bus-width = <4>;
++	status = "okay";
++};
++
++/* WIFI */
++&usdhc3 {
++	#address-cells = <1>;
++	#size-cells = <0>;
++	pinctrl-names = "default";
++	pinctrl-0 = <&pinctrl_usdhc3>;
++	bus-width = <4>;
++	max-frequency = <50000000>;
++	cap-power-off-card;
++	vmmc-supply = <&reg_usdhc3_vmmc>;
++	status = "okay";
++
++	wlcore: wlcore@2 {
++			compatible = "ti,cc33xx";
++			reg = <2>;
++
++			interrupt-parent = <&gpio1>;
++			interrupts = <12 IRQ_TYPE_LEVEL_LOW>;
++	};
++};
++
++&pcie_4ca00000 {
++	msi-map = <0x0 &its 0x60 0x1>,	//ENETC0 PF
++			<0x10 &its 0x61 0x1>, //ENETC0 VF0
++			<0x20 &its 0x62 0x1>, //ENETC0 VF1
++			<0x40 &its 0x63 0x1>, //ENETC1 PF
++			<0x50 &its 0x65 0x1>, //ENETC1 VF0
++			<0x60 &its 0x66 0x1>, //ENETC1 VF1
++			<0x80 &its 0x64 0x1>, //ENETC2 PF
++			<0xc0 &its 0x67 0x1>; //NETC Timer
++};
++
++&enetc_port0 {
++	pinctrl-names = "default";
++	pinctrl-0 = <&pinctrl_enetc0>;
++	phy-handle = <&ethphy0>;
++	phy-mode = "rgmii-id";
++	status = "okay";
++};
++
++&enetc_port1 {
++	pinctrl-names = "default";
++	pinctrl-0 = <&pinctrl_enetc1>;
++	phy-handle = <&ethphy1>;
++	phy-mode = "rgmii-id";
++	status = "okay";
++};
++
++&netc_timer {
++	status = "okay";
++};
++
++&netc_emdio {
++	pinctrl-names = "default";
++	pinctrl-0 = <&pinctrl_emdio>;
++	status = "okay";
++
++	ethphy0: ethernet-phy@0 {
++		reg = <0>;
++		compatible = "ethernet-phy-ieee802.3-c22";
++
++		mxl-8611x,led0_cfg = <(
++			MXL8611X_LEDX_CFG_LINK_UP_RX_ACT_ON |
++			MXL8611X_LEDX_CFG_LINK_UP_TX_ACT_ON |
++			MXL8611X_LEDX_CFG_TRAFFIC_ACT_BLINK_IND
++		)>;
++		mxl-8611x,led1_cfg = <(
++			MXL8611X_LEDX_CFG_LINK_UP_10MB_ON |
++			MXL8611X_LEDX_CFG_LINK_UP_100MB_ON |
++			MXL8611X_LEDX_CFG_LINK_UP_1GB_ON
++		)>;
++	};
++
++	ethphy1: ethernet-phy@1 {
++		reg = <1>;
++		compatible = "ethernet-phy-ieee802.3-c22";
++
++		mxl-8611x,led0_cfg = <(
++			MXL8611X_LEDX_CFG_LINK_UP_RX_ACT_ON |
++			MXL8611X_LEDX_CFG_LINK_UP_TX_ACT_ON |
++			MXL8611X_LEDX_CFG_TRAFFIC_ACT_BLINK_IND
++		)>;
++		mxl-8611x,led1_cfg = <(
++			MXL8611X_LEDX_CFG_LINK_UP_10MB_ON |
++			MXL8611X_LEDX_CFG_LINK_UP_100MB_ON |
++			MXL8611X_LEDX_CFG_LINK_UP_1GB_ON
++		)>;
++	};
++};
++
++&tpm6 {
++	pinctrl-names = "default";
++	pinctrl-0 = <&pinctrl_tpm6>;
++	status = "okay";
++};
++
++&usb2 {
++	dr_mode = "host";
++	vbus-supply = <&reg_usb_vbus>;
++	disable-over-current;
++	status = "okay";
++};
++
++
++&usb3 {
++	status = "okay";
++};
++
++&usb3_phy {
++	status = "okay";
++};
++
++&usb3_dwc3 {
++	dr_mode = "host";
++	hnp-disable;
++	srp-disable;
++	adp-disable;
++	usb-role-switch;
++	role-switch-default-mode = "none";
++	snps,dis-u1-entry-quirk;
++	snps,dis-u2-entry-quirk;
++	status = "okay";
++};
++
++&scmi_iomuxc {
++
++	pinctrl_tpm6: tpm6grp {
++		fsl,pins = <
++			IMX95_PAD_GPIO_IO27__TPM6_CH3			0x51e
++		>;
++	};
++
++	pinctrl_flexcan1: flexcan1grp {
++		fsl,pins = <
++			IMX95_PAD_PDM_CLK__AONMIX_TOP_CAN1_TX			0x39e
++			IMX95_PAD_PDM_BIT_STREAM0__AONMIX_TOP_CAN1_RX	0x39e
++		>;
++	};
++
++	pinctrl_flexcan3: flexcan3grp {
++		fsl,pins = <
++			IMX95_PAD_GPIO_IO28__CAN3_TX			0x39e
++			IMX95_PAD_GPIO_IO29__CAN3_RX			0x39e
++		>;
++	};
++
++	pinctrl_hp: hpgrp {
++		fsl,pins = <
++			IMX95_PAD_GPIO_IO11__GPIO2_IO_BIT11		0x31e
++		>;
++	};
++
++	pinctrl_lpi2c1: lpi2c1grp {
++		fsl,pins = <
++			IMX95_PAD_I2C1_SCL__AONMIX_TOP_LPI2C1_SCL	0x40000b9e
++			IMX95_PAD_I2C1_SDA__AONMIX_TOP_LPI2C1_SDA	0x40000b9e
++		>;
++	};
++
++	pinctrl_lpi2c2: lpi2c2grp {
++		fsl,pins = <
++			IMX95_PAD_I2C2_SCL__AONMIX_TOP_LPI2C2_SCL	0x40000b9e
++			IMX95_PAD_I2C2_SDA__AONMIX_TOP_LPI2C2_SDA	0x40000b9e
++		>;
++	};
++
++	pinctrl_lpi2c4: lpi2c4grp {
++		fsl,pins = <
++			IMX95_PAD_GPIO_IO30__LPI2C4_SDA			0x40000b9e
++			IMX95_PAD_GPIO_IO31__LPI2C4_SCL			0x40000b9e
++		>;
++	};
++
++	pinctrl_lpi2c6: lpi2c6grp {
++		fsl,pins = <
++			IMX95_PAD_GPIO_IO04__LPI2C6_SDA			0x40000b9e
++			IMX95_PAD_GPIO_IO05__LPI2C6_SCL			0x40000b9e
++		>;
++	};
++
++	pinctrl_uart1: uart1grp {
++		fsl,pins = <
++			IMX95_PAD_UART1_RXD__AONMIX_TOP_LPUART1_RX      0x31e
++			IMX95_PAD_UART1_TXD__AONMIX_TOP_LPUART1_TX      0x31e
++		>;
++	};
++
++	pinctrl_uart3: uart3grp {
++		fsl,pins = <
++			IMX95_PAD_GPIO_IO14__LPUART3_TX      0x31e
++			IMX95_PAD_GPIO_IO15__LPUART3_RX      0x31e
++		>;
++	};
++
++	pinctrl_uart5: uart5grp {
++		fsl,pins = <
++			IMX95_PAD_GPIO_IO00__LPUART5_TX			0x31e
++			IMX95_PAD_GPIO_IO01__LPUART5_RX				0x31e
++		>;
++	};
++
++	pinctrl_uart6: uart6grp {
++		fsl,pins = <
++			IMX95_PAD_GPIO_IO32__LPUART6_TX			0x31e
++			IMX95_PAD_GPIO_IO33__LPUART6_RX				0x31e
++		>;
++	};
++
++	pinctrl_uart8: uart8grp {
++		fsl,pins = <
++			IMX95_PAD_GPIO_IO12__LPUART8_TX			0x31e
++			IMX95_PAD_GPIO_IO13__LPUART8_RX				0x31e
++		>;
++	};
++
++	pinctrl_emdio: emdiogrp {
++		fsl,pins = <
++			IMX95_PAD_ENET2_MDC__NETCMIX_TOP_NETC_MDC		0x57e
++			IMX95_PAD_ENET2_MDIO__NETCMIX_TOP_NETC_MDIO		0x97e
++		>;
++	};
++
++	pinctrl_enetc0: enetc0grp {
++		fsl,pins = <
++			//IMX95_PAD_ENET1_MDC__NETCMIX_TOP_NETC_MDC		0x57e
++			//IMX95_PAD_ENET1_MDIO__NETCMIX_TOP_NETC_MDIO		0x97e
++			IMX95_PAD_ENET1_TD0__NETCMIX_TOP_ETH0_RGMII_TD0		0x57e
++			IMX95_PAD_ENET1_TD1__NETCMIX_TOP_ETH0_RGMII_TD1		0x57e
++			IMX95_PAD_ENET1_TD2__NETCMIX_TOP_ETH0_RGMII_TD2		0x57e
++			IMX95_PAD_ENET1_TD3__NETCMIX_TOP_ETH0_RGMII_TD3		0x57e
++			IMX95_PAD_ENET1_TX_CTL__NETCMIX_TOP_ETH0_RGMII_TX_CTL	0x57e
++			IMX95_PAD_ENET1_TXC__NETCMIX_TOP_ETH0_RGMII_TX_CLK	0x58e
++			IMX95_PAD_ENET1_RX_CTL__NETCMIX_TOP_ETH0_RGMII_RX_CTL	0x57e
++			IMX95_PAD_ENET1_RXC__NETCMIX_TOP_ETH0_RGMII_RX_CLK	0x58e
++			IMX95_PAD_ENET1_RD0__NETCMIX_TOP_ETH0_RGMII_RD0		0x57e
++			IMX95_PAD_ENET1_RD1__NETCMIX_TOP_ETH0_RGMII_RD1		0x57e
++			IMX95_PAD_ENET1_RD2__NETCMIX_TOP_ETH0_RGMII_RD2		0x57e
++			IMX95_PAD_ENET1_RD3__NETCMIX_TOP_ETH0_RGMII_RD3		0x57e
++			IMX95_PAD_GPIO_IO24__GPIO2_IO_BIT24					0x57e /* ENET1_INT_B */
++		>;
++	};
++
++	pinctrl_enetc1: enetc1grp {
++		fsl,pins = <
++			IMX95_PAD_ENET2_TD3__NETCMIX_TOP_ETH1_RGMII_TD3		0x57e
++			IMX95_PAD_ENET2_TD2__NETCMIX_TOP_ETH1_RGMII_TD2		0x57e
++			IMX95_PAD_ENET2_TD1__NETCMIX_TOP_ETH1_RGMII_TD1		0x57e
++			IMX95_PAD_ENET2_TD0__NETCMIX_TOP_ETH1_RGMII_TD0		0x57e
++			IMX95_PAD_ENET2_TX_CTL__NETCMIX_TOP_ETH1_RGMII_TX_CTL	0x57e
++			IMX95_PAD_ENET2_TXC__NETCMIX_TOP_ETH1_RGMII_TX_CLK	0x5fe
++			IMX95_PAD_ENET2_RX_CTL__NETCMIX_TOP_ETH1_RGMII_RX_CTL	0x57e
++			IMX95_PAD_ENET2_RXC__NETCMIX_TOP_ETH1_RGMII_RX_CLK	0x5fe
++			IMX95_PAD_ENET2_RD0__NETCMIX_TOP_ETH1_RGMII_RD0		0x57e
++			IMX95_PAD_ENET2_RD1__NETCMIX_TOP_ETH1_RGMII_RD1		0x57e
++			IMX95_PAD_ENET2_RD2__NETCMIX_TOP_ETH1_RGMII_RD2		0x57e
++			IMX95_PAD_ENET2_RD3__NETCMIX_TOP_ETH1_RGMII_RD3		0x57e
++			IMX95_PAD_GPIO_IO25__GPIO2_IO_BIT25					0x57e /* ENET2_INT_B */
++		>;
++	};
++
++	pinctrl_pcal6416_20: pcal6416grp {
++		fsl,pins = <
++			IMX95_PAD_XSPI1_DATA2__GPIO5_IO_BIT2			0x31e
++		>;
++	};
++
++	pinctrl_pcal6416_21: pcal6416grp {
++		fsl,pins = <
++			IMX95_PAD_XSPI1_DATA3__GPIO5_IO_BIT3			0x31e
++		>;
++	};
++
++	pinctrl_ptn5110: ptn5110grp {
++		fsl,pins = <
++			IMX95_PAD_GPIO_IO34__GPIO5_IO_BIT14			0x31e
++		>;
++	};
++
++	pinctrl_sai1: sai1grp {
++		fsl,pins = <
++			IMX95_PAD_SAI1_RXD0__AONMIX_TOP_SAI1_RX_DATA_BIT0    0x31e
++			IMX95_PAD_SAI1_TXC__AONMIX_TOP_SAI1_TX_BCLK      0x31e
++			IMX95_PAD_SAI1_TXFS__AONMIX_TOP_SAI1_TX_SYNC     0x31e
++			IMX95_PAD_SAI1_TXD0__AONMIX_TOP_SAI1_TX_DATA_BIT0    0x31e
++		>;
++	};
++
++	pinctrl_sai3: sai3grp {
++		fsl,pins = <
++			IMX95_PAD_GPIO_IO17__SAI3_MCLK				0x31e
++			IMX95_PAD_GPIO_IO16__SAI3_TX_BCLK			0x31e
++			IMX95_PAD_GPIO_IO26__SAI3_TX_SYNC			0x31e
++			IMX95_PAD_GPIO_IO20__SAI3_RX_DATA_BIT0			0x31e
++			IMX95_PAD_GPIO_IO19__SAI3_TX_DATA_BIT0			0x31e
++		>;
++	};
++
++	pinctrl_usdhc1: usdhc1grp {
++		fsl,pins = <
++			IMX95_PAD_SD1_CLK__USDHC1_CLK				0x158e
++			IMX95_PAD_SD1_CMD__USDHC1_CMD				0x138e
++			IMX95_PAD_SD1_DATA0__USDHC1_DATA0			0x138e
++			IMX95_PAD_SD1_DATA1__USDHC1_DATA1			0x138e
++			IMX95_PAD_SD1_DATA2__USDHC1_DATA2			0x138e
++			IMX95_PAD_SD1_DATA3__USDHC1_DATA3			0x138e
++			IMX95_PAD_SD1_DATA4__USDHC1_DATA4			0x138e
++			IMX95_PAD_SD1_DATA5__USDHC1_DATA5			0x138e
++			IMX95_PAD_SD1_DATA6__USDHC1_DATA6			0x138e
++			IMX95_PAD_SD1_DATA7__USDHC1_DATA7			0x138e
++			IMX95_PAD_SD1_STROBE__USDHC1_STROBE			0x158e
++		>;
++	};
++
++	pinctrl_usdhc1_100mhz: usdhc1-100mhzgrp {
++		fsl,pins = <
++			IMX95_PAD_SD1_CLK__USDHC1_CLK				0x158e
++			IMX95_PAD_SD1_CMD__USDHC1_CMD				0x138e
++			IMX95_PAD_SD1_DATA0__USDHC1_DATA0			0x138e
++			IMX95_PAD_SD1_DATA1__USDHC1_DATA1			0x138e
++			IMX95_PAD_SD1_DATA2__USDHC1_DATA2			0x138e
++			IMX95_PAD_SD1_DATA3__USDHC1_DATA3			0x138e
++			IMX95_PAD_SD1_DATA4__USDHC1_DATA4			0x138e
++			IMX95_PAD_SD1_DATA5__USDHC1_DATA5			0x138e
++			IMX95_PAD_SD1_DATA6__USDHC1_DATA6			0x138e
++			IMX95_PAD_SD1_DATA7__USDHC1_DATA7			0x138e
++			IMX95_PAD_SD1_STROBE__USDHC1_STROBE			0x158e
++		>;
++	};
++
++	pinctrl_usdhc1_200mhz: usdhc1-200mhzgrp {
++		fsl,pins = <
++			IMX95_PAD_SD1_CLK__USDHC1_CLK				0x15fe
++			IMX95_PAD_SD1_CMD__USDHC1_CMD				0x13fe
++			IMX95_PAD_SD1_DATA0__USDHC1_DATA0			0x13fe
++			IMX95_PAD_SD1_DATA1__USDHC1_DATA1			0x13fe
++			IMX95_PAD_SD1_DATA2__USDHC1_DATA2			0x13fe
++			IMX95_PAD_SD1_DATA3__USDHC1_DATA3			0x13fe
++			IMX95_PAD_SD1_DATA4__USDHC1_DATA4			0x13fe
++			IMX95_PAD_SD1_DATA5__USDHC1_DATA5			0x13fe
++			IMX95_PAD_SD1_DATA6__USDHC1_DATA6			0x13fe
++			IMX95_PAD_SD1_DATA7__USDHC1_DATA7			0x13fe
++			IMX95_PAD_SD1_STROBE__USDHC1_STROBE			0x15fe
++		>;
++	};
++
++	pinctrl_reg_usdhc2_vmmc: regusdhc2vmmcgrp {
++		fsl,pins = <
++			IMX95_PAD_SD2_RESET_B__GPIO3_IO_BIT7			0x31e
++		>;
++	};
++
++	pinctrl_usdhc2_gpio: usdhc2gpiogrp {
++		fsl,pins = <
++			IMX95_PAD_SD2_CD_B__GPIO3_IO_BIT0			0x31e
++		>;
++	};
++
++	pinctrl_csi0: csi0grp {
++		fsl,pins = <
++			IMX95_PAD_XSPI1_SS0_B__GPIO5_IO_BIT10		0x31e /* CAM0_nRST */
++		>;
++	};
++
++	pinctrl_usdhc2: usdhc2grp {
++		fsl,pins = <
++			IMX95_PAD_SD2_CLK__USDHC2_CLK					0x158e
++			IMX95_PAD_SD2_CMD__USDHC2_CMD					0x138e
++			IMX95_PAD_SD2_DATA0__USDHC2_DATA0				0x138e
++			IMX95_PAD_SD2_DATA1__USDHC2_DATA1				0x138e
++			IMX95_PAD_SD2_DATA2__USDHC2_DATA2				0x138e
++			IMX95_PAD_SD2_DATA3__USDHC2_DATA3				0x138e
++			IMX95_PAD_SD2_VSELECT__USDHC2_VSELECT			0x51e
++		>;
++	};
++
++	pinctrl_usdhc2_100mhz: usdhc2-100mhzgrp {
++		fsl,pins = <
++			IMX95_PAD_SD2_CLK__USDHC2_CLK					0x158e
++			IMX95_PAD_SD2_CMD__USDHC2_CMD					0x138e
++			IMX95_PAD_SD2_DATA0__USDHC2_DATA0				0x138e
++			IMX95_PAD_SD2_DATA1__USDHC2_DATA1				0x138e
++			IMX95_PAD_SD2_DATA2__USDHC2_DATA2				0x138e
++			IMX95_PAD_SD2_DATA3__USDHC2_DATA3				0x138e
++			IMX95_PAD_SD2_VSELECT__USDHC2_VSELECT			0x51e
++		>;
++	};
++
++	pinctrl_usdhc2_200mhz: usdhc2-200mhzgrp {
++		fsl,pins = <
++			IMX95_PAD_SD2_CLK__USDHC2_CLK					0x15fe
++			IMX95_PAD_SD2_CMD__USDHC2_CMD					0x13fe
++			IMX95_PAD_SD2_DATA0__USDHC2_DATA0				0x13fe
++			IMX95_PAD_SD2_DATA1__USDHC2_DATA1				0x13fe
++			IMX95_PAD_SD2_DATA2__USDHC2_DATA2				0x13fe
++			IMX95_PAD_SD2_DATA3__USDHC2_DATA3				0x13fe
++			IMX95_PAD_SD2_VSELECT__USDHC2_VSELECT			0x51e
++		>;
++	};
++
++	pinctrl_usdhc3: usdhc3grp {
++		fsl,pins = <
++			IMX95_PAD_SD3_CLK__USDHC3_CLK					0x158e
++			IMX95_PAD_SD3_CMD__USDHC3_CMD					0x138e
++			IMX95_PAD_SD3_DATA0__USDHC3_DATA0				0x138e
++			IMX95_PAD_SD3_DATA1__USDHC3_DATA1				0x138e
++			IMX95_PAD_SD3_DATA2__USDHC3_DATA2				0x138e
++			IMX95_PAD_SD3_DATA3__USDHC3_DATA3				0x138e
++			IMX95_PAD_SAI1_TXC__AONMIX_TOP_GPIO1_IO_BIT12	0x31e
++		>;
++	};
++};
++
++&vpuctrl {
++	boot = <&vpu_boot>;
++	sram = <&sram1>;
++};
++
++&wdog3 {
++	status = "okay";
++};
++
++&pcie0 {
++	pinctrl-names = "default";
++	fsl,refclk-pad-mode = <IMX8_PCIE_REFCLK_PAD_OUTPUT>;
++	reset-gpio = <&i2c6_gpio_expander_20 11 GPIO_ACTIVE_LOW>;
++	vpcie-supply = <&reg_pcie0>;
++	status = "okay";
++};
++
++&pcie1 {
++	pinctrl-names = "default";
++	fsl,refclk-pad-mode = <IMX8_PCIE_REFCLK_PAD_OUTPUT>;
++	reset-gpio = <&i2c6_gpio_expander_20 12 GPIO_ACTIVE_LOW>;
++	vpcie-supply = <&reg_slot_pwr>;
++	status = "okay";
++};
++
++&pcie1_ep {
++	pinctrl-names = "default";
++	fsl,refclk-pad-mode = <IMX8_PCIE_REFCLK_PAD_OUTPUT>;
++	vpcie-supply = <&reg_slot_pwr>;
++	status = "disabled";
++};
++
++&sai1 {
++	#sound-dai-cells = <0>;
++	pinctrl-names = "default";
++	pinctrl-0 = <&pinctrl_sai1>;
++	assigned-clocks = <&scmi_clk IMX95_CLK_AUDIOPLL1_VCO>,
++					<&scmi_clk IMX95_CLK_AUDIOPLL2_VCO>,
++					<&scmi_clk IMX95_CLK_AUDIOPLL1>,
++					<&scmi_clk IMX95_CLK_AUDIOPLL2>,
++					<&scmi_clk IMX95_CLK_SAI1>;
++	assigned-clock-parents = <0>, <0>, <0>, <0>,
++							<&scmi_clk IMX95_CLK_AUDIOPLL1>;
++	assigned-clock-rates = <3932160000>,
++							<3612672000>, <393216000>,
++							<361267200>, <12288000>;
++	fsl,sai-mclk-direction-output;
++	status = "disabled";
++};
++
++&sai3 {
++    #sound-dai-cells = <0>;
++    pinctrl-names = "default";
++    pinctrl-0 = <&pinctrl_sai3>;
++    assigned-clocks = <&scmi_clk IMX95_CLK_SAI3>;
++    assigned-clock-parents = <&scmi_clk IMX95_CLK_AUDIOPLL1>;
++    assigned-clock-rates = <24576000>;
++    fsl,sai-mclk-direction-output;
++    status = "okay";
++};
++
++&gpio1 {
++	status = "okay";
++	gpio-line-names =
++		"", "", "", "", "", "", "", "",
++		"", "", "", "", "WIFI_WAKE#", "", "", "",
++		"", "", "", "", "", "", "", "",
++		"", "", "", "", "", "", "", "";
++};
++
++&gpio2 {
++	gpio-line-names =
++		"", "", "", "", "", "", "", "",
++		"", "", "", "", "", "", "", "",
++		"", "", "", "", "", "", "", "",
++		"", "", "", "LCD_BKLT_PWM", "", "", "", "";
++
++		pin_lcd_bklt_pwm{
++			gpio-hog;
++			gpios = <27 0>;
++			output-high;
++		};
++};
++
++&gpio3 {
++	gpio-line-names =
++		"", "", "", "", "", "", "", "",
++		"", "", "", "", "", "", "", "",
++		"", "", "", "", "", "", "", "",
++		"", "", "", "", "", "", "", "";
++};
++
++&gpio4 {
++	gpio-line-names =
++		"", "", "", "", "", "", "", "",
++		"", "", "", "", "", "", "", "",
++		"", "", "", "", "", "", "", "",
++		"", "", "", "", "", "", "", "";
++
++};
++
++&gpio5 {
++	gpio-line-names =
++		"enet1_mdc", "enet1_mdio", "", "", "", "", "", "",
++		"", "", "", "", "", "", "", "",
++		"", "", "", "", "", "", "", "",
++		"", "", "", "", "", "", "", "";
++
++		ENET1_MDC {
++			gpio-hog;
++			input;
++			gpios = <0 0>;
++			line-name = "enet1_mdc";
++		};
++
++		ENET1_MDIO {
++			gpio-hog;
++			input;
++			gpios = <1 0>;
++			line-name = "enet1_mdio";
++			};
++};
+\ No newline at end of file
+diff --git a/arch/arm64/boot/dts/engicam/imx95-smarcore-smarcore-evb.dts b/arch/arm64/boot/dts/engicam/imx95-smarcore-smarcore-evb.dts
+new file mode 100644
+index 000000000000..f0396fe13910
+--- /dev/null
++++ b/arch/arm64/boot/dts/engicam/imx95-smarcore-smarcore-evb.dts
+@@ -0,0 +1,1247 @@
++// SPDX-License-Identifier: (GPL-2.0+ OR MIT)
++/*
++ * Copyright 2023 NXP
++ */
++
++/dts-v1/;
++
++#include <dt-bindings/phy/phy-imx8-pcie.h>
++#include <dt-bindings/pwm/pwm.h>
++#include <dt-bindings/usb/pd.h>
++#include <dt-bindings/gpio/gpio.h>
++#include <dt-bindings/interrupt-controller/irq.h>
++#include <dt-bindings/net/mxl-8611x.h>
++#include "../freescale/imx95.dtsi"
++
++#define FALLING_EDGE		BIT(0)
++#define RISING_EDGE		BIT(1)
++
++/ {
++	model = "NXP i.MX95 Smarcore - Smarcore-EVB";
++	compatible = "fsl,imx95-19x19-evk", "fsl,imx95";
++
++	aliases {
++		ethernet0 = &enetc_port0;
++		ethernet1 = &enetc_port1;
++	};
++
++	chosen {
++		stdout-path = &lpuart1;
++		#address-cells = <2>;
++		#size-cells = <2>;
++	};
++
++	clk_ov5640_fixed: clock {
++		#clock-cells = <0>;
++		compatible = "fixed-clock";
++		clock-frequency = <24000000>;
++	};
++
++	memory@80000000 {
++		device_type = "memory";
++		reg = <0x0 0x80000000 0 0x80000000>;
++	};
++
++	reserved-memory {
++		#address-cells = <2>;
++		#size-cells = <2>;
++		ranges;
++
++		linux_cma: linux,cma {
++			compatible = "shared-dma-pool";
++			reusable;
++			size = <0 0x3c000000>;
++			alloc-ranges = <0 0x80000000 0 0x7f000000>;
++			linux,cma-default;
++		};
++
++		vpu_boot: vpu_boot@a0000000 {
++			reg = <0 0xa0000000 0 0x100000>;
++			no-map;
++		};
++
++		vdev0vring0: vdev0vring0@88000000 {
++			reg = <0 0x88000000 0 0x8000>;
++			no-map;
++		};
++
++		vdev0vring1: vdev0vring1@88008000 {
++			reg = <0 0x88008000 0 0x8000>;
++			no-map;
++		};
++
++		vdev1vring0: vdev1vring0@88010000 {
++			reg = <0 0x88010000 0 0x8000>;
++			no-map;
++		};
++
++		vdev1vring1: vdev1vring1@88018000 {
++			reg = <0 0x88018000 0 0x8000>;
++			no-map;
++		};
++
++		rsc_table: rsc-table@88220000 {
++			reg = <0 0x88220000 0 0x1000>;
++			no-map;
++		};
++
++		vdevbuffer: vdevbuffer@88020000 {
++			compatible = "shared-dma-pool";
++			reg = <0 0x88020000 0 0x100000>;
++			no-map;
++		};
++	};
++
++	reg_3v3_avdd_sgtl: reg_3v3_avdd_regulator {
++		compatible = "regulator-fixed";
++		regulator-name = "3v3_avdd_sgtl";
++		regulator-min-microvolt = <3300000>;
++		regulator-max-microvolt = <3300000>;
++		always-on;
++	};
++
++	reg_3v3_sgtl: reg_3v3_sgtl_regulator {
++		compatible = "regulator-fixed";
++		regulator-name = "3v3_sgtl";
++		regulator-min-microvolt = <3300000>;
++		regulator-max-microvolt = <3300000>;
++		always-on;
++	};
++
++	reg_1v8_sgtl: reg_1v8_sgtl_regulator {
++		compatible = "regulator-fixed";
++		regulator-name = "1v8_sgtl";
++		regulator-min-microvolt = <1800000>;
++		regulator-max-microvolt = <1800000>;
++		always-on;
++	};
++
++	reg_audio_pwr: regulator-audio-pwr {
++		compatible = "regulator-fixed";
++		regulator-name = "audio-pwr";
++		regulator-min-microvolt = <3300000>;
++		regulator-max-microvolt = <3300000>;
++		enable-active-high;
++	};
++
++	reg_1p8v: regulator-1p8v {
++		compatible = "regulator-fixed";
++		regulator-max-microvolt = <1800000>;
++		regulator-min-microvolt = <1800000>;
++		regulator-name = "+V1.8_SW";
++	};
++
++	reg_3p3v: regulator-3p3v {
++		compatible = "regulator-fixed";
++		regulator-max-microvolt = <3300000>;
++		regulator-min-microvolt = <3300000>;
++		regulator-name = "+V3.3_SW";
++	};
++
++	reg_usdhc2_vmmc: regulator-usdhc2 {
++		compatible = "regulator-fixed";
++		pinctrl-names = "default";
++		pinctrl-0 = <&pinctrl_reg_usdhc2_vmmc>;
++		regulator-name = "VDD_SD2_3V3";
++		regulator-min-microvolt = <3300000>;
++		regulator-max-microvolt = <3300000>;
++		gpio = <&gpio3 7 GPIO_ACTIVE_HIGH>;
++		off-on-delay-us = <12000>;
++		enable-active-high;
++	};
++
++	reg_usdhc3_vmmc: regulator-usdhc3 {
++		compatible = "regulator-fixed";
++		regulator-name = "WIFI-BT_DISABLE";
++		pinctrl-names = "default";
++		regulator-min-microvolt = <1800000>;
++		regulator-max-microvolt = <1800000>;
++		gpio = <&i2c6_gpio_expander_21 5 GPIO_ACTIVE_HIGH>;
++		enable-active-high;
++	};
++
++	reg_pcie0: regulator-pcie {
++		compatible = "regulator-fixed";
++		regulator-name = "PCIE_WLAN_EN";
++		regulator-min-microvolt = <3300000>;
++		regulator-max-microvolt = <3300000>;
++		vin-supply = <&reg_m2_pwr>;
++		//gpio = <&i2c7_pcal6524 6 GPIO_ACTIVE_HIGH>;
++		enable-active-high;
++		regulator-always-on;
++	};
++
++	reg_vref_1v8: regulator-adc-vref {
++		compatible = "regulator-fixed";
++		regulator-name = "vref_1v8";
++		regulator-min-microvolt = <1800000>;
++		regulator-max-microvolt = <1800000>;
++	};
++
++	reg_usb_vbus: regulator-vbus {
++		compatible = "regulator-fixed";
++		regulator-name = "USB_VBUS";
++		regulator-min-microvolt = <5000000>;
++		regulator-max-microvolt = <5000000>;
++		//gpio = <&i2c7_pcal6524 3 GPIO_ACTIVE_HIGH>;
++		enable-active-high;
++		regulator-always-on;
++	};
++
++	reg_m2_pwr: regulator-m2-pwr {
++		compatible = "regulator-fixed";
++		regulator-name = "M.2-power";
++		regulator-min-microvolt = <3300000>;
++		regulator-max-microvolt = <3300000>;
++		//gpio = <&i2c7_pcal6524 20 GPIO_ACTIVE_HIGH>;
++		enable-active-high;
++	};
++
++	reg_slot_pwr: regulator-slot-pwr {
++		compatible = "regulator-fixed";
++		regulator-name = "PCIe slot-power";
++		regulator-min-microvolt = <3300000>;
++		regulator-max-microvolt = <3300000>;
++		//gpio = <&i2c7_pcal6524 14 GPIO_ACTIVE_HIGH>;
++		enable-active-high;
++		regulator-always-on;
++	};
++
++	reg_aqr_stby: regulator-aqr-stby {
++		compatible = "regulator-fixed";
++		regulator-name = "aqr-stby";
++		regulator-min-microvolt = <3300000>;
++		regulator-max-microvolt = <3300000>;
++		//gpio = <&i2c5_gpio_expander_21 1 GPIO_ACTIVE_HIGH>;
++		enable-active-high;
++	};
++
++	cm7: imx95-cm7 {
++		compatible = "fsl,imx95-cm7";
++		mbox-names = "tx", "rx", "rxdb";
++		mboxes = <&mu7 0 1
++			  &mu7 1 1
++			  &mu7 3 1>;
++		memory-region = <&vdevbuffer>, <&vdev0vring0>, <&vdev0vring1>,
++				<&vdev1vring0>, <&vdev1vring1>, <&rsc_table>;
++		/* cpuid and lmmid must align with SM firmware */
++		fsl,cpu-id = <1>;
++		fsl,lmm-id = <1>;
++		fsl,startup-delay-ms = <50>;
++		status = "okay";
++	};
++
++	sound-micfil {
++		compatible = "fsl,imx-audio-card";
++		model = "micfil-audio";
++
++		pri-dai-link {
++			link-name = "micfil hifi";
++			format = "i2s";
++
++			cpu {
++				sound-dai = <&micfil>;
++			};
++		};
++	};
++
++	sound {
++	    compatible = "simple-audio-card";
++	    simple-audio-card,name = "imx95-sgtl5000";
++	    simple-audio-card,format = "i2s";
++	    simple-audio-card,bitclock-master = <&dailink_master>;
++	    simple-audio-card,frame-master = <&dailink_master>;
++
++	    simple-audio-card,cpu {
++	        sound-dai = <&sai3>;
++	    };
++
++	    dailink_master: simple-audio-card,codec {
++	        sound-dai = <&sgtl5000>;
++	        clocks = <&scmi_clk IMX95_CLK_SAI3>;
++	    };
++	};
++
++	lvds0_panel {
++		compatible = "ampire,am-1280800n3tzqw-t00h";
++
++		port {
++			panel_in: endpoint {
++				remote-endpoint = <&lvds0_out>;
++			};
++		};
++	};
++
++	lvds_backlight: backlight {
++		compatible = "pwm-backlight";
++		pwms = <&tpm6 3 100000 0>;
++		brightness-levels = < 0  1  2  3  4  5  6  7  8  9
++							10 11 12 13 14 15 16 17 18 19
++							20 21 22 23 24 25 26 27 28 29
++							30 31 32 33 34 35 36 37 38 39
++							40 41 42 43 44 45 46 47 48 49
++							50 51 52 53 54 55 56 57 58 59
++							60 61 62 63 64 65 66 67 68 69
++							70 71 72 73 74 75 76 77 78 79
++							80 81 82 83 84 85 86 87 88 89
++							90 91 92 93 94 95 96 97 98 99
++							100>;
++		default-brightness-level = <80>;
++		pinctrl-names = "default";
++		status = "okay";
++	};
++};
++
++&display_pixel_link {
++	status = "okay";
++};
++
++&ldb {
++	#address-cells = <1>;
++	#size-cells = <0>;
++	assigned-clocks = <&scmi_clk IMX95_CLK_LDBPLL_VCO>,
++			  <&scmi_clk IMX95_CLK_LDBPLL>;
++	assigned-clock-rates = <2986200000>, <497700000>;
++	status = "okay";
++
++	channel@1 {
++		#address-cells = <1>;
++		#size-cells = <0>;
++		reg = <1>;
++		status = "okay";
++
++		port@1 {
++			reg = <1>;
++
++			lvds0_out: endpoint {
++				remote-endpoint = <&panel_in>;
++			};
++		};
++	};
++};
++
++&ldb1_phy {
++	status = "okay";
++};
++
++&pixel_interleaver {
++	#address-cells = <1>;
++	#size-cells = <0>;
++	status = "okay";
++
++	channel@1 {
++		reg = <1>;
++		status = "okay";
++	};
++};
++
++&adc1 {
++	vref-supply = <&reg_vref_1v8>;
++	status = "okay";
++};
++
++&displaymix_irqsteer {
++	status = "okay";
++};
++
++&dpu {
++	status = "okay";
++};
++
++&edma1 {
++	status = "disabled";
++};
++
++&edma2 {
++	status = "disabled";
++};
++
++&edma3 {
++	status = "disabled";
++};
++
++&flexcan1 {
++	pinctrl-names = "default";
++	pinctrl-0 = <&pinctrl_flexcan1>;
++	status = "okay";
++};
++
++&flexcan3 {
++	pinctrl-names = "default";
++	pinctrl-0 = <&pinctrl_flexcan3>;
++	status = "okay";
++};
++
++&lpi2c1 {
++	/* I2C1 is used for the PMIC? */
++	#address-cells = <1>;
++	#size-cells = <0>;
++	clock-frequency = <400000>;
++	pinctrl-names = "default";
++	pinctrl-0 = <&pinctrl_lpi2c1>;
++	status = "disabled";
++};
++
++&lpi2c2 {
++	#address-cells = <1>;
++	#size-cells = <0>;
++	clock-frequency = <400000>;
++	pinctrl-names = "default";
++	pinctrl-0 = <&pinctrl_lpi2c2>;
++	status = "okay";
++
++    sgtl5000: codec@a {
++        compatible = "fsl,sgtl5000";
++		status = "okay";
++		#sound-dai-cells = <0>;
++        reg = <0x0a>;
++        clocks = <&scmi_clk IMX95_CLK_SAI3>;
++		clock-names = "mclk";
++		assigned-clock-rates = <24576000>, <24576000>;
++		VDDA-supply = <&reg_3v3_sgtl>;
++		VDDIO-supply = <&reg_1v8_sgtl>;
++		VDDD-supply = <&reg_1v8_sgtl>;
++    };
++};
++
++&lpi2c4 {
++	#address-cells = <1>;
++	#size-cells = <0>;
++	clock-frequency = <400000>;
++	pinctrl-names = "default";
++	pinctrl-0 = <&pinctrl_lpi2c4>;
++	status = "okay";
++
++	ov5640_0: ov5640_mipi@3c {
++		compatible = "ov5640_mainline";
++		reg = <0x3c>;
++		pinctrl-names = "default";
++		pinctrl-0 = <&pinctrl_csi0>;
++		clocks = <&clk_ov5640_fixed>;
++		clock-names = "xclk";
++		assigned-clock-rates = <24000000>;
++		powerdown-gpios = <&gpio5 8 GPIO_ACTIVE_HIGH>;
++		reset-gpios = <&gpio5 10 GPIO_ACTIVE_LOW>;
++		status = "okay";
++
++		port {
++			ov5640_mipi_0_ep: endpoint {
++				remote-endpoint = <&mipi_csi0_ep>;
++				data-lanes = <1 2>;
++				clock-lanes = <0>;
++			};
++		};
++	};
++};
++
++&dphy_rx {
++	status = "okay";
++};
++
++&combo_rx {
++	status = "okay";
++};
++
++&mipi_csi0 {
++	status = "okay";
++
++	ports {
++		#address-cells = <1>;
++		#size-cells = <0>;
++
++		port@0 {
++			reg = <0>;
++			mipi_csi0_ep: endpoint {
++				remote-endpoint = <&ov5640_mipi_0_ep>;
++				data-lanes = <1 2>;
++				clock-lanes = <0>;
++			};
++		};
++
++		port@1 {
++			reg = <1>;
++				mipi_csi0_out: endpoint {
++				remote-endpoint = <&formatter_0_in>;
++			};
++		};
++	};
++};
++
++&csi_pixel_formatter_0 {
++	status = "okay";
++
++	ports {
++		#address-cells = <1>;
++		#size-cells = <0>;
++
++		port@0 {
++			reg = <0>;
++
++			formatter_0_in: endpoint {
++				remote-endpoint = <&mipi_csi0_out>;
++			};
++		};
++
++		port@1 {
++			reg = <1>;
++
++			formatter_0_out: endpoint {
++				remote-endpoint = <&isi_in_2>;
++			};
++		};
++	};
++};
++
++&isi {
++	status = "okay";
++
++	ports {
++		#address-cells = <1>;
++		#size-cells = <0>;
++
++		port@2 {
++			reg = <2>;
++
++			isi_in_2: endpoint {
++				remote-endpoint = <&formatter_0_out>;
++			};
++		};
++	};
++};
++
++&lpi2c6 {
++	#address-cells = <1>;
++	#size-cells = <0>;
++	clock-frequency = <100000>;
++	pinctrl-names = "default";
++	pinctrl-0 = <&pinctrl_lpi2c6>;
++	status = "okay";
++
++	i2c6_gpio_expander_20: i2c6-gpio-expander@20 {
++		compatible = "nxp,pcal6416";
++		reg = <0x20>;
++		gpio-controller;
++		#gpio-cells = <2>;
++		vcc-supply = <&reg_3p3v>;
++		gpio-line-names = "pf53_soc_pg", "pf53_arm_pg", "soc_usb1_en", "soc_usb1_oc",
++							"soc_usb2_en", "soc_usb2_oc", "enet1_rst_n", "enet2_rst_n",
++							"hub_usb_reset_b", "usb_type_sel", "eth_clk_en", "pcie_a_rst",
++							"pcie_b_rst", "pcie_a_req",	"pcie_b_req", "pcie_ckgen_pd_n";
++
++		pin_soc_usb1_en {
++			gpio-hog;
++			gpios = <2 0>;
++			output-high;
++		};
++		
++		pin_soc_usb2_en {
++			gpio-hog;
++			gpios = <4 0>;
++			output-high;
++		};
++		
++		pin_enet1_rst_n {
++			gpio-hog;
++			gpios = <6 0>;
++			output-high;
++		};
++
++		pin_enet2_rst_n {
++			gpio-hog;
++			gpios = <7 0>;
++			output-high;
++		};
++
++		pin_hub_usb_reset_b {
++			gpio-hog;
++			gpios = <8 0>;
++			output-high;
++		};
++
++		pin_usb_type_sel {
++			gpio-hog;
++			gpios = <9 0>;
++			output-low;
++		};
++
++		pin_eth_clk_en {
++			gpio-hog;
++			gpios = <10 0>;
++			output-high;
++		};
++
++		pin_pcie_a_req {
++			gpio-hog;
++			gpios = <13 0>;
++			output-low;
++		};
++
++		pin_pcie_b_req {
++			gpio-hog;
++			gpios = <14 0>;
++			output-low;
++		};
++
++		pin_pcie_ckgen_pd_n {
++			gpio-hog;
++			gpios = <15 0>;
++			output-high;
++		};
++	};
++
++	i2c6_gpio_expander_21: i2c6-gpio-expander@21 {
++		compatible = "nxp,pcal6416";
++		#gpio-cells = <2>;
++		gpio-controller;
++		reg = <0x21>;
++		interrupt-controller;
++		#interrupt-cells = <2>;
++		interrupt-parent = <&gpio5>;
++		interrupts = <3 IRQ_TYPE_LEVEL_LOW>;
++		pinctrl-names = "default";
++		pinctrl-0 = <&pinctrl_pcal6416_21>;
++		vcc-supply = <&reg_3p3v>;
++		gpio-line-names = "lcd1_bklt_en", "lcd_bklt_en", "lcd1_vdd_en", "lcd_vdd_en",
++							"se050_en", "wifi-bt_disable", "", "", "",
++							"", "", "M2B_W_DISABLE_N", "", "",	"", "", "", "", "", "", "",
++							"", "", "";
++
++		pin_lcd_bklt_en {
++			gpio-hog;
++			gpios = <1 0>;
++			output-high;
++		};
++
++		pin_lcd_vdd_en {
++			gpio-hog;
++			gpios = <3 0>;
++			output-high;
++		};
++
++		pin_M2B_W_DISABLE_N{
++			gpio-hog;
++			gpios = <11 0>;
++			output-high;
++		};
++	};
++
++	pcf8523: rtc@68 {
++		compatible = "nxp,pcf8523";
++		reg = <0x68>;
++	};
++};
++
++&lpuart1 {
++	/* Debug Console */
++	pinctrl-names = "default";
++	pinctrl-0 = <&pinctrl_uart1>;
++	status = "okay";
++};
++
++&mu7 {
++	status = "disabled";
++};
++
++&lpuart5 {
++	/* RS232 SER2 */
++	pinctrl-names = "default";
++	pinctrl-0 = <&pinctrl_uart5>;
++	status = "okay";
++};
++
++&lpuart8 {
++	/* BT */
++	pinctrl-names = "default";
++	pinctrl-0 = <&pinctrl_uart8>;
++	status = "okay";
++
++	bluetooth {
++		compatible = "ti,cc33xx-bt";
++		cc33xx-supply = <&reg_usdhc3_vmmc>;
++		max-speed = <115200>;
++	};
++};
++
++&mu7 {
++	status = "okay";
++};
++
++&usdhc1 {
++	pinctrl-names = "default", "state_100mhz", "state_200mhz", "sleep";
++	pinctrl-0 = <&pinctrl_usdhc1>;
++	pinctrl-1 = <&pinctrl_usdhc1_100mhz>;
++	pinctrl-2 = <&pinctrl_usdhc1_200mhz>;
++	pinctrl-3 = <&pinctrl_usdhc1>;
++	bus-width = <8>;
++	vmmc-supply = <&reg_3p3v>;
++	vqmmc-supply = <&reg_1p8v>;
++	non-removable;
++	iommus = <&smmu 0x1>;
++	no-sdio;
++	no-sd;
++	status = "okay";
++};
++
++&usdhc2 {
++	pinctrl-names = "default", "state_100mhz", "state_200mhz", "sleep";
++	pinctrl-0 = <&pinctrl_usdhc2>, <&pinctrl_usdhc2_gpio>;
++	pinctrl-1 = <&pinctrl_usdhc2_100mhz>, <&pinctrl_usdhc2_gpio>;
++	pinctrl-2 = <&pinctrl_usdhc2_200mhz>, <&pinctrl_usdhc2_gpio>;
++	pinctrl-3 = <&pinctrl_usdhc2>, <&pinctrl_usdhc2_gpio>;
++	cd-gpios = <&gpio3 0 GPIO_ACTIVE_LOW>;
++	vmmc-supply = <&reg_usdhc2_vmmc>;
++	vqmmc-supply = <&reg_usdhc2_vmmc>;
++	no-1-8-v;
++	max-frequency = <25000000>;
++	bus-width = <4>;
++	iommus = <&smmu 0x1>;
++	status = "okay";
++};
++ 
++/* WIFI */
++&usdhc3 {
++	#address-cells = <1>;
++	#size-cells = <0>;
++	pinctrl-names = "default";
++	pinctrl-0 = <&pinctrl_usdhc3>;
++	bus-width = <4>;
++	max-frequency = <50000000>;
++	cap-power-off-card;
++	vmmc-supply = <&reg_usdhc3_vmmc>;
++	status = "okay";
++
++	wlcore: wlcore@2 {
++		compatible = "ti,cc33xx";
++		reg = <2>;
++
++		interrupt-parent = <&gpio1>;
++		interrupts = <12 IRQ_TYPE_LEVEL_LOW>;
++	};
++};
++
++&pcie_4ca00000 {
++	msi-map = <0x0 &its 0x60 0x1>,	//ENETC0 PF
++			  <0x10 &its 0x61 0x1>, //ENETC0 VF0
++			  <0x20 &its 0x62 0x1>, //ENETC0 VF1
++			  <0x40 &its 0x63 0x1>, //ENETC1 PF
++			  <0x50 &its 0x65 0x1>, //ENETC1 VF0
++			  <0x60 &its 0x66 0x1>, //ENETC1 VF1
++			  <0x80 &its 0x64 0x1>, //ENETC2 PF
++			  <0xc0 &its 0x67 0x1>; //NETC Timer
++};
++
++&enetc_port0 {
++	pinctrl-names = "default";
++	pinctrl-0 = <&pinctrl_enetc0>;
++	phy-handle = <&ethphy0>;
++	phy-mode = "rgmii-id";
++	status = "okay";
++};
++
++&enetc_port1 {
++	pinctrl-names = "default";
++	pinctrl-0 = <&pinctrl_enetc1>;
++	phy-handle = <&ethphy1>;
++	phy-mode = "rgmii-id";
++	status = "okay";
++};
++
++&netc_timer {
++	status = "okay";
++};
++
++&netc_emdio {
++	pinctrl-names = "default";
++	pinctrl-0 = <&pinctrl_emdio>;
++	status = "okay";
++
++	ethphy0: ethernet-phy@0 {
++		reg = <0>;
++		compatible = "ethernet-phy-ieee802.3-c22";
++
++		mxl-8611x,led0_cfg = <(
++			MXL8611X_LEDX_CFG_LINK_UP_RX_ACT_ON |
++			MXL8611X_LEDX_CFG_LINK_UP_TX_ACT_ON |
++			MXL8611X_LEDX_CFG_TRAFFIC_ACT_BLINK_IND
++		)>;
++		mxl-8611x,led1_cfg = <(
++			MXL8611X_LEDX_CFG_LINK_UP_10MB_ON |
++			MXL8611X_LEDX_CFG_LINK_UP_100MB_ON |
++			MXL8611X_LEDX_CFG_LINK_UP_1GB_ON
++		)>;
++	};
++
++	ethphy1: ethernet-phy@1 {
++		reg = <1>;
++		compatible = "ethernet-phy-ieee802.3-c22";
++
++		mxl-8611x,led0_cfg = <(
++			MXL8611X_LEDX_CFG_LINK_UP_RX_ACT_ON |
++			MXL8611X_LEDX_CFG_LINK_UP_TX_ACT_ON |
++			MXL8611X_LEDX_CFG_TRAFFIC_ACT_BLINK_IND
++		)>;
++		mxl-8611x,led1_cfg = <(
++			MXL8611X_LEDX_CFG_LINK_UP_10MB_ON |
++			MXL8611X_LEDX_CFG_LINK_UP_100MB_ON |
++			MXL8611X_LEDX_CFG_LINK_UP_1GB_ON
++		)>;
++	};
++};
++
++&tpm6 {
++	pinctrl-names = "default";
++	pinctrl-0 = <&pinctrl_tpm6>;
++	status = "okay";
++};
++
++&usb2 {
++	dr_mode = "host";
++	vbus-supply = <&reg_usb_vbus>;
++	disable-over-current;
++	status = "okay";
++};
++
++
++&usb3 {
++	status = "okay";
++};
++
++&usb3_phy {
++	status = "okay";
++};
++
++&usb3_dwc3 {
++	dr_mode = "host";
++	hnp-disable;
++	srp-disable;
++	adp-disable;
++	usb-role-switch;
++	role-switch-default-mode = "none";
++	snps,dis-u1-entry-quirk;
++	snps,dis-u2-entry-quirk;
++	status = "okay";
++};
++
++&scmi_iomuxc {
++
++	pinctrl_tpm6: tpm6grp {
++		fsl,pins = <
++			IMX95_PAD_GPIO_IO27__TPM6_CH3			0x51e
++		>;
++	};
++
++	pinctrl_flexcan1: flexcan1grp {
++		fsl,pins = <
++			IMX95_PAD_PDM_CLK__AONMIX_TOP_CAN1_TX			0x39e
++			IMX95_PAD_PDM_BIT_STREAM0__AONMIX_TOP_CAN1_RX	0x39e
++		>;
++	};
++
++	pinctrl_flexcan3: flexcan3grp {
++		fsl,pins = <
++			IMX95_PAD_GPIO_IO28__CAN3_TX			0x39e
++			IMX95_PAD_GPIO_IO29__CAN3_RX			0x39e
++		>;
++	};
++
++	pinctrl_hp: hpgrp {
++		fsl,pins = <
++			IMX95_PAD_GPIO_IO11__GPIO2_IO_BIT11		0x31e
++		>;
++	};
++
++	pinctrl_lpi2c1: lpi2c1grp {
++		fsl,pins = <
++			IMX95_PAD_I2C1_SCL__AONMIX_TOP_LPI2C1_SCL	0x40000b9e
++			IMX95_PAD_I2C1_SDA__AONMIX_TOP_LPI2C1_SDA	0x40000b9e
++		>;
++	};
++
++	pinctrl_lpi2c2: lpi2c2grp {
++		fsl,pins = <
++			IMX95_PAD_I2C2_SCL__AONMIX_TOP_LPI2C2_SCL	0x40000b9e
++			IMX95_PAD_I2C2_SDA__AONMIX_TOP_LPI2C2_SDA	0x40000b9e
++		>;
++	};
++
++	pinctrl_lpi2c4: lpi2c4grp {
++		fsl,pins = <
++			IMX95_PAD_GPIO_IO30__LPI2C4_SDA			0x40000b9e
++			IMX95_PAD_GPIO_IO31__LPI2C4_SCL			0x40000b9e
++		>;
++	};
++
++	pinctrl_lpi2c6: lpi2c6grp {
++		fsl,pins = <
++			IMX95_PAD_GPIO_IO04__LPI2C6_SDA			0x40000b9e
++			IMX95_PAD_GPIO_IO05__LPI2C6_SCL			0x40000b9e
++		>;
++	};
++
++	pinctrl_uart1: uart1grp {
++		fsl,pins = <
++			IMX95_PAD_UART1_RXD__AONMIX_TOP_LPUART1_RX      0x31e
++			IMX95_PAD_UART1_TXD__AONMIX_TOP_LPUART1_TX      0x31e
++		>;
++	};
++
++	pinctrl_uart3: uart3grp {
++		fsl,pins = <
++			IMX95_PAD_GPIO_IO14__LPUART3_TX      0x31e
++			IMX95_PAD_GPIO_IO15__LPUART3_RX      0x31e
++		>;
++	};
++
++	pinctrl_uart5: uart5grp {
++		fsl,pins = <
++			IMX95_PAD_GPIO_IO00__LPUART5_TX			0x31e
++			IMX95_PAD_GPIO_IO01__LPUART5_RX			0x31e
++			IMX95_PAD_GPIO_IO03__LPUART5_RTS_B		0x31e
++			IMX95_PAD_GPIO_IO02__LPUART5_CTS_B		0x31e
++		>;
++	};
++
++	pinctrl_uart8: uart8grp {
++		fsl,pins = <
++			IMX95_PAD_GPIO_IO12__LPUART8_TX			0x31e
++			IMX95_PAD_GPIO_IO13__LPUART8_RX				0x31e
++		>;
++	};
++
++	pinctrl_emdio: emdiogrp {
++		fsl,pins = <
++			IMX95_PAD_ENET2_MDC__NETCMIX_TOP_NETC_MDC		0x57e
++			IMX95_PAD_ENET2_MDIO__NETCMIX_TOP_NETC_MDIO		0x97e
++		>;
++	};
++
++	pinctrl_enetc0: enetc0grp {
++		fsl,pins = <
++			//IMX95_PAD_ENET1_MDC__NETCMIX_TOP_NETC_MDC		0x57e
++			//IMX95_PAD_ENET1_MDIO__NETCMIX_TOP_NETC_MDIO		0x97e
++			IMX95_PAD_ENET1_TD0__NETCMIX_TOP_ETH0_RGMII_TD0		0x57e
++			IMX95_PAD_ENET1_TD1__NETCMIX_TOP_ETH0_RGMII_TD1		0x57e
++			IMX95_PAD_ENET1_TD2__NETCMIX_TOP_ETH0_RGMII_TD2		0x57e
++			IMX95_PAD_ENET1_TD3__NETCMIX_TOP_ETH0_RGMII_TD3		0x57e
++			IMX95_PAD_ENET1_TX_CTL__NETCMIX_TOP_ETH0_RGMII_TX_CTL	0x57e
++			IMX95_PAD_ENET1_TXC__NETCMIX_TOP_ETH0_RGMII_TX_CLK	0x58e
++			IMX95_PAD_ENET1_RX_CTL__NETCMIX_TOP_ETH0_RGMII_RX_CTL	0x57e
++			IMX95_PAD_ENET1_RXC__NETCMIX_TOP_ETH0_RGMII_RX_CLK	0x58e
++			IMX95_PAD_ENET1_RD0__NETCMIX_TOP_ETH0_RGMII_RD0		0x57e
++			IMX95_PAD_ENET1_RD1__NETCMIX_TOP_ETH0_RGMII_RD1		0x57e
++			IMX95_PAD_ENET1_RD2__NETCMIX_TOP_ETH0_RGMII_RD2		0x57e
++			IMX95_PAD_ENET1_RD3__NETCMIX_TOP_ETH0_RGMII_RD3		0x57e
++			IMX95_PAD_GPIO_IO24__GPIO2_IO_BIT24					0x57e /* ENET1_INT_B */
++		>;
++	};
++
++	pinctrl_enetc1: enetc1grp {
++		fsl,pins = <
++			IMX95_PAD_ENET2_TD3__NETCMIX_TOP_ETH1_RGMII_TD3		0x57e
++			IMX95_PAD_ENET2_TD2__NETCMIX_TOP_ETH1_RGMII_TD2		0x57e
++			IMX95_PAD_ENET2_TD1__NETCMIX_TOP_ETH1_RGMII_TD1		0x57e
++			IMX95_PAD_ENET2_TD0__NETCMIX_TOP_ETH1_RGMII_TD0		0x57e
++			IMX95_PAD_ENET2_TX_CTL__NETCMIX_TOP_ETH1_RGMII_TX_CTL	0x57e
++			IMX95_PAD_ENET2_TXC__NETCMIX_TOP_ETH1_RGMII_TX_CLK	0x5fe
++			IMX95_PAD_ENET2_RX_CTL__NETCMIX_TOP_ETH1_RGMII_RX_CTL	0x57e
++			IMX95_PAD_ENET2_RXC__NETCMIX_TOP_ETH1_RGMII_RX_CLK	0x5fe
++			IMX95_PAD_ENET2_RD0__NETCMIX_TOP_ETH1_RGMII_RD0		0x57e
++			IMX95_PAD_ENET2_RD1__NETCMIX_TOP_ETH1_RGMII_RD1		0x57e
++			IMX95_PAD_ENET2_RD2__NETCMIX_TOP_ETH1_RGMII_RD2		0x57e
++			IMX95_PAD_ENET2_RD3__NETCMIX_TOP_ETH1_RGMII_RD3		0x57e
++			IMX95_PAD_GPIO_IO25__GPIO2_IO_BIT25					0x57e /* ENET2_INT_B */
++		>;
++	};
++
++	pinctrl_pcal6416_20: pcal6416grp {
++		fsl,pins = <
++			IMX95_PAD_XSPI1_DATA2__GPIO5_IO_BIT2			0x31e
++		>;
++	};
++
++	pinctrl_pcal6416_21: pcal6416grp {
++		fsl,pins = <
++			IMX95_PAD_XSPI1_DATA3__GPIO5_IO_BIT3			0x31e
++		>;
++	};
++
++	pinctrl_ptn5110: ptn5110grp {
++		fsl,pins = <
++			IMX95_PAD_GPIO_IO34__GPIO5_IO_BIT14			0x31e
++		>;
++	};
++
++	pinctrl_sai1: sai1grp {
++		fsl,pins = <
++			IMX95_PAD_SAI1_RXD0__AONMIX_TOP_SAI1_RX_DATA_BIT0    0x31e
++			IMX95_PAD_SAI1_TXC__AONMIX_TOP_SAI1_TX_BCLK      0x31e
++			IMX95_PAD_SAI1_TXFS__AONMIX_TOP_SAI1_TX_SYNC     0x31e
++			IMX95_PAD_SAI1_TXD0__AONMIX_TOP_SAI1_TX_DATA_BIT0    0x31e
++		>;
++	};
++
++	pinctrl_sai3: sai3grp {
++		fsl,pins = <
++			IMX95_PAD_GPIO_IO17__SAI3_MCLK				0x31e
++			IMX95_PAD_GPIO_IO16__SAI3_TX_BCLK			0x31e
++			IMX95_PAD_GPIO_IO26__SAI3_TX_SYNC			0x31e
++			IMX95_PAD_GPIO_IO20__SAI3_RX_DATA_BIT0			0x31e
++			IMX95_PAD_GPIO_IO19__SAI3_TX_DATA_BIT0			0x31e
++		>;
++	};
++
++	pinctrl_usdhc1: usdhc1grp {
++		fsl,pins = <
++			IMX95_PAD_SD1_CLK__USDHC1_CLK				0x158e
++			IMX95_PAD_SD1_CMD__USDHC1_CMD				0x138e
++			IMX95_PAD_SD1_DATA0__USDHC1_DATA0			0x138e
++			IMX95_PAD_SD1_DATA1__USDHC1_DATA1			0x138e
++			IMX95_PAD_SD1_DATA2__USDHC1_DATA2			0x138e
++			IMX95_PAD_SD1_DATA3__USDHC1_DATA3			0x138e
++			IMX95_PAD_SD1_DATA4__USDHC1_DATA4			0x138e
++			IMX95_PAD_SD1_DATA5__USDHC1_DATA5			0x138e
++			IMX95_PAD_SD1_DATA6__USDHC1_DATA6			0x138e
++			IMX95_PAD_SD1_DATA7__USDHC1_DATA7			0x138e
++			IMX95_PAD_SD1_STROBE__USDHC1_STROBE			0x158e
++		>;
++	};
++
++	pinctrl_usdhc1_100mhz: usdhc1-100mhzgrp {
++		fsl,pins = <
++			IMX95_PAD_SD1_CLK__USDHC1_CLK				0x158e
++			IMX95_PAD_SD1_CMD__USDHC1_CMD				0x138e
++			IMX95_PAD_SD1_DATA0__USDHC1_DATA0			0x138e
++			IMX95_PAD_SD1_DATA1__USDHC1_DATA1			0x138e
++			IMX95_PAD_SD1_DATA2__USDHC1_DATA2			0x138e
++			IMX95_PAD_SD1_DATA3__USDHC1_DATA3			0x138e
++			IMX95_PAD_SD1_DATA4__USDHC1_DATA4			0x138e
++			IMX95_PAD_SD1_DATA5__USDHC1_DATA5			0x138e
++			IMX95_PAD_SD1_DATA6__USDHC1_DATA6			0x138e
++			IMX95_PAD_SD1_DATA7__USDHC1_DATA7			0x138e
++			IMX95_PAD_SD1_STROBE__USDHC1_STROBE			0x158e
++		>;
++	};
++
++	pinctrl_usdhc1_200mhz: usdhc1-200mhzgrp {
++		fsl,pins = <
++			IMX95_PAD_SD1_CLK__USDHC1_CLK				0x15fe
++			IMX95_PAD_SD1_CMD__USDHC1_CMD				0x13fe
++			IMX95_PAD_SD1_DATA0__USDHC1_DATA0			0x13fe
++			IMX95_PAD_SD1_DATA1__USDHC1_DATA1			0x13fe
++			IMX95_PAD_SD1_DATA2__USDHC1_DATA2			0x13fe
++			IMX95_PAD_SD1_DATA3__USDHC1_DATA3			0x13fe
++			IMX95_PAD_SD1_DATA4__USDHC1_DATA4			0x13fe
++			IMX95_PAD_SD1_DATA5__USDHC1_DATA5			0x13fe
++			IMX95_PAD_SD1_DATA6__USDHC1_DATA6			0x13fe
++			IMX95_PAD_SD1_DATA7__USDHC1_DATA7			0x13fe
++			IMX95_PAD_SD1_STROBE__USDHC1_STROBE			0x15fe
++		>;
++	};
++
++	pinctrl_reg_usdhc2_vmmc: regusdhc2vmmcgrp {
++		fsl,pins = <
++			IMX95_PAD_SD2_RESET_B__GPIO3_IO_BIT7			0x31e
++		>;
++	};
++
++	pinctrl_usdhc2_gpio: usdhc2gpiogrp {
++		fsl,pins = <
++			IMX95_PAD_SD2_CD_B__GPIO3_IO_BIT0			0x31e
++		>;
++	};
++
++	pinctrl_csi0: csi0grp {
++		fsl,pins = <
++			IMX95_PAD_XSPI1_DQS__GPIO5_IO_BIT8			0x31e /* CAM0_PWRDN */
++			IMX95_PAD_XSPI1_SS0_B__GPIO5_IO_BIT10		0x31e /* CAM0_nRST */
++		>;
++	};
++
++	pinctrl_usdhc2: usdhc2grp {
++		fsl,pins = <
++			IMX95_PAD_SD2_CLK__USDHC2_CLK					0x158e
++			IMX95_PAD_SD2_CMD__USDHC2_CMD					0x138e
++			IMX95_PAD_SD2_DATA0__USDHC2_DATA0				0x138e
++			IMX95_PAD_SD2_DATA1__USDHC2_DATA1				0x138e
++			IMX95_PAD_SD2_DATA2__USDHC2_DATA2				0x138e
++			IMX95_PAD_SD2_DATA3__USDHC2_DATA3				0x138e
++			IMX95_PAD_SD2_VSELECT__USDHC2_VSELECT			0x51e
++		>;
++	};
++
++	pinctrl_usdhc2_100mhz: usdhc2-100mhzgrp {
++		fsl,pins = <
++			IMX95_PAD_SD2_CLK__USDHC2_CLK					0x158e
++			IMX95_PAD_SD2_CMD__USDHC2_CMD					0x138e
++			IMX95_PAD_SD2_DATA0__USDHC2_DATA0				0x138e
++			IMX95_PAD_SD2_DATA1__USDHC2_DATA1				0x138e
++			IMX95_PAD_SD2_DATA2__USDHC2_DATA2				0x138e
++			IMX95_PAD_SD2_DATA3__USDHC2_DATA3				0x138e
++			IMX95_PAD_SD2_VSELECT__USDHC2_VSELECT			0x51e
++		>;
++	};
++
++	pinctrl_usdhc2_200mhz: usdhc2-200mhzgrp {
++		fsl,pins = <
++			IMX95_PAD_SD2_CLK__USDHC2_CLK					0x15fe
++			IMX95_PAD_SD2_CMD__USDHC2_CMD					0x13fe
++			IMX95_PAD_SD2_DATA0__USDHC2_DATA0				0x13fe
++			IMX95_PAD_SD2_DATA1__USDHC2_DATA1				0x13fe
++			IMX95_PAD_SD2_DATA2__USDHC2_DATA2				0x13fe
++			IMX95_PAD_SD2_DATA3__USDHC2_DATA3				0x13fe
++			IMX95_PAD_SD2_VSELECT__USDHC2_VSELECT			0x51e
++		>;
++	};
++
++	pinctrl_usdhc3: usdhc3grp {
++		fsl,pins = <
++			IMX95_PAD_SD3_CLK__USDHC3_CLK					0x158e
++			IMX95_PAD_SD3_CMD__USDHC3_CMD					0x138e
++			IMX95_PAD_SD3_DATA0__USDHC3_DATA0				0x138e
++			IMX95_PAD_SD3_DATA1__USDHC3_DATA1				0x138e
++			IMX95_PAD_SD3_DATA2__USDHC3_DATA2				0x138e
++			IMX95_PAD_SD3_DATA3__USDHC3_DATA3				0x138e
++			IMX95_PAD_SAI1_TXC__AONMIX_TOP_GPIO1_IO_BIT12	0x31e
++		>;
++	};
++};
++
++&vpuctrl {
++	boot = <&vpu_boot>;
++	sram = <&sram1>;
++};
++
++&wdog3 {
++	status = "okay";
++};
++
++&pcie0 {
++	pinctrl-names = "default";
++	fsl,refclk-pad-mode = <IMX8_PCIE_REFCLK_PAD_OUTPUT>;
++	reset-gpio = <&i2c6_gpio_expander_20 11 GPIO_ACTIVE_LOW>;
++	vpcie-supply = <&reg_pcie0>;
++	status = "okay";
++};
++
++&pcie1 {
++	pinctrl-names = "default";
++	fsl,refclk-pad-mode = <IMX8_PCIE_REFCLK_PAD_OUTPUT>;
++	reset-gpio = <&i2c6_gpio_expander_20 12 GPIO_ACTIVE_LOW>;
++	vpcie-supply = <&reg_slot_pwr>;
++	status = "okay";
++};
++
++&pcie1_ep {
++	pinctrl-names = "default";
++	fsl,refclk-pad-mode = <IMX8_PCIE_REFCLK_PAD_OUTPUT>;
++	vpcie-supply = <&reg_slot_pwr>;
++	status = "disabled";
++};
++
++&sai1 {
++	#sound-dai-cells = <0>;
++	pinctrl-names = "default";
++	pinctrl-0 = <&pinctrl_sai1>;
++	assigned-clocks = <&scmi_clk IMX95_CLK_AUDIOPLL1_VCO>,
++					<&scmi_clk IMX95_CLK_AUDIOPLL2_VCO>,
++					<&scmi_clk IMX95_CLK_AUDIOPLL1>,
++					<&scmi_clk IMX95_CLK_AUDIOPLL2>,
++					<&scmi_clk IMX95_CLK_SAI1>;
++	assigned-clock-parents = <0>, <0>, <0>, <0>,
++							<&scmi_clk IMX95_CLK_AUDIOPLL1>;
++	assigned-clock-rates = <3932160000>,
++							<3612672000>, <393216000>,
++							<361267200>, <12288000>;
++	fsl,sai-mclk-direction-output;
++	status = "disabled";
++};
++
++&sai3 {
++    #sound-dai-cells = <0>;
++    pinctrl-names = "default";
++    pinctrl-0 = <&pinctrl_sai3>;
++    assigned-clocks = <&scmi_clk IMX95_CLK_SAI3>;
++    assigned-clock-parents = <&scmi_clk IMX95_CLK_AUDIOPLL1>;
++    assigned-clock-rates = <24576000>;
++    fsl,sai-mclk-direction-output;
++    status = "okay";
++};
++
++&micfil {
++	#sound-dai-cells = <0>;
++	pinctrl-names = "default";
++	//pinctrl-0 = <&pinctrl_pdm>;
++	assigned-clocks = <&scmi_clk IMX95_CLK_AUDIOPLL1_VCO>,
++					<&scmi_clk IMX95_CLK_AUDIOPLL2_VCO>,
++					<&scmi_clk IMX95_CLK_AUDIOPLL1>,
++					<&scmi_clk IMX95_CLK_AUDIOPLL2>,
++					<&scmi_clk IMX95_CLK_PDM>;
++	assigned-clock-parents = <0>, <0>, <0>, <0>,
++							<&scmi_clk IMX95_CLK_AUDIOPLL1>;
++	assigned-clock-rates = <3932160000>,
++							<3612672000>, <393216000>,
++							<361267200>, <49152000>;
++	status = "disabled";
++};
++
++&gpio1 {
++	status = "okay";
++	gpio-line-names =
++		"", "", "", "", "", "", "", "",
++		"", "", "", "", "WIFI_WAKE#", "", "", "",
++		"", "", "", "", "", "", "", "",
++		"", "", "", "", "", "", "", "";
++};
++
++&gpio2 {
++	gpio-line-names =
++		"", "", "", "", "", "", "", "",
++		"", "", "", "", "", "", "", "",
++		"", "", "", "", "", "", "", "",
++		"", "", "", "LCD_BKLT_PWM", "", "", "", "";
++
++		pin_lcd_bklt_pwm{
++			gpio-hog;
++			gpios = <27 0>;
++			output-high;
++		};
++};
++
++&gpio3 {
++	gpio-line-names =
++		"", "", "", "", "", "", "", "",
++		"", "", "", "", "", "", "", "",
++		"", "", "", "", "", "", "", "",
++		"", "", "", "", "", "", "", "";
++};
++
++&gpio4 {
++	gpio-line-names =
++		"", "", "", "", "", "", "", "",
++		"", "", "", "", "", "", "", "",
++		"", "", "", "", "", "", "", "",
++		"", "", "", "", "", "", "", "";
++
++};
++
++&gpio5 {
++	gpio-line-names =
++		"enet1_mdc", "enet1_mdio", "", "", "", "", "", "",
++		"", "", "", "", "", "", "", "",
++		"", "", "", "", "", "", "", "",
++		"", "", "", "", "", "", "", "";
++
++		ENET1_MDC {
++			gpio-hog;
++			input;
++			gpios = <0 0>;
++			line-name = "enet1_mdc";
++		};
++
++		ENET1_MDIO {
++			gpio-hog;
++			input;
++			gpios = <1 0>;
++			line-name = "enet1_mdio";
++			};
++};
+diff --git a/arch/arm64/boot/dts/engicam/imx95-smarcore-xtouch2.dts b/arch/arm64/boot/dts/engicam/imx95-smarcore-xtouch2.dts
+new file mode 100644
+index 000000000000..effd352f0554
+--- /dev/null
++++ b/arch/arm64/boot/dts/engicam/imx95-smarcore-xtouch2.dts
+@@ -0,0 +1,997 @@
++// SPDX-License-Identifier: (GPL-2.0+ OR MIT)
++/*
++ * Copyright 2026 NXP
++ */
++
++/dts-v1/;
++
++#include <dt-bindings/phy/phy-imx8-pcie.h>
++#include <dt-bindings/pwm/pwm.h>
++#include <dt-bindings/usb/pd.h>
++#include <dt-bindings/gpio/gpio.h>
++#include <dt-bindings/interrupt-controller/irq.h>
++#include <dt-bindings/net/mxl-8611x.h>
++#include "../freescale/imx95.dtsi"
++
++/ {
++	model = "NXP i.MX95 Smarcore - XTOUCH 2.0";
++	compatible = "fsl,imx95-19x19-evk", "fsl,imx95";
++
++	aliases {
++		ethernet0 = &enetc_port0;
++		ethernet1 = &enetc_port1;
++	};
++
++	chosen {
++		stdout-path = &lpuart1;
++		#address-cells = <2>;
++		#size-cells = <2>;
++	};
++
++	memory@80000000 {
++		device_type = "memory";
++		reg = <0x0 0x80000000 0 0xF0000000>;
++	};
++
++	reserved-memory {
++		#address-cells = <2>;
++		#size-cells = <2>;
++		ranges;
++
++		linux_cma: linux,cma {
++			compatible = "shared-dma-pool";
++			alloc-ranges = <0 0x80000000 0 0x7f000000>;
++			size = <0 0x3c000000>;
++			linux,cma-default;
++			reusable;
++		};
++
++		vpu_boot: vpu_boot@a0000000 {
++			reg = <0 0xa0000000 0 0x100000>;
++			no-map;
++		};
++
++		vdev0vring0: vdev0vring0@88000000 {
++			reg = <0 0x88000000 0 0x8000>;
++			no-map;
++		};
++
++		vdev0vring1: vdev0vring1@88008000 {
++			reg = <0 0x88008000 0 0x8000>;
++			no-map;
++		};
++
++		vdev1vring0: vdev1vring0@88010000 {
++			reg = <0 0x88010000 0 0x8000>;
++			no-map;
++		};
++
++		vdev1vring1: vdev1vring1@88018000 {
++			reg = <0 0x88018000 0 0x8000>;
++			no-map;
++		};
++
++		rsc_table: rsc-table@88220000 {
++			reg = <0 0x88220000 0 0x1000>;
++			no-map;
++		};
++
++		vdevbuffer: vdevbuffer@88020000 {
++			compatible = "shared-dma-pool";
++			reg = <0 0x88020000 0 0x100000>;
++			no-map;
++		};
++	};
++
++	reg_3v3_avdd_sgtl: reg_3v3_avdd_regulator {
++		compatible = "regulator-fixed";
++		regulator-name = "3v3_avdd_sgtl";
++		regulator-min-microvolt = <3300000>;
++		regulator-max-microvolt = <3300000>;
++		always-on;
++	};
++
++	reg_3v3_sgtl: reg_3v3_sgtl_regulator {
++		compatible = "regulator-fixed";
++		regulator-name = "3v3_sgtl";
++		regulator-min-microvolt = <3300000>;
++		regulator-max-microvolt = <3300000>;
++		always-on;
++	};
++
++	reg_1v8_sgtl: reg_1v8_sgtl_regulator {
++		compatible = "regulator-fixed";
++		regulator-name = "1v8_sgtl";
++		regulator-min-microvolt = <1800000>;
++		regulator-max-microvolt = <1800000>;
++		always-on;
++	};
++
++	reg_audio_pwr: regulator-audio-pwr {
++		compatible = "regulator-fixed";
++		regulator-name = "audio-pwr";
++		regulator-min-microvolt = <3300000>;
++		regulator-max-microvolt = <3300000>;
++		enable-active-high;
++	};
++
++	reg_1p8v: regulator-1p8v {
++		compatible = "regulator-fixed";
++		regulator-max-microvolt = <1800000>;
++		regulator-min-microvolt = <1800000>;
++		regulator-name = "+V1.8_SW";
++	};
++
++	reg_3p3v: regulator-3p3v {
++		compatible = "regulator-fixed";
++		regulator-max-microvolt = <3300000>;
++		regulator-min-microvolt = <3300000>;
++		regulator-name = "+V3.3_SW";
++	};
++
++	reg_usdhc2_vmmc: regulator-usdhc2 {
++		compatible = "regulator-fixed";
++		pinctrl-names = "default";
++		pinctrl-0 = <&pinctrl_reg_usdhc2_vmmc>;
++		regulator-name = "VDD_SD2_3V3";
++		regulator-min-microvolt = <3300000>;
++		regulator-max-microvolt = <3300000>;
++		gpio = <&gpio3 7 GPIO_ACTIVE_HIGH>;
++		off-on-delay-us = <12000>;
++		enable-active-high;
++	};
++
++	/*reg_usdhc3_vmmc: regulator-usdhc3 {
++	 * compatible = "regulator-fixed";
++	 * regulator-name = "WIFI-BT_DISABLE";
++	 * pinctrl-names = "default";
++	 * regulator-min-microvolt = <1800000>;
++	 * regulator-max-microvolt = <1800000>;
++	 * gpio = <&i2c6_gpio_expander_21 5 GPIO_ACTIVE_HIGH>;
++	 * enable-active-high;
++	 * };
++	 */
++
++	reg_pcie0: regulator-pcie {
++		compatible = "regulator-fixed";
++		regulator-name = "PCIE_WLAN_EN";
++		regulator-min-microvolt = <3300000>;
++		regulator-max-microvolt = <3300000>;
++		vin-supply = <&reg_m2_pwr>;
++		//gpio = <&i2c7_pcal6524 6 GPIO_ACTIVE_HIGH>;
++		enable-active-high;
++		regulator-always-on;
++	};
++
++	reg_vref_1v8: regulator-adc-vref {
++		compatible = "regulator-fixed";
++		regulator-name = "vref_1v8";
++		regulator-min-microvolt = <1800000>;
++		regulator-max-microvolt = <1800000>;
++	};
++
++	reg_usb_vbus: regulator-vbus {
++		compatible = "regulator-fixed";
++		regulator-name = "USB_VBUS";
++		regulator-min-microvolt = <5000000>;
++		regulator-max-microvolt = <5000000>;
++		//gpio = <&i2c7_pcal6524 3 GPIO_ACTIVE_HIGH>;
++		enable-active-high;
++		regulator-always-on;
++	};
++
++	reg_m2_pwr: regulator-m2-pwr {
++		compatible = "regulator-fixed";
++		regulator-name = "M.2-power";
++		regulator-min-microvolt = <3300000>;
++		regulator-max-microvolt = <3300000>;
++		//gpio = <&i2c7_pcal6524 20 GPIO_ACTIVE_HIGH>;
++		enable-active-high;
++	};
++
++	reg_slot_pwr: regulator-slot-pwr {
++		compatible = "regulator-fixed";
++		regulator-name = "PCIe slot-power";
++		regulator-min-microvolt = <3300000>;
++		regulator-max-microvolt = <3300000>;
++		//gpio = <&i2c7_pcal6524 14 GPIO_ACTIVE_HIGH>;
++		enable-active-high;
++		regulator-always-on;
++	};
++
++	reg_aqr_stby: regulator-aqr-stby {
++		compatible = "regulator-fixed";
++		regulator-name = "aqr-stby";
++		regulator-min-microvolt = <3300000>;
++		regulator-max-microvolt = <3300000>;
++		//gpio = <&i2c5_gpio_expander_21 1 GPIO_ACTIVE_HIGH>;
++		enable-active-high;
++	};
++
++	cm7: imx95-cm7 {
++		compatible = "fsl,imx95-cm7";
++		mbox-names = "tx", "rx", "rxdb";
++		mboxes = <&mu7 0 1
++				  &mu7 1 1
++				  &mu7 3 1>;
++		memory-region = <&vdevbuffer>, <&vdev0vring0>, <&vdev0vring1>,
++						<&vdev1vring0>, <&vdev1vring1>, <&rsc_table>;
++		/* cpuid and lmmid must align with SM firmware */
++		fsl,cpu-id = <1>;
++		fsl,lmm-id = <1>;
++		fsl,startup-delay-ms = <50>;
++		status = "disabled";
++	};
++
++	sound {
++		compatible = "simple-audio-card";
++		simple-audio-card,name = "imx95-sgtl5000";
++		simple-audio-card,format = "i2s";
++		simple-audio-card,bitclock-master = <&dailink_master>;
++		simple-audio-card,frame-master = <&dailink_master>;
++
++		simple-audio-card,cpu {
++			sound-dai = <&sai3>;
++		};
++
++		dailink_master: simple-audio-card,codec {
++			sound-dai = <&sgtl5000>;
++			clocks = <&scmi_clk IMX95_CLK_SAI3>;
++		};
++	};
++
++	lvds0_panel {
++		compatible = "ampire,am-1280800n3tzqw-t00h";
++
++		port {
++			panel_in: endpoint {
++				remote-endpoint = <&lvds0_out>;
++			};
++		};
++	};
++
++	lvds_backlight: backlight {
++		compatible = "pwm-backlight";
++		pwms = <&tpm6 3 100000 0>;
++		brightness-levels = <0 1 2 3 4 5 6 7 8 9
++							 10 11 12 13 14 15 16 17 18 19
++							 20 21 22 23 24 25 26 27 28 29
++							 30 31 32 33 34 35 36 37 38 39
++							 40 41 42 43 44 45 46 47 48 49
++							 50 51 52 53 54 55 56 57 58 59
++							 60 61 62 63 64 65 66 67 68 69
++							 70 71 72 73 74 75 76 77 78 79
++							 80 81 82 83 84 85 86 87 88 89
++							 90 91 92 93 94 95 96 97 98 99
++							 100>;
++		default-brightness-level = <80>;
++		pinctrl-names = "default";
++		status = "okay";
++	};
++};
++
++&display_pixel_link {
++	status = "okay";
++};
++
++&ldb {
++	#address-cells = <1>;
++	#size-cells = <0>;
++	assigned-clocks = <&scmi_clk IMX95_CLK_LDBPLL_VCO>,
++					  <&scmi_clk IMX95_CLK_LDBPLL>;
++	assigned-clock-rates = <2986200000>, <497700000>;
++	status = "okay";
++
++	channel@0 {
++		#address-cells = <1>;
++		#size-cells = <0>;
++		reg = <0>;
++		status = "okay";
++
++		port@1 {
++			reg = <1>;
++
++			lvds0_out: endpoint {
++				remote-endpoint = <&panel_in>;
++			};
++		};
++	};
++};
++
++&tpm6 {
++	pinctrl-names = "default";
++	pinctrl-0 = <&pinctrl_tpm6>;
++	status = "disabled";
++};
++
++&ldb0_phy {
++	status = "okay";
++};
++
++&pixel_interleaver {
++	#address-cells = <1>;
++	#size-cells = <0>;
++	status = "okay";
++
++	channel@0 {
++		reg = <0>;
++		status = "okay";
++	};
++};
++
++&adc1 {
++	vref-supply = <&reg_vref_1v8>;
++	status = "disabled";
++};
++
++&displaymix_irqsteer {
++	status = "okay";
++};
++
++&dpu {
++	status = "okay";
++};
++
++&edma1 {
++	status = "okay";
++};
++
++&edma2 {
++	status = "okay";
++};
++
++&edma3 {
++	status = "okay";
++};
++
++&flexcan1 {
++	pinctrl-names = "default";
++	pinctrl-0 = <&pinctrl_flexcan1>;
++	status = "okay";
++};
++
++&flexcan3 {
++	pinctrl-names = "default";
++	pinctrl-0 = <&pinctrl_flexcan3>;
++	status = "okay";
++};
++
++&lpi2c2 {
++	clock-frequency = <400000>;
++	pinctrl-names = "default";
++	pinctrl-0 = <&pinctrl_lpi2c2>;
++	status = "okay";
++
++	sgtl5000: codec@a {
++		compatible = "fsl,sgtl5000";
++		status = "okay";
++		#sound-dai-cells = <0>;
++		reg = <0x0a>;
++		clocks = <&scmi_clk IMX95_CLK_SAI3>;
++		clock-names = "mclk";
++		assigned-clock-rates = <12288000>, <12288000>;
++		VDDA-supply = <&reg_1v8_sgtl>;
++		VDDIO-supply = <&reg_1v8_sgtl>;
++		VDDD-supply = <&reg_1v8_sgtl>;
++	};
++};
++
++&lpi2c4 {
++	clock-frequency = <400000>;
++	pinctrl-names = "default";
++	pinctrl-0 = <&pinctrl_lpi2c4>;
++	status = "okay";
++};
++
++&lpi2c6 {
++	clock-frequency = <400000>;
++	pinctrl-names = "default";
++	pinctrl-0 = <&pinctrl_lpi2c6>;
++	status = "okay";
++
++	i2c6_gpio_expander_20: i2c6-gpio-expander@20 {
++		compatible = "nxp,pcal6416";
++		reg = <0x20>;
++		gpio-controller;
++		#gpio-cells = <2>;
++		vcc-supply = <&reg_3p3v>;
++		gpio-line-names = "pf53_soc_pg", "pf53_arm_pg", "soc_usb1_en", "soc_usb1_oc",
++						  "soc_usb2_en", "soc_usb2_oc", "enet1_rst_n", "enet2_rst_n",
++						  "hub_usb_reset_b", "usb_type_sel", "eth_clk_en", "pcie_a_rst",
++						  "pcie_b_rst", "pcie_a_req", "pcie_b_req", "pcie_ckgen_pd_n";
++
++		pin_soc_usb1_en {
++			gpio-hog;
++			gpios = <2 0>;
++			output-high;
++		};
++		
++		pin_soc_usb2_en {
++			gpio-hog;
++			gpios = <4 0>;
++			output-high;
++		};
++		
++		pin_enet1_rst_n {
++			gpio-hog;
++			gpios = <6 0>;
++			output-high;
++		};
++
++		pin_enet2_rst_n {
++			gpio-hog;
++			gpios = <7 0>;
++			output-high;
++		};
++
++		pin_hub_usb_reset_b {
++			gpio-hog;
++			gpios = <8 0>;
++			output-high;
++		};
++
++		pin_usb_type_sel {
++			gpio-hog;
++			gpios = <9 0>;
++			output-low;
++		};
++
++		pin_eth_clk_en {
++			gpio-hog;
++			gpios = <10 0>;
++			output-high;
++		};
++
++		pin_pcie_a_req {
++			gpio-hog;
++			gpios = <13 0>;
++			output-low;
++		};
++
++		pin_pcie_b_req {
++			gpio-hog;
++			gpios = <14 0>;
++			output-low;
++		};
++
++		pin_pcie_ckgen_pd_n {
++			gpio-hog;
++			gpios = <15 0>;
++			output-high;
++		};
++	};
++
++	i2c6_gpio_expander_21: i2c6-gpio-expander@21 {
++		compatible = "nxp,pcal6416";
++		#gpio-cells = <2>;
++		gpio-controller;
++		reg = <0x21>;
++		interrupt-controller;
++		#interrupt-cells = <2>;
++		interrupt-parent = <&gpio5>;
++		interrupts = <3 IRQ_TYPE_LEVEL_LOW>;
++		pinctrl-names = "default";
++		pinctrl-0 = <&pinctrl_pcal6416_21>;
++		vcc-supply = <&reg_3p3v>;
++		gpio-line-names = "lcd1_bklt_en", "lcd_bklt_en", "lcd1_vdd_en", "lcd_vdd_en",
++						  "se050_en", "wifi-bt_disable", "", "", "",
++						  "", "", "", "", "", "", "", "", "", "", "", "",
++						  "", "", "";
++
++		pin_lcd_bklt_en {
++			gpio-hog;
++			gpios = <1 0>;
++			output-high;
++		};
++
++		pin_lcd_vdd_en {
++			gpio-hog;
++			gpios = <3 0>;
++			output-high;
++		};
++	};
++
++	pcf8523: rtc@68 {
++		compatible = "nxp,pcf8523";
++		reg = <0x68>;
++	};
++};
++
++&lpuart1 {
++	/* Debug Console */
++	pinctrl-names = "default";
++	pinctrl-0 = <&pinctrl_uart1>;
++	status = "okay";
++};
++
++&lpuart3 {
++	/* RS232 -> M7 Console pins */
++	pinctrl-names = "default";
++	pinctrl-0 = <&pinctrl_uart3>;
++	status = "disabled";
++};
++
++&lpuart5 {
++	/* RS485 */
++	pinctrl-names = "default";
++	pinctrl-0 = <&pinctrl_uart5>;
++        linux,rs485-enabled-at-boot-time; 
++        status = "okay";
++};
++
++&lpuart8 {
++	/* BT */
++	pinctrl-names = "default";
++	pinctrl-0 = <&pinctrl_uart8>;
++	status = "okay";
++
++	bluetooth {
++		compatible = "ti,cc33xx-bt";
++		//cc33xx-supply = <&reg_usdhc3_vmmc>;
++		max-speed = <115200>;
++	};
++};
++
++&mu7 {
++	status = "disabled";
++};
++
++&usdhc1 {
++	pinctrl-names = "default", "state_100mhz", "state_200mhz", "sleep";
++	pinctrl-0 = <&pinctrl_usdhc1>;
++	pinctrl-1 = <&pinctrl_usdhc1_100mhz>;
++	pinctrl-2 = <&pinctrl_usdhc1_200mhz>;
++	pinctrl-3 = <&pinctrl_usdhc1>;
++	bus-width = <8>;
++	vmmc-supply = <&reg_3p3v>;
++	vqmmc-supply = <&reg_1p8v>;
++	non-removable;
++	no-sdio;
++	no-sd;
++	status = "okay";
++};
++
++&usdhc2 {
++	pinctrl-names = "default", "state_100mhz", "state_200mhz", "sleep";
++	pinctrl-0 = <&pinctrl_usdhc2>, <&pinctrl_usdhc2_gpio>;
++	pinctrl-1 = <&pinctrl_usdhc2_100mhz>, <&pinctrl_usdhc2_gpio>;
++	pinctrl-2 = <&pinctrl_usdhc2_200mhz>, <&pinctrl_usdhc2_gpio>;
++	pinctrl-3 = <&pinctrl_usdhc2>, <&pinctrl_usdhc2_gpio>;
++	cd-gpios = <&gpio3 0 GPIO_ACTIVE_LOW>;
++	vmmc-supply = <&reg_usdhc2_vmmc>;
++	vqmmc-supply = <&reg_1p8v>;
++	no-1-8-v;
++	max-frequency = <50000000>;
++	bus-width = <4>;
++	status = "okay";
++};
++ 
++/* WIFI */
++&usdhc3 {
++	#address-cells = <1>;
++	#size-cells = <0>;
++	pinctrl-names = "default";
++	pinctrl-0 = <&pinctrl_usdhc3>;
++	bus-width = <4>;
++	max-frequency = <50000000>;
++	cap-power-off-card;
++	//vmmc-supply = <&reg_usdhc3_vmmc>;
++	status = "disabled";
++
++	wlcore: wlcore@2 {
++		compatible = "ti,cc33xx";
++		reg = <2>;
++
++		interrupt-parent = <&gpio1>;
++		interrupts = <12 IRQ_TYPE_LEVEL_LOW>;
++	};
++};
++
++&pcie_4ca00000 {
++	msi-map = <0x0 &its 0x60 0x1>,	//ENETC0 PF
++			  <0x10 &its 0x61 0x1>, //ENETC0 VF0
++			  <0x20 &its 0x62 0x1>, //ENETC0 VF1
++			  <0x40 &its 0x63 0x1>, //ENETC1 PF
++			  <0x50 &its 0x65 0x1>, //ENETC1 VF0
++			  <0x60 &its 0x66 0x1>, //ENETC1 VF1
++			  <0x80 &its 0x64 0x1>, //ENETC2 PF
++			  <0xc0 &its 0x67 0x1>; //NETC Timer
++};
++
++&enetc_port0 {
++	pinctrl-names = "default";
++	pinctrl-0 = <&pinctrl_enetc0>;
++	phy-handle = <&ethphy0>;
++	phy-mode = "rgmii-id";
++	status = "okay";
++};
++
++&enetc_port1 {
++	pinctrl-names = "default";
++	pinctrl-0 = <&pinctrl_enetc1>;
++	phy-handle = <&ethphy1>;
++	phy-mode = "rgmii-id";
++	status = "okay";
++};
++
++&netc_timer {
++	status = "okay";
++};
++
++&netc_emdio {
++	pinctrl-names = "default";
++	pinctrl-0 = <&pinctrl_emdio>;
++	status = "okay";
++
++	ethphy0: ethernet-phy@0 {
++		reg = <0>;
++		compatible = "ethernet-phy-ieee802.3-c22";
++
++		mxl-8611x,led0_cfg = <(MXL8611X_LEDX_CFG_LINK_UP_RX_ACT_ON |
++							  MXL8611X_LEDX_CFG_LINK_UP_TX_ACT_ON |
++							  MXL8611X_LEDX_CFG_TRAFFIC_ACT_BLINK_IND)>;
++		mxl-8611x,led1_cfg = <(MXL8611X_LEDX_CFG_LINK_UP_10MB_ON |
++							  MXL8611X_LEDX_CFG_LINK_UP_100MB_ON |
++							  MXL8611X_LEDX_CFG_LINK_UP_1GB_ON)>;
++	};
++
++	ethphy1: ethernet-phy@1 {
++		reg = <1>;
++		compatible = "ethernet-phy-ieee802.3-c22";
++
++		mxl-8611x,led0_cfg = <(MXL8611X_LEDX_CFG_LINK_UP_RX_ACT_ON |
++							  MXL8611X_LEDX_CFG_LINK_UP_TX_ACT_ON |
++							  MXL8611X_LEDX_CFG_TRAFFIC_ACT_BLINK_IND)>;
++		mxl-8611x,led1_cfg = <(MXL8611X_LEDX_CFG_LINK_UP_10MB_ON |
++							  MXL8611X_LEDX_CFG_LINK_UP_100MB_ON |
++							  MXL8611X_LEDX_CFG_LINK_UP_1GB_ON)>;
++	};
++};
++
++&usb2 {
++	dr_mode = "host";
++	vbus-supply = <&reg_usb_vbus>;
++	disable-over-current;
++	status = "okay";
++};
++
++&usb3 {
++	status = "okay";
++};
++
++&usb3_phy {
++	status = "okay";
++};
++
++&usb3_dwc3 {
++	dr_mode = "host";
++	hnp-disable;
++	srp-disable;
++	adp-disable;
++	usb-role-switch;
++	role-switch-default-mode = "none";
++	snps,dis-u1-entry-quirk;
++	snps,dis-u2-entry-quirk;
++	status = "okay";
++};
++
++&mali {
++	status = "okay";
++};
++
++&scmi_iomuxc {
++	pinctrl_tpm6: tpm6grp {
++		fsl,pins = <IMX95_PAD_GPIO_IO27__TPM6_CH3 0x51e>;
++	};
++
++	pinctrl_flexcan1: flexcan1grp {
++		fsl,pins = <IMX95_PAD_PDM_CLK__AONMIX_TOP_CAN1_TX 0x39e
++					IMX95_PAD_PDM_BIT_STREAM0__AONMIX_TOP_CAN1_RX 0x39e>;
++	};
++
++	pinctrl_flexcan3: flexcan3grp {
++		fsl,pins = <IMX95_PAD_GPIO_IO28__CAN3_TX 0x39e
++					IMX95_PAD_GPIO_IO29__CAN3_RX 0x39e>;
++	};
++
++	pinctrl_hp: hpgrp {
++		fsl,pins = <IMX95_PAD_GPIO_IO11__GPIO2_IO_BIT11 0x31e>;
++	};
++
++	pinctrl_lpi2c1: lpi2c1grp {
++		fsl,pins = <IMX95_PAD_I2C1_SCL__AONMIX_TOP_LPI2C1_SCL 0x40000b9e
++					IMX95_PAD_I2C1_SDA__AONMIX_TOP_LPI2C1_SDA 0x40000b9e>;
++	};
++
++	pinctrl_lpi2c2: lpi2c2grp {
++		fsl,pins = <IMX95_PAD_I2C2_SCL__AONMIX_TOP_LPI2C2_SCL 0x40000b9e
++					IMX95_PAD_I2C2_SDA__AONMIX_TOP_LPI2C2_SDA 0x40000b9e>;
++	};
++
++	pinctrl_lpi2c4: lpi2c4grp {
++		fsl,pins = <IMX95_PAD_GPIO_IO30__LPI2C4_SDA 0x40000b9e
++					IMX95_PAD_GPIO_IO31__LPI2C4_SCL 0x40000b9e>;
++	};
++
++	pinctrl_lpi2c6: lpi2c6grp {
++		fsl,pins = <IMX95_PAD_GPIO_IO04__LPI2C6_SDA 0x40000b9e
++					IMX95_PAD_GPIO_IO05__LPI2C6_SCL 0x40000b9e>;
++	};
++
++	pinctrl_uart1: uart1grp {
++		fsl,pins = <IMX95_PAD_UART1_RXD__AONMIX_TOP_LPUART1_RX 0x31e
++					IMX95_PAD_UART1_TXD__AONMIX_TOP_LPUART1_TX 0x31e>;
++	};
++
++	pinctrl_uart3: uart3grp {
++		fsl,pins = <IMX95_PAD_GPIO_IO14__LPUART3_TX 0x31e
++					IMX95_PAD_GPIO_IO15__LPUART3_RX 0x31e>;
++	};
++
++	pinctrl_uart5: uart5grp {
++		fsl,pins = <IMX95_PAD_GPIO_IO00__LPUART5_TX 0x31e
++					IMX95_PAD_GPIO_IO01__LPUART5_RX 0x31e
++                                        IMX95_PAD_GPIO_IO03__LPUART5_RTS_B 0x31e>;
++	};
++
++	pinctrl_uart6: uart6grp {
++		fsl,pins = <IMX95_PAD_GPIO_IO32__LPUART6_TX 0x31e
++					IMX95_PAD_GPIO_IO33__LPUART6_RX 0x31e>;
++	};
++
++	pinctrl_uart8: uart8grp {
++		fsl,pins = <IMX95_PAD_GPIO_IO12__LPUART8_TX 0x31e
++					IMX95_PAD_GPIO_IO13__LPUART8_RX 0x31e>;
++	};
++
++	pinctrl_emdio: emdiogrp {
++		fsl,pins = <IMX95_PAD_ENET2_MDC__NETCMIX_TOP_NETC_MDC 0x57e
++					IMX95_PAD_ENET2_MDIO__NETCMIX_TOP_NETC_MDIO 0x97e>;
++	};
++
++	pinctrl_enetc0: enetc0grp {
++		fsl,pins = <
++					//IMX95_PAD_ENET1_MDC__NETCMIX_TOP_NETC_MDC		0x57e
++					//IMX95_PAD_ENET1_MDIO__NETCMIX_TOP_NETC_MDIO		0x97e
++					IMX95_PAD_ENET1_TD0__NETCMIX_TOP_ETH0_RGMII_TD0 0x57e
++					IMX95_PAD_ENET1_TD1__NETCMIX_TOP_ETH0_RGMII_TD1 0x57e
++					IMX95_PAD_ENET1_TD2__NETCMIX_TOP_ETH0_RGMII_TD2 0x57e
++					IMX95_PAD_ENET1_TD3__NETCMIX_TOP_ETH0_RGMII_TD3 0x57e
++					IMX95_PAD_ENET1_TX_CTL__NETCMIX_TOP_ETH0_RGMII_TX_CTL 0x57e
++					IMX95_PAD_ENET1_TXC__NETCMIX_TOP_ETH0_RGMII_TX_CLK 0x58e
++					IMX95_PAD_ENET1_RX_CTL__NETCMIX_TOP_ETH0_RGMII_RX_CTL 0x57e
++					IMX95_PAD_ENET1_RXC__NETCMIX_TOP_ETH0_RGMII_RX_CLK 0x58e
++					IMX95_PAD_ENET1_RD0__NETCMIX_TOP_ETH0_RGMII_RD0 0x57e
++					IMX95_PAD_ENET1_RD1__NETCMIX_TOP_ETH0_RGMII_RD1 0x57e
++					IMX95_PAD_ENET1_RD2__NETCMIX_TOP_ETH0_RGMII_RD2 0x57e
++					IMX95_PAD_ENET1_RD3__NETCMIX_TOP_ETH0_RGMII_RD3 0x57e
++					IMX95_PAD_GPIO_IO24__GPIO2_IO_BIT24 0x57e /* ENET1_INT_B */ >;
++	};
++
++	pinctrl_enetc1: enetc1grp {
++		fsl,pins = <IMX95_PAD_ENET2_TD3__NETCMIX_TOP_ETH1_RGMII_TD3 0x57e
++					IMX95_PAD_ENET2_TD2__NETCMIX_TOP_ETH1_RGMII_TD2 0x57e
++					IMX95_PAD_ENET2_TD1__NETCMIX_TOP_ETH1_RGMII_TD1 0x57e
++					IMX95_PAD_ENET2_TD0__NETCMIX_TOP_ETH1_RGMII_TD0 0x57e
++					IMX95_PAD_ENET2_TX_CTL__NETCMIX_TOP_ETH1_RGMII_TX_CTL 0x57e
++					IMX95_PAD_ENET2_TXC__NETCMIX_TOP_ETH1_RGMII_TX_CLK 0x5fe
++					IMX95_PAD_ENET2_RX_CTL__NETCMIX_TOP_ETH1_RGMII_RX_CTL 0x57e
++					IMX95_PAD_ENET2_RXC__NETCMIX_TOP_ETH1_RGMII_RX_CLK 0x5fe
++					IMX95_PAD_ENET2_RD0__NETCMIX_TOP_ETH1_RGMII_RD0 0x57e
++					IMX95_PAD_ENET2_RD1__NETCMIX_TOP_ETH1_RGMII_RD1 0x57e
++					IMX95_PAD_ENET2_RD2__NETCMIX_TOP_ETH1_RGMII_RD2 0x57e
++					IMX95_PAD_ENET2_RD3__NETCMIX_TOP_ETH1_RGMII_RD3 0x57e
++					IMX95_PAD_GPIO_IO25__GPIO2_IO_BIT25 0x57e /* ENET2_INT_B */ >;
++	};
++
++	pinctrl_pcal6416_20: pcal6416grp {
++		fsl,pins = <IMX95_PAD_XSPI1_DATA2__GPIO5_IO_BIT2 0x31e>;
++	};
++
++	pinctrl_pcal6416_21: pcal6416grp {
++		fsl,pins = <IMX95_PAD_XSPI1_DATA3__GPIO5_IO_BIT3 0x31e>;
++	};
++
++	pinctrl_ptn5110: ptn5110grp {
++		fsl,pins = <IMX95_PAD_GPIO_IO34__GPIO5_IO_BIT14 0x31e>;
++	};
++
++	pinctrl_sai1: sai1grp {
++		fsl,pins = <IMX95_PAD_SAI1_RXD0__AONMIX_TOP_SAI1_RX_DATA_BIT0 0x31e
++					IMX95_PAD_SAI1_TXC__AONMIX_TOP_SAI1_TX_BCLK 0x31e
++					IMX95_PAD_SAI1_TXFS__AONMIX_TOP_SAI1_TX_SYNC 0x31e
++					IMX95_PAD_SAI1_TXD0__AONMIX_TOP_SAI1_TX_DATA_BIT0 0x31e>;
++	};
++
++	pinctrl_sai3: sai3grp {
++		fsl,pins = <IMX95_PAD_GPIO_IO17__SAI3_MCLK 0x31e
++					IMX95_PAD_GPIO_IO16__SAI3_TX_BCLK 0x31e
++					IMX95_PAD_GPIO_IO26__SAI3_TX_SYNC 0x31e
++					IMX95_PAD_GPIO_IO20__SAI3_RX_DATA_BIT0 0x31e
++					IMX95_PAD_GPIO_IO19__SAI3_TX_DATA_BIT0 0x31e>;
++	};
++
++	pinctrl_usdhc1: usdhc1grp {
++		fsl,pins = <IMX95_PAD_SD1_CLK__USDHC1_CLK 0x158e
++					IMX95_PAD_SD1_CMD__USDHC1_CMD 0x138e
++					IMX95_PAD_SD1_DATA0__USDHC1_DATA0 0x138e
++					IMX95_PAD_SD1_DATA1__USDHC1_DATA1 0x138e
++					IMX95_PAD_SD1_DATA2__USDHC1_DATA2 0x138e
++					IMX95_PAD_SD1_DATA3__USDHC1_DATA3 0x138e
++					IMX95_PAD_SD1_DATA4__USDHC1_DATA4 0x138e
++					IMX95_PAD_SD1_DATA5__USDHC1_DATA5 0x138e
++					IMX95_PAD_SD1_DATA6__USDHC1_DATA6 0x138e
++					IMX95_PAD_SD1_DATA7__USDHC1_DATA7 0x138e
++					IMX95_PAD_SD1_STROBE__USDHC1_STROBE 0x158e>;
++	};
++
++	pinctrl_usdhc1_100mhz: usdhc1-100mhzgrp {
++		fsl,pins = <IMX95_PAD_SD1_CLK__USDHC1_CLK 0x158e
++					IMX95_PAD_SD1_CMD__USDHC1_CMD 0x138e
++					IMX95_PAD_SD1_DATA0__USDHC1_DATA0 0x138e
++					IMX95_PAD_SD1_DATA1__USDHC1_DATA1 0x138e
++					IMX95_PAD_SD1_DATA2__USDHC1_DATA2 0x138e
++					IMX95_PAD_SD1_DATA3__USDHC1_DATA3 0x138e
++					IMX95_PAD_SD1_DATA4__USDHC1_DATA4 0x138e
++					IMX95_PAD_SD1_DATA5__USDHC1_DATA5 0x138e
++					IMX95_PAD_SD1_DATA6__USDHC1_DATA6 0x138e
++					IMX95_PAD_SD1_DATA7__USDHC1_DATA7 0x138e
++					IMX95_PAD_SD1_STROBE__USDHC1_STROBE 0x158e>;
++	};
++
++	pinctrl_usdhc1_200mhz: usdhc1-200mhzgrp {
++		fsl,pins = <IMX95_PAD_SD1_CLK__USDHC1_CLK 0x15fe
++					IMX95_PAD_SD1_CMD__USDHC1_CMD 0x13fe
++					IMX95_PAD_SD1_DATA0__USDHC1_DATA0 0x13fe
++					IMX95_PAD_SD1_DATA1__USDHC1_DATA1 0x13fe
++					IMX95_PAD_SD1_DATA2__USDHC1_DATA2 0x13fe
++					IMX95_PAD_SD1_DATA3__USDHC1_DATA3 0x13fe
++					IMX95_PAD_SD1_DATA4__USDHC1_DATA4 0x13fe
++					IMX95_PAD_SD1_DATA5__USDHC1_DATA5 0x13fe
++					IMX95_PAD_SD1_DATA6__USDHC1_DATA6 0x13fe
++					IMX95_PAD_SD1_DATA7__USDHC1_DATA7 0x13fe
++					IMX95_PAD_SD1_STROBE__USDHC1_STROBE 0x15fe>;
++	};
++
++	pinctrl_reg_usdhc2_vmmc: regusdhc2vmmcgrp {
++		fsl,pins = <IMX95_PAD_SD2_RESET_B__GPIO3_IO_BIT7 0x31e>;
++	};
++
++	pinctrl_usdhc2_gpio: usdhc2gpiogrp {
++		fsl,pins = <IMX95_PAD_SD2_CD_B__GPIO3_IO_BIT0 0x31e>;
++	};
++
++	pinctrl_usdhc2: usdhc2grp {
++		fsl,pins = <IMX95_PAD_SD2_CLK__USDHC2_CLK 0x158e
++					IMX95_PAD_SD2_CMD__USDHC2_CMD 0x138e
++					IMX95_PAD_SD2_DATA0__USDHC2_DATA0 0x138e
++					IMX95_PAD_SD2_DATA1__USDHC2_DATA1 0x138e
++					IMX95_PAD_SD2_DATA2__USDHC2_DATA2 0x138e
++					IMX95_PAD_SD2_DATA3__USDHC2_DATA3 0x138e
++					IMX95_PAD_SD2_VSELECT__USDHC2_VSELECT 0x51e>;
++	};
++
++	pinctrl_usdhc2_100mhz: usdhc2-100mhzgrp {
++		fsl,pins = <IMX95_PAD_SD2_CLK__USDHC2_CLK 0x158e
++					IMX95_PAD_SD2_CMD__USDHC2_CMD 0x138e
++					IMX95_PAD_SD2_DATA0__USDHC2_DATA0 0x138e
++					IMX95_PAD_SD2_DATA1__USDHC2_DATA1 0x138e
++					IMX95_PAD_SD2_DATA2__USDHC2_DATA2 0x138e
++					IMX95_PAD_SD2_DATA3__USDHC2_DATA3 0x138e
++					IMX95_PAD_SD2_VSELECT__USDHC2_VSELECT 0x51e>;
++	};
++
++	pinctrl_usdhc2_200mhz: usdhc2-200mhzgrp {
++		fsl,pins = <IMX95_PAD_SD2_CLK__USDHC2_CLK 0x15fe
++					IMX95_PAD_SD2_CMD__USDHC2_CMD 0x13fe
++					IMX95_PAD_SD2_DATA0__USDHC2_DATA0 0x13fe
++					IMX95_PAD_SD2_DATA1__USDHC2_DATA1 0x13fe
++					IMX95_PAD_SD2_DATA2__USDHC2_DATA2 0x13fe
++					IMX95_PAD_SD2_DATA3__USDHC2_DATA3 0x13fe
++					IMX95_PAD_SD2_VSELECT__USDHC2_VSELECT 0x51e>;
++	};
++
++	pinctrl_usdhc3: usdhc3grp {
++		fsl,pins = <IMX95_PAD_SD3_CLK__USDHC3_CLK 0x158e
++					IMX95_PAD_SD3_CMD__USDHC3_CMD 0x138e
++					IMX95_PAD_SD3_DATA0__USDHC3_DATA0 0x138e
++					IMX95_PAD_SD3_DATA1__USDHC3_DATA1 0x138e
++					IMX95_PAD_SD3_DATA2__USDHC3_DATA2 0x138e
++					IMX95_PAD_SD3_DATA3__USDHC3_DATA3 0x138e
++					IMX95_PAD_SAI1_TXC__AONMIX_TOP_GPIO1_IO_BIT12 0x31e>;
++	};
++};
++
++&vpuctrl {
++	boot = <&vpu_boot>;
++	sram = <&sram1>;
++};
++
++&wdog3 {
++	fsl,ext-reset-output;
++	status = "disabled";
++};
++
++&pcie0 {
++	pinctrl-names = "default";
++	fsl,refclk-pad-mode = <IMX8_PCIE_REFCLK_PAD_OUTPUT>;
++	reset-gpio = <&i2c6_gpio_expander_20 11 GPIO_ACTIVE_LOW>;
++	vpcie-supply = <&reg_pcie0>;
++	status = "disabled";
++};
++
++&pcie1 {
++	pinctrl-names = "default";
++	fsl,refclk-pad-mode = <IMX8_PCIE_REFCLK_PAD_OUTPUT>;
++	reset-gpio = <&i2c6_gpio_expander_20 12 GPIO_ACTIVE_LOW>;
++	vpcie-supply = <&reg_slot_pwr>;
++	status = "disabled";
++};
++
++&pcie1_ep {
++	pinctrl-names = "default";
++	fsl,refclk-pad-mode = <IMX8_PCIE_REFCLK_PAD_OUTPUT>;
++	vpcie-supply = <&reg_slot_pwr>;
++	status = "disabled";
++};
++
++&sai3 {
++	#sound-dai-cells = <0>;
++	pinctrl-names = "default";
++	pinctrl-0 = <&pinctrl_sai3>;
++	assigned-clocks = <&scmi_clk IMX95_CLK_SAI3>;
++	assigned-clock-parents = <&scmi_clk IMX95_CLK_AUDIOPLL1>;
++	assigned-clock-rates = <12288000>;
++	fsl,sai-mclk-direction-output;
++	status = "okay";
++};
++
++&gpio1 {
++	gpio-line-names = "", "", "", "", "", "", "", "",
++					  "", "", "", "", "WIFI_WAKE#", "", "", "",
++					  "", "", "", "", "", "", "", "",
++					  "", "", "", "", "", "", "", "";
++};
++
++&gpio2 {
++	gpio-line-names = "", "", "", "", "", "", "", "",
++					  "", "", "", "", "", "", "", "",
++					  "", "", "", "", "", "", "", "",
++					  "", "", "", "", "", "", "", "";
++};
++
++&gpio3 {
++	status = "okay";
++	gpio-line-names = "", "", "", "", "", "", "", "",
++					  "", "", "", "", "", "", "", "",
++					  "", "", "", "", "", "", "", "",
++					  "", "", "", "", "", "", "", "";
++};
++
++&gpio4 {
++	gpio-line-names = "", "", "", "", "", "", "", "",
++					  "", "", "", "", "", "", "", "",
++					  "", "", "", "", "", "", "", "",
++					  "", "", "", "", "", "", "", "";
++};
++
++&gpio5 {
++	gpio-line-names = "enet1_mdc", "enet1_mdio", "", "", "", "", "", "",
++					  "", "", "", "", "", "", "", "",
++					  "", "", "", "", "", "", "", "",
++					  "", "", "", "", "", "", "", "";
++
++	ENET1_MDC {
++		gpio-hog;
++		input;
++		gpios = <0 0>;
++		line-name = "enet1_mdc";
++	};
++
++	ENET1_MDIO {
++		gpio-hog;
++		input;
++		gpios = <1 0>;
++		line-name = "enet1_mdio";
++	};
++};
+diff --git a/arch/arm64/configs/imx95_smarcore_defconfig b/arch/arm64/configs/imx95_smarcore_defconfig
+new file mode 100644
+index 000000000000..487a3f537501
+--- /dev/null
++++ b/arch/arm64/configs/imx95_smarcore_defconfig
+@@ -0,0 +1,1210 @@
++CONFIG_SYSVIPC=y
++CONFIG_POSIX_MQUEUE=y
++CONFIG_NO_HZ_IDLE=y
++CONFIG_HIGH_RES_TIMERS=y
++CONFIG_BPF_SYSCALL=y
++CONFIG_BPF_JIT=y
++CONFIG_PREEMPT=y
++CONFIG_IRQ_TIME_ACCOUNTING=y
++CONFIG_BSD_PROCESS_ACCT=y
++CONFIG_BSD_PROCESS_ACCT_V3=y
++CONFIG_TASKSTATS=y
++CONFIG_TASK_XACCT=y
++CONFIG_TASK_IO_ACCOUNTING=y
++CONFIG_IKCONFIG=y
++CONFIG_IKCONFIG_PROC=y
++CONFIG_NUMA_BALANCING=y
++CONFIG_MEMCG=y
++CONFIG_BLK_CGROUP=y
++CONFIG_CFS_BANDWIDTH=y
++CONFIG_CGROUP_PIDS=y
++CONFIG_CGROUP_FREEZER=y
++CONFIG_CGROUP_HUGETLB=y
++CONFIG_CPUSETS=y
++CONFIG_CGROUP_DEVICE=y
++CONFIG_CGROUP_CPUACCT=y
++CONFIG_CGROUP_PERF=y
++CONFIG_CGROUP_BPF=y
++CONFIG_USER_NS=y
++CONFIG_SCHED_AUTOGROUP=y
++CONFIG_RELAY=y
++CONFIG_BLK_DEV_INITRD=y
++CONFIG_KALLSYMS_ALL=y
++CONFIG_PROFILING=y
++CONFIG_KEXEC=y
++CONFIG_KEXEC_FILE=y
++CONFIG_ARCH_KEEMBAY=y
++CONFIG_ARCH_NXP=y
++CONFIG_ARCH_LAYERSCAPE=y
++CONFIG_ARCH_MXC=y
++CONFIG_ARCH_S32=y
++CONFIG_SOC_S32V234=y
++CONFIG_ARM64_VA_BITS_48=y
++CONFIG_SCHED_MC=y
++CONFIG_SCHED_SMT=y
++CONFIG_NUMA=y
++CONFIG_XEN=y
++CONFIG_ARCH_FORCE_MAX_ORDER=13
++CONFIG_COMPAT=y
++CONFIG_RANDOMIZE_BASE=y
++CONFIG_PM_DEBUG=y
++CONFIG_PM_TEST_SUSPEND=y
++CONFIG_WQ_POWER_EFFICIENT_DEFAULT=y
++CONFIG_ENERGY_MODEL=y
++CONFIG_ARM_PSCI_CPUIDLE=y
++CONFIG_CPU_FREQ=y
++CONFIG_CPU_FREQ_STAT=y
++CONFIG_CPU_FREQ_DEFAULT_GOV_ONDEMAND=y
++CONFIG_CPU_FREQ_GOV_POWERSAVE=y
++CONFIG_CPU_FREQ_GOV_USERSPACE=y
++CONFIG_CPU_FREQ_GOV_CONSERVATIVE=y
++CONFIG_CPU_FREQ_GOV_SCHEDUTIL=y
++CONFIG_CPUFREQ_DT=y
++CONFIG_ARM_SCPI_CPUFREQ=y
++CONFIG_ARM_IMX_CPUFREQ_DT=y
++CONFIG_ARM_SCMI_CPUFREQ=y
++CONFIG_QORIQ_CPUFREQ=y
++CONFIG_ACPI_CPPC_CPUFREQ=m
++CONFIG_ACPI=y
++CONFIG_ACPI_APEI=y
++CONFIG_ACPI_APEI_GHES=y
++CONFIG_ACPI_APEI_MEMORY_FAILURE=y
++CONFIG_ACPI_APEI_EINJ=y
++CONFIG_VIRTUALIZATION=y
++CONFIG_KVM=y
++CONFIG_JUMP_LABEL=y
++CONFIG_MODULES=y
++CONFIG_MODULE_UNLOAD=y
++CONFIG_MODVERSIONS=y
++CONFIG_BLK_DEV_THROTTLING=y
++# CONFIG_CORE_DUMP_DEFAULT_ELF_HEADERS is not set
++# CONFIG_COMPAT_BRK is not set
++CONFIG_KSM=y
++CONFIG_MEMORY_FAILURE=y
++CONFIG_TRANSPARENT_HUGEPAGE=y
++CONFIG_NET=y
++CONFIG_PACKET=y
++CONFIG_TLS=y
++CONFIG_TLS_DEVICE=y
++CONFIG_XFRM_USER=m
++CONFIG_IP_MULTICAST=y
++CONFIG_IP_PNP=y
++CONFIG_IP_PNP_DHCP=y
++CONFIG_IP_PNP_BOOTP=y
++CONFIG_INET_ESP=m
++CONFIG_IPV6_SIT=m
++CONFIG_NETFILTER=y
++CONFIG_BRIDGE_NETFILTER=m
++CONFIG_NETFILTER_NETLINK_OSF=m
++CONFIG_NF_CONNTRACK=m
++CONFIG_NF_CONNTRACK_EVENTS=y
++CONFIG_NF_CONNTRACK_FTP=m
++CONFIG_NF_CONNTRACK_TFTP=m
++CONFIG_NF_TABLES=y
++CONFIG_NF_TABLES_INET=y
++CONFIG_NF_TABLES_NETDEV=y
++CONFIG_NFT_CT=m
++CONFIG_NFT_MASQ=m
++CONFIG_NFT_NAT=m
++CONFIG_NFT_COMPAT=m
++CONFIG_NFT_DUP_NETDEV=m
++CONFIG_NFT_FWD_NETDEV=m
++CONFIG_NF_FLOW_TABLE=m
++CONFIG_NETFILTER_XT_MARK=m
++CONFIG_NETFILTER_XT_TARGET_CHECKSUM=m
++CONFIG_NETFILTER_XT_TARGET_LOG=m
++CONFIG_NETFILTER_XT_MATCH_ADDRTYPE=m
++CONFIG_NETFILTER_XT_MATCH_BPF=m
++CONFIG_NETFILTER_XT_MATCH_CONNTRACK=m
++CONFIG_NETFILTER_XT_MATCH_IPVS=m
++CONFIG_IP_VS=m
++CONFIG_IP_VS_PROTO_TCP=y
++CONFIG_IP_VS_PROTO_UDP=y
++CONFIG_IP_VS_RR=m
++CONFIG_IP_VS_NFCT=y
++CONFIG_NF_SOCKET_IPV4=m
++CONFIG_NF_TPROXY_IPV4=m
++CONFIG_IP_NF_IPTABLES=m
++CONFIG_IP_NF_FILTER=m
++CONFIG_IP_NF_TARGET_REJECT=m
++CONFIG_IP_NF_NAT=m
++CONFIG_IP_NF_TARGET_MASQUERADE=m
++CONFIG_IP_NF_TARGET_REDIRECT=m
++CONFIG_IP_NF_MANGLE=m
++CONFIG_NF_SOCKET_IPV6=m
++CONFIG_NF_TPROXY_IPV6=m
++CONFIG_IP6_NF_IPTABLES=m
++CONFIG_IP6_NF_FILTER=m
++CONFIG_IP6_NF_TARGET_REJECT=m
++CONFIG_IP6_NF_MANGLE=m
++CONFIG_IP6_NF_NAT=m
++CONFIG_IP6_NF_TARGET_MASQUERADE=m
++CONFIG_NF_TABLES_BRIDGE=m
++CONFIG_BRIDGE_NF_EBTABLES=m
++CONFIG_BRIDGE=y
++CONFIG_BRIDGE_VLAN_FILTERING=y
++CONFIG_NET_DSA=y
++CONFIG_VLAN_8021Q_GVRP=y
++CONFIG_VLAN_8021Q_MVRP=y
++CONFIG_LLC2=y
++CONFIG_NET_SCHED=y
++CONFIG_NET_SCH_MULTIQ=y
++CONFIG_NET_SCH_CBS=y
++CONFIG_NET_SCH_ETF=y
++CONFIG_NET_SCH_TAPRIO=y
++CONFIG_NET_SCH_MQPRIO=y
++CONFIG_NET_SCH_INGRESS=y
++CONFIG_NET_CLS_BASIC=y
++CONFIG_NET_CLS_U32=y
++CONFIG_NET_CLS_CGROUP=m
++CONFIG_NET_CLS_FLOWER=y
++CONFIG_NET_CLS_ACT=y
++CONFIG_NET_ACT_POLICE=y
++CONFIG_NET_ACT_GACT=y
++CONFIG_NET_ACT_MIRRED=y
++CONFIG_NET_ACT_SKBEDIT=y
++CONFIG_NET_ACT_GATE=y
++CONFIG_TSN=y
++CONFIG_VSOCKETS=y
++CONFIG_VIRTIO_VSOCKETS=y
++CONFIG_QRTR=m
++CONFIG_QRTR_SMD=m
++CONFIG_QRTR_TUN=m
++CONFIG_CGROUP_NET_PRIO=y
++CONFIG_NET_PKTGEN=m
++CONFIG_CAN=m
++CONFIG_BT=y
++CONFIG_BT_RFCOMM=y
++CONFIG_BT_RFCOMM_TTY=y
++CONFIG_BT_BNEP=y
++CONFIG_BT_BNEP_MC_FILTER=y
++CONFIG_BT_BNEP_PROTO_FILTER=y
++CONFIG_BT_HIDP=y
++CONFIG_BT_LEDS=y
++# CONFIG_BT_DEBUGFS is not set
++CONFIG_BT_HCIBTUSB=m
++CONFIG_BT_HCIUART=y
++CONFIG_BT_HCIUART_BCSP=y
++CONFIG_BT_HCIUART_ATH3K=y
++CONFIG_BT_HCIUART_LL=y
++CONFIG_BT_HCIUART_3WIRE=y
++CONFIG_BT_HCIUART_BCM=y
++CONFIG_BT_HCIUART_QCA=y
++CONFIG_BT_HCIVHCI=y
++CONFIG_BT_NXPUART=m
++CONFIG_CFG80211=m
++CONFIG_NL80211_TESTMODE=y
++CONFIG_CFG80211_WEXT=y
++CONFIG_MAC80211=m
++CONFIG_MAC80211_LEDS=y
++CONFIG_NET_9P=y
++CONFIG_NET_9P_VIRTIO=y
++CONFIG_NFC=m
++CONFIG_NFC_NCI=m
++CONFIG_NFC_S3FWRN5_I2C=m
++CONFIG_PCI=y
++CONFIG_PCIEPORTBUS=y
++CONFIG_PCI_IOV=y
++CONFIG_PCI_PASID=y
++CONFIG_HOTPLUG_PCI=y
++CONFIG_HOTPLUG_PCI_ACPI=y
++CONFIG_PCIE_ALTERA=y
++CONFIG_PCIE_ALTERA_MSI=y
++CONFIG_PCI_HOST_THUNDER_PEM=y
++CONFIG_PCI_HOST_THUNDER_ECAM=y
++CONFIG_PCI_HOST_GENERIC=y
++CONFIG_PCI_XGENE=y
++CONFIG_PCI_NXP_RPMSG=y
++CONFIG_PCI_MESON=m
++CONFIG_PCI_IMX6_HOST=y
++CONFIG_PCI_IMX6_EP=y
++CONFIG_PCI_LAYERSCAPE=y
++CONFIG_PCI_HISI=y
++CONFIG_PCIE_KIRIN=y
++CONFIG_PCIE_LAYERSCAPE_GEN4=y
++CONFIG_PCI_ENDPOINT=y
++CONFIG_PCI_ENDPOINT_CONFIGFS=y
++CONFIG_PCI_EPF_TEST=y
++CONFIG_DEVTMPFS=y
++CONFIG_DEVTMPFS_MOUNT=y
++CONFIG_VEXPRESS_CONFIG=y
++CONFIG_FSL_MC_UAPI_SUPPORT=y
++CONFIG_ARM_SCMI_PROTOCOL=y
++CONFIG_ARM_SCMI_RAW_MODE_SUPPORT=y
++CONFIG_ARM_SCMI_RAW_MODE_SUPPORT_COEX=y
++CONFIG_ARM_SCMI_POWER_CONTROL=y
++CONFIG_ARM_SCPI_PROTOCOL=y
++CONFIG_EFI_CAPSULE_LOADER=y
++CONFIG_IMX_DSP=y
++CONFIG_IMX_SCU=y
++CONFIG_IMX_SEC_ENCLAVE=y
++CONFIG_GNSS=m
++CONFIG_GNSS_MTK_SERIAL=m
++CONFIG_MTD=y
++CONFIG_MTD_CMDLINE_PARTS=y
++CONFIG_MTD_BLOCK=y
++CONFIG_MTD_CFI=y
++CONFIG_MTD_CFI_ADV_OPTIONS=y
++CONFIG_MTD_CFI_INTELEXT=y
++CONFIG_MTD_CFI_AMDSTD=y
++CONFIG_MTD_CFI_STAA=y
++CONFIG_MTD_PHYSMAP=y
++CONFIG_MTD_PHYSMAP_OF=y
++CONFIG_MTD_DATAFLASH=y
++CONFIG_MTD_SST25L=y
++CONFIG_MTD_RAW_NAND=y
++CONFIG_MTD_NAND_DENALI_DT=y
++CONFIG_MTD_NAND_GPMI_NAND=y
++CONFIG_MTD_SPI_NAND=y
++CONFIG_MTD_SPI_NOR=y
++# CONFIG_MTD_SPI_NOR_USE_4K_SECTORS is not set
++CONFIG_MTD_UBI=y
++CONFIG_BLK_DEV_LOOP=y
++CONFIG_BLK_DEV_NBD=m
++CONFIG_XEN_BLKDEV_BACKEND=m
++CONFIG_VIRTIO_BLK=y
++CONFIG_BLK_DEV_NVME=y
++CONFIG_SRAM=y
++CONFIG_PCI_ENDPOINT_TEST=y
++CONFIG_EEPROM_AT24=m
++CONFIG_EEPROM_AT25=m
++CONFIG_UACCE=m
++# CONFIG_SCSI_PROC_FS is not set
++CONFIG_BLK_DEV_SD=y
++CONFIG_SCSI_SAS_ATA=y
++CONFIG_SCSI_HISI_SAS=y
++CONFIG_SCSI_HISI_SAS_PCI=y
++CONFIG_MEGARAID_SAS=y
++CONFIG_SCSI_MPT3SAS=m
++CONFIG_ATA=y
++CONFIG_SATA_AHCI=y
++CONFIG_SATA_AHCI_PLATFORM=y
++CONFIG_AHCI_IMX=y
++CONFIG_AHCI_CEVA=y
++CONFIG_AHCI_QORIQ=y
++CONFIG_SATA_SIL24=y
++CONFIG_PATA_OF_PLATFORM=y
++CONFIG_MD=y
++CONFIG_BLK_DEV_MD=m
++CONFIG_BLK_DEV_DM=m
++CONFIG_DM_CRYPT=m
++CONFIG_DM_MIRROR=m
++CONFIG_DM_ZERO=m
++CONFIG_NETDEVICES=y
++CONFIG_DUMMY=m
++CONFIG_MACVLAN=m
++CONFIG_MACVTAP=m
++CONFIG_IPVLAN=m
++CONFIG_VXLAN=m
++CONFIG_TUN=y
++CONFIG_VETH=m
++CONFIG_VIRTIO_NET=y
++CONFIG_NET_DSA_MSCC_FELIX=m
++CONFIG_NET_DSA_SJA1105=m
++CONFIG_NET_DSA_SJA1105_PTP=y
++CONFIG_NET_DSA_SJA1105_TAS=y
++CONFIG_NET_DSA_SJA1105_VL=y
++CONFIG_NET_DSA_NETC_SWITCH=y
++CONFIG_AMD_XGBE=y
++CONFIG_ATL1C=m
++CONFIG_BCMGENET=m
++CONFIG_BNX2X=m
++CONFIG_SYSTEMPORT=m
++CONFIG_MACB=y
++CONFIG_THUNDER_NIC_PF=y
++CONFIG_FEC=y
++CONFIG_FEC_UIO=y
++CONFIG_FSL_FMAN=y
++CONFIG_FSL_DPAA_ETH=y
++CONFIG_FSL_DPAA2_ETH=y
++CONFIG_FSL_DPAA2_MAC=y
++CONFIG_FSL_DPAA2_SWITCH=y
++CONFIG_FSL_ENETC=y
++CONFIG_FSL_ENETC4=y
++CONFIG_FSL_ENETC_VF=y
++CONFIG_NXP_NETC_BLK_CTRL=y
++CONFIG_FSL_ENETC_QOS=y
++CONFIG_HIX5HD2_GMAC=y
++CONFIG_HNS_DSAF=y
++CONFIG_HNS_ENET=y
++CONFIG_HNS3=y
++CONFIG_HNS3_HCLGE=y
++CONFIG_HNS3_ENET=y
++CONFIG_E1000=y
++CONFIG_E1000E=y
++CONFIG_IGB=y
++CONFIG_IGBVF=y
++CONFIG_MVMDIO=y
++CONFIG_SKY2=y
++CONFIG_MLX4_EN=m
++CONFIG_MLX5_CORE=m
++CONFIG_MLX5_CORE_EN=y
++CONFIG_MSCC_OCELOT_SWITCH=y
++CONFIG_QCOM_EMAC=m
++CONFIG_RMNET=m
++CONFIG_SMC91X=y
++CONFIG_SMSC911X=y
++CONFIG_STMMAC_ETH=y
++CONFIG_DWMAC_GENERIC=m
++CONFIG_SFP=m
++CONFIG_ADIN_PHY=y
++CONFIG_AQUANTIA_PHY=y
++CONFIG_BROADCOM_PHY=m
++CONFIG_BCM54140_PHY=m
++CONFIG_MARVELL_PHY=m
++CONFIG_MARVELL_10G_PHY=m
++CONFIG_MAXLINEAR_GPHY=y
++CONFIG_MAXLINEAR_8611X_PHY=y
++CONFIG_MICREL_PHY=y
++CONFIG_MICROSEMI_PHY=y
++CONFIG_NXP_C45_TJA11XX_PHY=y
++CONFIG_NXP_TJA11XX_PHY=y
++CONFIG_AT803X_PHY=y
++CONFIG_REALTEK_PHY=y
++CONFIG_ROCKCHIP_PHY=y
++CONFIG_DP83848_PHY=y
++CONFIG_VITESSE_PHY=y
++CONFIG_CAN_FLEXCAN=m
++CONFIG_CAN_MCP251XFD=m
++CONFIG_CAN_MCP251XFD_SANITY=y
++CONFIG_MDIO_BITBANG=y
++CONFIG_MDIO_BUS_MUX_MULTIPLEXER=y
++CONFIG_MDIO_BUS_MUX_MMIOREG=y
++CONFIG_USB_PEGASUS=m
++CONFIG_USB_RTL8150=m
++CONFIG_USB_RTL8152=y
++CONFIG_USB_LAN78XX=m
++CONFIG_USB_USBNET=y
++CONFIG_USB_NET_AX8817X=m
++CONFIG_USB_NET_AX88179_178A=m
++CONFIG_USB_NET_CDCETHER=m
++CONFIG_USB_NET_CDC_NCM=m
++CONFIG_USB_NET_DM9601=m
++CONFIG_USB_NET_SR9800=m
++CONFIG_USB_NET_SMSC75XX=m
++CONFIG_USB_NET_SMSC95XX=m
++CONFIG_USB_NET_NET1080=m
++CONFIG_USB_NET_PLUSB=m
++CONFIG_USB_NET_MCS7830=m
++CONFIG_USB_NET_CDC_SUBSET=m
++CONFIG_USB_NET_ZAURUS=m
++CONFIG_BRCMFMAC=m
++CONFIG_WL18XX=m
++CONFIG_WLCORE_SDIO=m
++CONFIG_XEN_NETDEV_BACKEND=m
++CONFIG_IVSHMEM_NET=y
++CONFIG_INPUT_EVDEV=y
++CONFIG_KEYBOARD_ADC=m
++CONFIG_KEYBOARD_GPIO=y
++CONFIG_KEYBOARD_RPMSG=y
++CONFIG_KEYBOARD_SNVS_PWRKEY=y
++CONFIG_KEYBOARD_IMX_SC_KEY=y
++CONFIG_KEYBOARD_CROS_EC=y
++CONFIG_INPUT_TOUCHSCREEN=y
++CONFIG_TOUCHSCREEN_ADS7846=m
++CONFIG_TOUCHSCREEN_ATMEL_MXT=m
++CONFIG_TOUCHSCREEN_EXC3000=y
++CONFIG_TOUCHSCREEN_GOODIX=m
++CONFIG_TOUCHSCREEN_ILITEK=y
++CONFIG_TOUCHSCREEN_EDT_FT5X06=y
++CONFIG_TOUCHSCREEN_FTS=m
++CONFIG_TOUCHSCREEN_SYNAPTICS_DSX_I2C=m
++CONFIG_INPUT_MISC=y
++CONFIG_INPUT_BBNSM_PWRKEY=y
++CONFIG_INPUT_PWM_BEEPER=m
++CONFIG_INPUT_PWM_VIBRA=m
++# CONFIG_SERIO_SERPORT is not set
++CONFIG_SERIO_AMBAKMI=y
++CONFIG_LEGACY_PTY_COUNT=16
++CONFIG_SERIAL_8250=y
++CONFIG_SERIAL_8250_CONSOLE=y
++CONFIG_SERIAL_8250_EXTENDED=y
++CONFIG_SERIAL_8250_SHARE_IRQ=y
++CONFIG_SERIAL_8250_DW=y
++CONFIG_SERIAL_OF_PLATFORM=y
++CONFIG_SERIAL_AMBA_PL011=y
++CONFIG_SERIAL_AMBA_PL011_CONSOLE=y
++CONFIG_SERIAL_IMX=y
++CONFIG_SERIAL_IMX_CONSOLE=y
++CONFIG_SERIAL_XILINX_PS_UART=y
++CONFIG_SERIAL_XILINX_PS_UART_CONSOLE=y
++CONFIG_SERIAL_FSL_LPUART=y
++CONFIG_SERIAL_FSL_LPUART_CONSOLE=y
++CONFIG_SERIAL_FSL_LINFLEXUART=y
++CONFIG_SERIAL_FSL_LINFLEXUART_CONSOLE=y
++CONFIG_RPMSG_TTY=m
++CONFIG_SERIAL_DEV_BUS=y
++CONFIG_VIRTIO_CONSOLE=y
++CONFIG_IPMI_HANDLER=m
++CONFIG_IPMI_DEVICE_INTERFACE=m
++CONFIG_IPMI_SI=m
++CONFIG_TCG_TPM=y
++CONFIG_TCG_TIS_I2C=y
++CONFIG_TCG_TIS_I2C_INFINEON=y
++CONFIG_I2C_CHARDEV=y
++CONFIG_I2C_MUX=y
++CONFIG_I2C_MUX_GPIO=y
++CONFIG_I2C_MUX_PCA954x=y
++CONFIG_I2C_GPIO=m
++CONFIG_I2C_IMX=y
++CONFIG_I2C_IMX_LPI2C=y
++CONFIG_I2C_RK3X=y
++CONFIG_I2C_RPBUS=y
++CONFIG_I2C_CROS_EC_TUNNEL=y
++CONFIG_I2C_SLAVE_EEPROM=y
++CONFIG_I3C=y
++CONFIG_SVC_I3C_MASTER=y
++CONFIG_SPI=y
++CONFIG_SPI_CADENCE_QUADSPI=y
++CONFIG_SPI_DESIGNWARE=m
++CONFIG_SPI_DW_DMA=y
++CONFIG_SPI_DW_MMIO=m
++CONFIG_SPI_FSL_LPSPI=y
++CONFIG_SPI_FSL_QUADSPI=y
++CONFIG_SPI_NXP_FLEXSPI=y
++CONFIG_SPI_NXP_XSPI=y
++CONFIG_SPI_IMX=y
++CONFIG_SPI_FSL_DSPI=y
++CONFIG_SPI_PL022=y
++CONFIG_SPI_SPIDEV=y
++CONFIG_SPI_SLAVE=y
++CONFIG_SPI_SLAVE_TIME=y
++CONFIG_SPI_SLAVE_SYSTEM_CONTROL=y
++CONFIG_SPMI=y
++CONFIG_PPS_CLIENT_GPIO=y
++CONFIG_PINCTRL_MAX77620=y
++CONFIG_PINCTRL_SCMI=y
++CONFIG_PINCTRL_SINGLE=y
++CONFIG_PINCTRL_IMX_SCMI=y
++CONFIG_PINCTRL_IMX8MM=y
++CONFIG_PINCTRL_IMX8MN=y
++CONFIG_PINCTRL_IMX8MP=y
++CONFIG_PINCTRL_IMX8MQ=y
++CONFIG_PINCTRL_IMX8QM=y
++CONFIG_PINCTRL_IMX8QXP=y
++CONFIG_PINCTRL_IMX8DXL=y
++CONFIG_PINCTRL_IMX8ULP=y
++CONFIG_PINCTRL_IMX93=y
++CONFIG_PINCTRL_S32V234=y
++CONFIG_GPIO_ALTERA=m
++CONFIG_GPIO_DWAPB=y
++CONFIG_GPIO_IMX_RPMSG=y
++CONFIG_GPIO_MB86S7X=y
++CONFIG_GPIO_MPC8XXX=y
++CONFIG_GPIO_MXC=y
++CONFIG_GPIO_PL061=y
++CONFIG_GPIO_WCD934X=m
++CONFIG_GPIO_XGENE=y
++CONFIG_GPIO_MAX732X=y
++CONFIG_GPIO_PCA953X=y
++CONFIG_GPIO_PCA953X_IRQ=y
++CONFIG_GPIO_PCA9570=y
++CONFIG_GPIO_PCF857X=y
++CONFIG_GPIO_ADP5585=y
++CONFIG_GPIO_BD9571MWV=m
++CONFIG_GPIO_MAX77620=y
++CONFIG_GPIO_SL28CPLD=m
++CONFIG_POWER_RESET_XGENE=y
++CONFIG_POWER_RESET_SYSCON=y
++CONFIG_SYSCON_REBOOT_MODE=y
++CONFIG_BATTERY_SBS=m
++CONFIG_BATTERY_BQ27XXX=y
++CONFIG_BATTERY_MAX17042=m
++CONFIG_CHARGER_BQ25890=m
++CONFIG_CHARGER_BQ25980=m
++CONFIG_SENSORS_ARM_SCMI=y
++CONFIG_SENSORS_ARM_SCPI=y
++CONFIG_SENSORS_FP9931=y
++CONFIG_SENSORS_LM90=m
++CONFIG_SENSORS_PWM_FAN=m
++CONFIG_SENSORS_SL28CPLD=m
++CONFIG_SENSORS_EMC2305=m
++CONFIG_SENSORS_INA2XX=m
++CONFIG_SENSORS_INA3221=m
++CONFIG_THERMAL_GOV_POWER_ALLOCATOR=y
++CONFIG_CPU_THERMAL=y
++CONFIG_THERMAL_EMULATION=y
++CONFIG_IMX_SC_THERMAL=y
++CONFIG_IMX8MM_THERMAL=y
++CONFIG_IMX91_THERMAL=y
++CONFIG_QORIQ_THERMAL=y
++CONFIG_WATCHDOG=y
++CONFIG_SL28CPLD_WATCHDOG=m
++CONFIG_ARM_SP805_WATCHDOG=y
++CONFIG_ARM_SBSA_WATCHDOG=y
++CONFIG_DW_WATCHDOG=y
++CONFIG_IMX2_WDT=y
++CONFIG_IMX_SC_WDT=y
++CONFIG_IMX7ULP_WDT=y
++CONFIG_ARM_SMC_WATCHDOG=y
++CONFIG_XEN_WDT=y
++CONFIG_MFD_ADP5585=y
++CONFIG_MFD_BD9571MWV=y
++CONFIG_MFD_AXP20X_I2C=y
++CONFIG_MFD_IMX_FLEXIO=y
++CONFIG_MFD_HI6421_PMIC=y
++CONFIG_MFD_FP9931=y
++CONFIG_MFD_MAX77620=y
++CONFIG_MFD_MAX96752=y
++CONFIG_MFD_MAX96752_I2C=y
++CONFIG_MFD_MAX96789=y
++CONFIG_MFD_MAX96789_I2C=y
++CONFIG_MFD_MT6397=y
++CONFIG_MFD_SEC_CORE=y
++CONFIG_MFD_SL28CPLD=y
++CONFIG_MFD_ROHM_BD718XX=y
++CONFIG_MFD_WCD934X=m
++CONFIG_REGULATOR_FIXED_VOLTAGE=y
++CONFIG_REGULATOR_AXP20X=y
++CONFIG_REGULATOR_BD718XX=y
++CONFIG_REGULATOR_BD9571MWV=y
++CONFIG_REGULATOR_FAN53555=y
++CONFIG_REGULATOR_GPIO=y
++CONFIG_REGULATOR_HI6421V530=y
++CONFIG_REGULATOR_MAX77620=y
++CONFIG_REGULATOR_MAX8973=y
++CONFIG_REGULATOR_FP9931=y
++CONFIG_REGULATOR_MP8859=y
++CONFIG_REGULATOR_MT6358=y
++CONFIG_REGULATOR_MT6397=y
++CONFIG_REGULATOR_PCA9450=y
++CONFIG_REGULATOR_PF9453=y
++CONFIG_REGULATOR_PF0900=y
++CONFIG_REGULATOR_PF8X00=y
++CONFIG_REGULATOR_PFUZE100=y
++CONFIG_REGULATOR_PWM=y
++CONFIG_REGULATOR_QCOM_SPMI=y
++CONFIG_REGULATOR_S2MPS11=y
++CONFIG_REGULATOR_TPS65132=m
++CONFIG_REGULATOR_VCTRL=m
++CONFIG_RC_CORE=m
++CONFIG_RC_DECODERS=y
++CONFIG_IR_IMON_DECODER=m
++CONFIG_IR_JVC_DECODER=m
++CONFIG_IR_MCE_KBD_DECODER=m
++CONFIG_IR_NEC_DECODER=m
++CONFIG_IR_RC5_DECODER=m
++CONFIG_IR_RC6_DECODER=m
++CONFIG_IR_RCMM_DECODER=m
++CONFIG_IR_SANYO_DECODER=m
++CONFIG_IR_SHARP_DECODER=m
++CONFIG_IR_SONY_DECODER=m
++CONFIG_IR_XMP_DECODER=m
++CONFIG_RC_DEVICES=y
++CONFIG_IR_GPIO_CIR=m
++CONFIG_MEDIA_SUPPORT=y
++CONFIG_MEDIA_CAMERA_SUPPORT=y
++CONFIG_MEDIA_ANALOG_TV_SUPPORT=y
++CONFIG_MEDIA_DIGITAL_TV_SUPPORT=y
++CONFIG_MEDIA_SDR_SUPPORT=y
++CONFIG_MEDIA_PLATFORM_SUPPORT=y
++# CONFIG_DVB_NET is not set
++CONFIG_MEDIA_USB_SUPPORT=y
++CONFIG_USB_VIDEO_CLASS=m
++CONFIG_V4L_PLATFORM_DRIVERS=y
++CONFIG_SDR_PLATFORM_DRIVERS=y
++CONFIG_V4L_MEM2MEM_DRIVERS=y
++CONFIG_VIDEO_MXC_CAPTURE=y
++CONFIG_MXC_MIPI_CSI=y
++CONFIG_MXC_CAMERA_OV5640_MIPI_V2=y
++CONFIG_VIDEO_AMPHION_VPU=y
++CONFIG_VIDEO_IMX7_CSI=m
++CONFIG_VIDEO_IMX8MQ_MIPI_CSI2=m
++CONFIG_VIDEO_IMX_CSI_FORMATTER=y
++CONFIG_VIDEO_IMX_MIPI_CSIS=m
++CONFIG_VIDEO_DWC_MIPI_CSIS=y
++CONFIG_VIDEO_IMX_PARALLEL_CSI=y
++CONFIG_VIDEO_IMX8_ISI=y
++CONFIG_VIDEO_IMX8_ISI_M2M=y
++CONFIG_VIDEO_IMX8_JPEG=m
++CONFIG_VIDEO_NXP_NEOISP=m
++CONFIG_VIDEO_MHDP_HDMIRX=y
++CONFIG_VIDEO_MHDP_HDMIRX_CEC=y
++CONFIG_VIDEO_HANTRO=m
++CONFIG_VIDEO_IMX219=m
++CONFIG_VIDEO_MT9M114X=y
++CONFIG_VIDEO_OV5640=y
++CONFIG_VIDEO_OV5645=m
++CONFIG_VIDEO_AP1302=m
++CONFIG_VIDEO_OX03C10_DRV=m
++CONFIG_VIDEO_RDACM20=y
++CONFIG_VIDEO_OX05B1S=m
++CONFIG_VIDEO_MAX9286=y
++CONFIG_VIDEO_MAX96724=m
++CONFIG_VIDEO_MX95MBCAM=m
++CONFIG_VIDEO_DS90UB953=m
++CONFIG_VIDEO_DS90UB960=m
++CONFIG_IMX_DPU_CORE=y
++CONFIG_IMX8MM_LCDIF_CORE=y
++CONFIG_IMX_LCDIFV3_CORE=y
++CONFIG_DRM=y
++CONFIG_DRM_I2C_NXP_TDA998X=m
++CONFIG_DRM_MALI_DISPLAY=m
++CONFIG_DRM_NOUVEAU=m
++CONFIG_DRM_VIRTIO_GPU=y
++CONFIG_DRM_PANEL_BOE_TV101WUM_NL6=y
++CONFIG_DRM_PANEL_LVDS=y
++CONFIG_DRM_PANEL_MANTIX_MLAF057WE51=m
++CONFIG_DRM_PANEL_RAYDIUM_RM67191=y
++CONFIG_DRM_PANEL_RAYDIUM_RM68200=y
++CONFIG_DRM_PANEL_RAYDIUM_RM692C9=y
++CONFIG_DRM_PANEL_ROCKTECK_HIMAX8394F=y
++CONFIG_DRM_PANEL_SEIKO_43WVF1G=y
++CONFIG_DRM_PANEL_SITRONIX_ST7703=m
++CONFIG_DRM_PANEL_SIMPLE=y
++CONFIG_DRM_PANEL_TIANMA_TM050RDH03=y
++CONFIG_DRM_PANEL_TRULY_NT35597_WQXGA=m
++CONFIG_DRM_PANEL_WKS_101WX001=y
++CONFIG_DRM_DISPLAY_CONNECTOR=y
++CONFIG_DRM_FSL_LDB=y
++CONFIG_DRM_LONTIUM_LT8912B=m
++CONFIG_DRM_LONTIUM_LT9611=m
++CONFIG_DRM_LONTIUM_LT9611UXC=y
++CONFIG_DRM_FSL_IMX_LVDS_BRIDGE=y
++CONFIG_DRM_MAX96752_LVDS=y
++CONFIG_DRM_MAX96789_DSI=y
++CONFIG_DRM_NWL_MIPI_DSI=y
++CONFIG_DRM_NXP_SEIKO_43WVFIG=y
++CONFIG_DRM_PARADE_PS8640=m
++CONFIG_DRM_SII902X=m
++CONFIG_DRM_SIMPLE_BRIDGE=m
++CONFIG_DRM_THINE_THC63LVD1024=m
++CONFIG_DRM_TI_SN65DSI83=y
++CONFIG_DRM_TI_SN65DSI86=m
++CONFIG_DRM_I2C_ADV7511=y
++CONFIG_DRM_I2C_ADV7511_AUDIO=y
++CONFIG_DRM_IMX95_LDB=y
++CONFIG_DRM_IMX95_MIPI_DSI=y
++CONFIG_DRM_IMX95_PIXEL_INTERLEAVER=y
++CONFIG_DRM_IMX95_PIXEL_LINK=y
++CONFIG_DRM_DW_HDMI_AHB_AUDIO=m
++CONFIG_DRM_DW_HDMI_I2S_AUDIO=m
++CONFIG_DRM_DW_HDMI_GP_AUDIO=y
++CONFIG_DRM_DW_HDMI_CEC=m
++CONFIG_DRM_ITE_IT6263=y
++CONFIG_DRM_ITE_IT6161=y
++CONFIG_DRM_IMX=y
++CONFIG_DRM_IMX_LCDIF_MUX_DISPLAY=y
++CONFIG_DRM_IMX_PARALLEL_DISPLAY=y
++CONFIG_DRM_IMX_TVE=y
++CONFIG_DRM_IMX_LDB=y
++CONFIG_DRM_IMX8QM_LDB=y
++CONFIG_DRM_IMX8QXP_LDB=y
++CONFIG_DRM_IMX8MP_LDB=y
++CONFIG_DRM_IMX93_LDB=y
++CONFIG_DRM_IMX_DW_MIPI_DSI=y
++CONFIG_DRM_IMX93_PARALLEL_DISPLAY_FORMAT=y
++CONFIG_DRM_IMX_HDMI=y
++CONFIG_DRM_IMX_SEC_DSIM=y
++CONFIG_DRM_IMX_DCIF=y
++CONFIG_DRM_IMX_DCNANO=y
++CONFIG_DRM_IMX95_DPU=y
++CONFIG_DRM_IMX_DCSS=y
++CONFIG_DRM_IMX_CDNS_MHDP=y
++CONFIG_DRM_ETNAVIV=m
++CONFIG_DRM_HISI_HIBMC=m
++CONFIG_DRM_HISI_KIRIN=m
++CONFIG_DRM_MXSFB=y
++CONFIG_DRM_PL111=m
++CONFIG_DRM_XEN_FRONTEND=y
++CONFIG_DRM_LIMA=m
++CONFIG_DRM_PANFROST=m
++CONFIG_FB=y
++CONFIG_FB_EFI=y
++CONFIG_FB_MXC_EINK_V2_PANEL=y
++CONFIG_BACKLIGHT_CLASS_DEVICE=y
++CONFIG_BACKLIGHT_PWM=y
++CONFIG_BACKLIGHT_LP855X=m
++CONFIG_BACKLIGHT_GPIO=y
++CONFIG_BACKLIGHT_LED=y
++CONFIG_LOGO=y
++# CONFIG_LOGO_LINUX_MONO is not set
++# CONFIG_LOGO_LINUX_VGA16 is not set
++CONFIG_SOUND=y
++CONFIG_SND=y
++CONFIG_SND_ALOOP=m
++CONFIG_SND_USB_AUDIO=m
++CONFIG_SND_SOC=y
++CONFIG_SND_SOC_FSL_ASRC=m
++CONFIG_SND_SOC_FSL_MQS=m
++CONFIG_SND_SOC_FSL_SSI=y
++CONFIG_SND_SOC_FSL_MICFIL=m
++CONFIG_SND_SOC_FSL_EASRC=m
++CONFIG_SND_SOC_FSL_XCVR=m
++CONFIG_SND_SOC_FSL_RPMSG=m
++CONFIG_SND_SOC_IMX_AUDMUX=y
++CONFIG_SND_IMX_SOC=y
++CONFIG_SND_SOC_IMX_SGTL5000=m
++CONFIG_SND_SOC_FSL_ASOC_CARD=m
++CONFIG_SND_SOC_IMX_AUDMIX=m
++CONFIG_SND_SOC_IMX_HDMI=m
++CONFIG_SND_SOC_IMX_CARD=m
++CONFIG_SND_SOC_IMX_PCM512X=m
++CONFIG_SND_SOC_SOF_TOPLEVEL=y
++CONFIG_SND_SOC_SOF_OF=m
++CONFIG_SND_SOC_SOF_IMX_TOPLEVEL=y
++CONFIG_SND_SOC_SOF_IMX8=m
++CONFIG_SND_SOC_SOF_IMX8M=m
++CONFIG_SND_SOC_SOF_IMX8ULP=m
++CONFIG_SND_SOC_SOF_IMX95=m
++CONFIG_SND_SOC_AK4613=m
++CONFIG_SND_SOC_BT_SCO=y
++CONFIG_SND_SOC_CROS_EC_CODEC=m
++CONFIG_SND_SOC_CS42XX8_I2C=y
++CONFIG_SND_SOC_DMIC=m
++CONFIG_SND_SOC_ES7134=m
++CONFIG_SND_SOC_ES7241=m
++CONFIG_SND_SOC_GTM601=m
++CONFIG_SND_SOC_MAX98357A=m
++CONFIG_SND_SOC_MAX98927=m
++CONFIG_SND_SOC_MSM8916_WCD_ANALOG=m
++CONFIG_SND_SOC_MSM8916_WCD_DIGITAL=m
++CONFIG_SND_SOC_PCM3168A_I2C=m
++CONFIG_SND_SOC_RT5659=m
++CONFIG_SND_SOC_SIMPLE_AMPLIFIER=m
++CONFIG_SND_SOC_SIMPLE_MUX=m
++CONFIG_SND_SOC_SPDIF=m
++CONFIG_SND_SOC_TAS571X=m
++CONFIG_SND_SOC_WCD934X=m
++CONFIG_SND_SOC_WM8524=y
++CONFIG_SND_SOC_WM8904=m
++CONFIG_SND_SOC_WM8960=m
++CONFIG_SND_SOC_WM8962=m
++CONFIG_SND_SOC_WSA881X=m
++CONFIG_SND_SOC_RPMSG_WM8960=m
++CONFIG_SND_SOC_RPMSG_AK4497=m
++CONFIG_SND_SOC_LPASS_WSA_MACRO=m
++CONFIG_SND_SOC_LPASS_VA_MACRO=m
++CONFIG_SND_SIMPLE_CARD=y
++CONFIG_SND_AUDIO_GRAPH_CARD=y
++CONFIG_SND_AUDIO_GRAPH_CARD2=m
++CONFIG_SND_VIRTIO=y
++CONFIG_HID_MULTITOUCH=m
++CONFIG_I2C_HID_ACPI=m
++CONFIG_I2C_HID_OF=m
++CONFIG_USB_CONN_GPIO=y
++CONFIG_USB=y
++CONFIG_USB_OTG=y
++CONFIG_USB_XHCI_HCD=y
++CONFIG_USB_XHCI_PCI_RENESAS=m
++CONFIG_USB_EHCI_HCD=y
++CONFIG_USB_EHCI_HCD_PLATFORM=y
++CONFIG_USB_OHCI_HCD=y
++CONFIG_USB_OHCI_HCD_PLATFORM=y
++CONFIG_USB_HCD_TEST_MODE=y
++CONFIG_USB_XEN_HCD=y
++CONFIG_USB_ACM=m
++CONFIG_USB_STORAGE=y
++CONFIG_USB_UAS=y
++CONFIG_USB_CDNS_SUPPORT=y
++CONFIG_USB_CDNS3=y
++CONFIG_USB_CDNS3_GADGET=y
++CONFIG_USB_CDNS3_HOST=y
++CONFIG_USB_MUSB_HDRC=y
++CONFIG_USB_DWC3=y
++CONFIG_USB_DWC2=y
++CONFIG_USB_CHIPIDEA=y
++CONFIG_USB_CHIPIDEA_UDC=y
++CONFIG_USB_CHIPIDEA_HOST=y
++CONFIG_USB_ISP1760=y
++CONFIG_USB_SERIAL=y
++CONFIG_USB_SERIAL_CONSOLE=y
++CONFIG_USB_SERIAL_GENERIC=y
++CONFIG_USB_SERIAL_SIMPLE=y
++CONFIG_USB_SERIAL_CP210X=m
++CONFIG_USB_SERIAL_FTDI_SIO=y
++CONFIG_USB_SERIAL_OPTION=m
++CONFIG_USB_TEST=m
++CONFIG_USB_EHSET_TEST_FIXTURE=y
++CONFIG_USB_HSIC_USB3503=y
++CONFIG_NOP_USB_XCEIV=y
++CONFIG_USB_MXS_PHY=y
++CONFIG_USB_ULPI=y
++CONFIG_USB_GADGET=y
++CONFIG_USB_SNP_UDC_PLAT=y
++CONFIG_USB_BDC_UDC=y
++CONFIG_USB_CONFIGFS=y
++CONFIG_USB_CONFIGFS_SERIAL=y
++CONFIG_USB_CONFIGFS_ACM=y
++CONFIG_USB_CONFIGFS_OBEX=y
++CONFIG_USB_CONFIGFS_NCM=y
++CONFIG_USB_CONFIGFS_ECM=y
++CONFIG_USB_CONFIGFS_ECM_SUBSET=y
++CONFIG_USB_CONFIGFS_RNDIS=y
++CONFIG_USB_CONFIGFS_EEM=y
++CONFIG_USB_CONFIGFS_MASS_STORAGE=y
++CONFIG_USB_CONFIGFS_F_LB_SS=y
++CONFIG_USB_CONFIGFS_F_FS=y
++CONFIG_USB_CONFIGFS_F_UAC1=y
++CONFIG_USB_CONFIGFS_F_UAC1_LEGACY=y
++CONFIG_USB_CONFIGFS_F_UAC2=y
++CONFIG_USB_CONFIGFS_F_MIDI=y
++CONFIG_USB_CONFIGFS_F_HID=y
++CONFIG_USB_CONFIGFS_F_UVC=y
++CONFIG_USB_ZERO=m
++CONFIG_USB_AUDIO=m
++CONFIG_USB_ETH=m
++CONFIG_USB_MASS_STORAGE=m
++CONFIG_USB_G_SERIAL=m
++CONFIG_TYPEC=y
++CONFIG_TYPEC_TCPM=y
++CONFIG_TYPEC_TCPCI=y
++CONFIG_TYPEC_FUSB302=m
++CONFIG_TYPEC_TPS6598X=m
++CONFIG_TYPEC_HD3SS3220=m
++CONFIG_TYPEC_SWITCH_GPIO=y
++CONFIG_MMC=y
++CONFIG_MMC_BLOCK_MINORS=32
++CONFIG_MMC_ARMMMCI=y
++CONFIG_MMC_SDHCI=y
++CONFIG_MMC_SDHCI_ACPI=y
++CONFIG_MMC_SDHCI_PLTFM=y
++CONFIG_MMC_SDHCI_OF_ARASAN=y
++CONFIG_MMC_SDHCI_OF_ESDHC=y
++CONFIG_MMC_SDHCI_CADENCE=y
++CONFIG_MMC_SDHCI_ESDHC_IMX=y
++CONFIG_MMC_SDHCI_F_SDH30=y
++CONFIG_MMC_SPI=y
++CONFIG_MMC_DW=y
++CONFIG_MMC_DW_EXYNOS=y
++CONFIG_MMC_DW_HI3798CV200=y
++CONFIG_MMC_DW_K3=y
++CONFIG_MMC_MTK=y
++CONFIG_MMC_SDHCI_XENON=y
++CONFIG_SCSI_UFSHCD=y
++CONFIG_SCSI_UFSHCD_PLATFORM=y
++CONFIG_NEW_LEDS=y
++CONFIG_LEDS_CLASS=y
++CONFIG_LEDS_CLASS_MULTICOLOR=m
++CONFIG_LEDS_LM3692X=m
++CONFIG_LEDS_PCA9532=m
++CONFIG_LEDS_GPIO=y
++CONFIG_LEDS_PCA963X=y
++CONFIG_LEDS_PCA995X=m
++CONFIG_LEDS_PWM=y
++CONFIG_LEDS_SYSCON=y
++CONFIG_LEDS_TRIGGER_TIMER=y
++CONFIG_LEDS_TRIGGER_DISK=y
++CONFIG_LEDS_TRIGGER_HEARTBEAT=y
++CONFIG_LEDS_TRIGGER_CPU=y
++CONFIG_LEDS_TRIGGER_DEFAULT_ON=y
++CONFIG_LEDS_TRIGGER_PANIC=y
++CONFIG_EDAC=y
++CONFIG_EDAC_GHES=y
++CONFIG_EDAC_LAYERSCAPE=m
++CONFIG_EDAC_SYNOPSYS=y
++CONFIG_RTC_CLASS=y
++CONFIG_RTC_DRV_DS1307=m
++CONFIG_RTC_DRV_HYM8563=m
++CONFIG_RTC_DRV_MAX77686=y
++CONFIG_RTC_DRV_PCF8523=y
++CONFIG_RTC_DRV_PCF85363=m
++CONFIG_RTC_DRV_M41T80=m
++CONFIG_RTC_DRV_RX8581=m
++CONFIG_RTC_DRV_RV3028=m
++CONFIG_RTC_DRV_RV8803=m
++CONFIG_RTC_DRV_S5M=y
++CONFIG_RTC_DRV_DS3232=y
++CONFIG_RTC_DRV_PCF2127=m
++CONFIG_RTC_DRV_EFI=y
++CONFIG_RTC_DRV_CROS_EC=y
++CONFIG_RTC_DRV_FSL_FTM_ALARM=m
++CONFIG_RTC_DRV_PL031=y
++CONFIG_RTC_DRV_SNVS=y
++CONFIG_RTC_DRV_BBNSM=y
++CONFIG_RTC_DRV_IMX_SC=y
++CONFIG_RTC_DRV_IMX_RPMSG=y
++CONFIG_DMADEVICES=y
++CONFIG_BCM_SBA_RAID=m
++CONFIG_FSL_EDMA=y
++CONFIG_FSL_QDMA=m
++CONFIG_IMX_SDMA=m
++CONFIG_MV_XOR_V2=y
++CONFIG_MXS_DMA=y
++CONFIG_MXC_PXP_V3=y
++CONFIG_PL330_DMA=y
++CONFIG_QCOM_HIDMA_MGMT=y
++CONFIG_QCOM_HIDMA=y
++CONFIG_DW_EDMA=y
++CONFIG_DW_EDMA_PCIE=y
++CONFIG_FSL_DPAA2_QDMA=m
++CONFIG_DMATEST=y
++CONFIG_UDMABUF=y
++CONFIG_DMABUF_HEAPS=y
++CONFIG_DMABUF_HEAPS_SYSTEM=y
++CONFIG_DMABUF_HEAPS_CMA=y
++CONFIG_DMABUF_HEAPS_DSP=y
++CONFIG_UIO_PCI_GENERIC=y
++CONFIG_UIO_IVSHMEM=y
++CONFIG_VFIO=y
++CONFIG_VFIO_PCI=y
++CONFIG_VFIO_FSL_MC=y
++CONFIG_VIRTIO_PCI=y
++CONFIG_VIRTIO_BALLOON=y
++CONFIG_VIRTIO_INPUT=y
++CONFIG_VIRTIO_MMIO=y
++CONFIG_VIRTIO_IVSHMEM=y
++CONFIG_VHOST_NET=m
++CONFIG_VHOST_VSOCK=y
++CONFIG_XEN_GNTDEV=y
++CONFIG_XEN_GNTDEV_DMABUF=y
++CONFIG_XEN_GRANT_DEV_ALLOC=y
++CONFIG_XEN_GRANT_DMA_ALLOC=y
++CONFIG_XEN_PCIDEV_STUB=y
++CONFIG_XEN_VIRTIO=y
++CONFIG_XEN_VIRTIO_FORCE_GRANT=y
++CONFIG_STAGING=y
++CONFIG_STAGING_MEDIA=y
++CONFIG_VIDEO_IMX_CAPTURE=y
++CONFIG_IMX8_MEDIA_DEVICE=m
++CONFIG_FSL_DPAA2=y
++CONFIG_FSL_PPFE=y
++CONFIG_FSL_PPFE_UTIL_DISABLED=y
++CONFIG_ETHOSU=y
++CONFIG_NEUTRON=y
++CONFIG_CHROME_PLATFORMS=y
++CONFIG_CROS_EC=y
++CONFIG_CROS_EC_I2C=y
++CONFIG_CROS_EC_SPI=y
++CONFIG_CROS_EC_CHARDEV=m
++CONFIG_CLK_VEXPRESS_OSC=y
++CONFIG_COMMON_CLK_SCMI=y
++CONFIG_COMMON_CLK_SCPI=y
++CONFIG_COMMON_CLK_CS2000_CP=y
++CONFIG_COMMON_CLK_FSL_SAI=y
++CONFIG_COMMON_CLK_S2MPS11=y
++CONFIG_COMMON_CLK_XGENE=y
++CONFIG_COMMON_CLK_PWM=y
++CONFIG_COMMON_CLK_VC5=y
++CONFIG_CLK_IMX8MM=y
++CONFIG_CLK_IMX8MN=y
++CONFIG_CLK_IMX8MP=y
++CONFIG_CLK_IMX8MQ=y
++CONFIG_CLK_IMX8QXP=y
++CONFIG_CLK_IMX8ULP=y
++CONFIG_CLK_IMX91=y
++CONFIG_CLK_IMX93=y
++CONFIG_CLK_IMX95_BLK_CTL=y
++CONFIG_HWSPINLOCK=y
++CONFIG_ARM_MHU=y
++CONFIG_IMX_MBOX=y
++CONFIG_PLATFORM_MHU=y
++CONFIG_IOMMU_IO_PGTABLE_ARMV7S=y
++CONFIG_ARM_SMMU=y
++CONFIG_ARM_SMMU_V3=y
++CONFIG_REMOTEPROC=y
++CONFIG_IMX_REMOTEPROC=y
++CONFIG_IMX_DSP_REMOTEPROC=m
++CONFIG_IMX_NEUTRON_REMOTEPROC=y
++CONFIG_RPMSG_CHAR=m
++CONFIG_RPMSG_CTRL=m
++CONFIG_RPMSG_QCOM_GLINK_RPM=y
++CONFIG_SOUNDWIRE=m
++CONFIG_SOUNDWIRE_QCOM=m
++CONFIG_FSL_DPAA=y
++CONFIG_FSL_MC_DPIO=y
++CONFIG_FSL_RCPM=y
++CONFIG_FSL_QIXIS=y
++CONFIG_SOC_TI=y
++CONFIG_IMX_SCU_PD=y
++CONFIG_DEVFREQ_GOV_PERFORMANCE=y
++CONFIG_DEVFREQ_GOV_POWERSAVE=y
++CONFIG_DEVFREQ_GOV_USERSPACE=y
++CONFIG_DEVFREQ_GOV_PASSIVE=y
++CONFIG_EXTCON_PTN5150=m
++CONFIG_EXTCON_USB_GPIO=y
++CONFIG_EXTCON_USBC_CROS_EC=y
++CONFIG_IIO=y
++CONFIG_FXLS8962AF_I2C=m
++CONFIG_IIO_ST_ACCEL_3AXIS=m
++CONFIG_IMX8QXP_ADC=y
++CONFIG_IMX93_ADC=y
++CONFIG_MAX9611=m
++CONFIG_QCOM_SPMI_VADC=m
++CONFIG_QCOM_SPMI_ADC5=m
++CONFIG_IIO_CROS_EC_SENSORS_CORE=m
++CONFIG_IIO_CROS_EC_SENSORS=m
++CONFIG_FXAS21002C=y
++CONFIG_IIO_ST_GYRO_3AXIS=m
++CONFIG_FXOS8700_I2C=y
++CONFIG_RPMSG_IIO_PEDOMETER=m
++CONFIG_INV_MPU6050_I2C=m
++CONFIG_IIO_ST_LSM6DSX=y
++CONFIG_IIO_CROS_EC_LIGHT_PROX=m
++CONFIG_SENSORS_ISL29018=y
++CONFIG_VCNL4000=m
++CONFIG_VCNL4035=m
++CONFIG_IIO_ST_MAGN_3AXIS=m
++CONFIG_IIO_CROS_EC_BARO=m
++CONFIG_MPL3115=y
++CONFIG_MS5611=m
++CONFIG_MS5611_I2C=m
++CONFIG_IIO_P3T1085_I2C=m
++CONFIG_IIO_P3T1085_I3C=m
++CONFIG_PWM=y
++CONFIG_PWM_ADP5585=y
++CONFIG_PWM_CROS_EC=m
++CONFIG_PWM_FSL_FTM=m
++CONFIG_PWM_IMX27=y
++CONFIG_PWM_IMX_TPM=y
++CONFIG_PWM_RPCHIP=y
++CONFIG_PWM_SL28CPLD=m
++CONFIG_SL28CPLD_INTC=y
++CONFIG_RESET_IMX7=y
++CONFIG_RESET_IMX8ULP_CSR=y
++CONFIG_RESET_IMX8ULP_SIM=y
++CONFIG_PHY_MIXEL_LVDS=y
++CONFIG_PHY_MIXEL_LVDS_COMBO=y
++CONFIG_PHY_CADENCE_SALVO=y
++CONFIG_PHY_FSL_IMX8MP_LVDS=y
++CONFIG_PHY_FSL_IMX9_DPHY_RX=y
++CONFIG_PHY_FSL_IMX93_MIPI_DPHY=y
++CONFIG_PHY_MIXEL_MIPI_DPHY=y
++CONFIG_PHY_FSL_IMX8M_PCIE=y
++CONFIG_PHY_FSL_IMX8QM_HSIO=y
++CONFIG_PHY_FSL_SAMSUNG_HDMI_PHY=y
++CONFIG_PHY_QCOM_USB_HS=y
++CONFIG_PHY_SAMSUNG_USB2=y
++CONFIG_ARM_CCI_PMU=m
++CONFIG_ARM_CCN=m
++CONFIG_ARM_CMN=m
++CONFIG_ARM_SMMU_V3_PMU=m
++CONFIG_ARM_DSU_PMU=m
++CONFIG_FSL_IMX8_DDR_PMU=y
++CONFIG_FSL_IMX9_DDR_PMU=y
++CONFIG_ARM_SPE_PMU=m
++CONFIG_ARM_DMC620_PMU=m
++CONFIG_HISI_PMU=y
++CONFIG_MALI_MIDGARD=y
++CONFIG_MALI_CSF_SUPPORT=y
++CONFIG_NVMEM_IMX_OCOTP=y
++CONFIG_NVMEM_IMX_OCOTP_SCU=y
++CONFIG_NVMEM_RMEM=m
++CONFIG_FPGA=y
++CONFIG_FPGA_BRIDGE=m
++CONFIG_ALTERA_FREEZE_BRIDGE=m
++CONFIG_FPGA_REGION=m
++CONFIG_OF_FPGA_REGION=m
++CONFIG_TEE=y
++CONFIG_OPTEE=y
++CONFIG_MUX_MMIO=y
++CONFIG_SLIM_QCOM_CTRL=m
++CONFIG_MXC_SIM=y
++CONFIG_MXC_GPU_VIV=y
++CONFIG_MXC_EMVSIM=y
++CONFIG_MXC_VIDEO_WAVE6=y
++CONFIG_EXT4_FS=y
++CONFIG_EXT4_FS_POSIX_ACL=y
++CONFIG_EXT4_FS_SECURITY=y
++CONFIG_BTRFS_FS=m
++CONFIG_BTRFS_FS_POSIX_ACL=y
++CONFIG_FANOTIFY=y
++CONFIG_FANOTIFY_ACCESS_PERMISSIONS=y
++CONFIG_QUOTA=y
++CONFIG_AUTOFS_FS=y
++CONFIG_FUSE_FS=m
++CONFIG_CUSE=m
++CONFIG_OVERLAY_FS=m
++CONFIG_VFAT_FS=y
++CONFIG_TMPFS_POSIX_ACL=y
++CONFIG_HUGETLBFS=y
++CONFIG_EFIVAR_FS=y
++CONFIG_JFFS2_FS=y
++CONFIG_UBIFS_FS=y
++CONFIG_SQUASHFS=y
++CONFIG_SQUASHFS_XZ=y
++CONFIG_NFS_FS=y
++CONFIG_NFS_V4=y
++CONFIG_NFS_V4_1=y
++CONFIG_NFS_V4_2=y
++CONFIG_ROOT_NFS=y
++CONFIG_NFSD=y
++CONFIG_9P_FS=y
++CONFIG_NLS_CODEPAGE_437=y
++CONFIG_NLS_ISO8859_1=y
++CONFIG_TRUSTED_KEYS=m
++# CONFIG_TRUSTED_KEYS_TPM is not set
++# CONFIG_TRUSTED_KEYS_TEE is not set
++CONFIG_SECURITY=y
++CONFIG_SECURITY_SELINUX=y
++CONFIG_SECURITY_APPARMOR=y
++CONFIG_DEFAULT_SECURITY_DAC=y
++CONFIG_CRYPTO_USER=y
++CONFIG_CRYPTO_TEST=m
++CONFIG_CRYPTO_ANUBIS=m
++CONFIG_CRYPTO_ARIA=m
++CONFIG_CRYPTO_BLOWFISH=m
++CONFIG_CRYPTO_CAMELLIA=m
++CONFIG_CRYPTO_CAST5=m
++CONFIG_CRYPTO_CAST6=m
++CONFIG_CRYPTO_FCRYPT=m
++CONFIG_CRYPTO_KHAZAD=m
++CONFIG_CRYPTO_SEED=m
++CONFIG_CRYPTO_SERPENT=m
++CONFIG_CRYPTO_TEA=m
++CONFIG_CRYPTO_TWOFISH=m
++CONFIG_CRYPTO_ARC4=m
++CONFIG_CRYPTO_CTS=m
++CONFIG_CRYPTO_LRW=m
++CONFIG_CRYPTO_PCBC=m
++CONFIG_CRYPTO_CHACHA20POLY1305=m
++CONFIG_CRYPTO_SEQIV=y
++CONFIG_CRYPTO_ECHAINIV=y
++CONFIG_CRYPTO_TLS=m
++CONFIG_CRYPTO_MD4=m
++CONFIG_CRYPTO_MICHAEL_MIC=y
++CONFIG_CRYPTO_RMD160=m
++CONFIG_CRYPTO_STREEBOG=m
++CONFIG_CRYPTO_VMAC=m
++CONFIG_CRYPTO_WP512=m
++CONFIG_CRYPTO_XCBC=m
++CONFIG_CRYPTO_ANSI_CPRNG=y
++CONFIG_CRYPTO_USER_API_HASH=m
++CONFIG_CRYPTO_USER_API_SKCIPHER=m
++CONFIG_CRYPTO_USER_API_RNG=m
++CONFIG_CRYPTO_USER_API_AEAD=m
++CONFIG_CRYPTO_CHACHA20_NEON=m
++CONFIG_CRYPTO_GHASH_ARM64_CE=y
++CONFIG_CRYPTO_SHA1_ARM64_CE=y
++CONFIG_CRYPTO_SHA2_ARM64_CE=y
++CONFIG_CRYPTO_SHA512_ARM64_CE=m
++CONFIG_CRYPTO_SHA3_ARM64=m
++CONFIG_CRYPTO_SM3_ARM64_CE=m
++CONFIG_CRYPTO_POLYVAL_ARM64_CE=m
++CONFIG_CRYPTO_AES_ARM64_BS=m
++CONFIG_CRYPTO_AES_ARM64_CE_CCM=y
++CONFIG_CRYPTO_CRCT10DIF_ARM64_CE=m
++CONFIG_CRYPTO_DEV_FSL_CAAM_SECVIO=m
++CONFIG_CRYPTO_DEV_FSL_CAAM=m
++CONFIG_CRYPTO_DEV_FSL_CAAM_SM_TEST=m
++CONFIG_CRYPTO_DEV_FSL_DPAA2_CAAM=m
++CONFIG_CRYPTO_DEV_CCREE=m
++CONFIG_CRYPTO_DEV_HISI_SEC2=m
++CONFIG_CRYPTO_DEV_HISI_ZIP=m
++CONFIG_CRYPTO_DEV_HISI_HPRE=m
++CONFIG_CRYPTO_DEV_HISI_TRNG=m
++CONFIG_CRYPTO_DEV_AMLOGIC_GXL=m
++CONFIG_INDIRECT_PIO=y
++CONFIG_CRC8=y
++CONFIG_SWIOTLB_DYNAMIC=y
++CONFIG_CMA_SIZE_MBYTES=32
++CONFIG_PRINTK_TIME=y
++CONFIG_DEBUG_KERNEL=y
++CONFIG_DEBUG_INFO_DWARF_TOOLCHAIN_DEFAULT=y
++CONFIG_DEBUG_INFO_REDUCED=y
++CONFIG_MAGIC_SYSRQ=y
++CONFIG_DEBUG_FS=y
++# CONFIG_SCHED_DEBUG is not set
++# CONFIG_FTRACE is not set
++CONFIG_SAMPLES=y
++CONFIG_SAMPLE_RPMSG_CLIENT=m
++CONFIG_CORESIGHT=y
++CONFIG_CORESIGHT_LINK_AND_SINK_TMC=y
++CONFIG_CORESIGHT_CATU=m
++CONFIG_CORESIGHT_SINK_TPIU=m
++CONFIG_CORESIGHT_SINK_ETBV10=m
++CONFIG_CORESIGHT_SOURCE_ETM4X=y
++CONFIG_CORESIGHT_STM=m
++CONFIG_CORESIGHT_CPU_DEBUG=m
++CONFIG_CORESIGHT_CTI=m
++CONFIG_MEMTEST=y
+diff --git a/drivers/net/phy/Kconfig b/drivers/net/phy/Kconfig
+index 47114eb93d27..f268d8a54a1f 100644
+--- a/drivers/net/phy/Kconfig
++++ b/drivers/net/phy/Kconfig
+@@ -272,6 +272,12 @@ config MEDIATEK_GE_PHY
+ 	help
+ 	  Supports the MediaTek Gigabit Ethernet PHYs.
+ 
++config MAXLINEAR_8611X_PHY
++	tristate "MaxLinear MXL86110 and MXL86111 PHYs"
++	help
++	  Supports the MXL86110 and MXL86111 PHYs.
++
++
+ config MEDIATEK_GE_SOC_PHY
+ 	tristate "MediaTek SoC Ethernet PHYs"
+ 	depends on (ARM64 && ARCH_MEDIATEK) || COMPILE_TEST
+diff --git a/drivers/net/phy/Makefile b/drivers/net/phy/Makefile
+index 4566988a3396..9645b011f8e0 100644
+--- a/drivers/net/phy/Makefile
++++ b/drivers/net/phy/Makefile
+@@ -74,6 +74,7 @@ obj-$(CONFIG_MARVELL_PHY)	+= marvell.o
+ obj-$(CONFIG_MARVELL_88Q2XXX_PHY)	+= marvell-88q2xxx.o
+ obj-$(CONFIG_MARVELL_88X2222_PHY)	+= marvell-88x2222.o
+ obj-$(CONFIG_MAXLINEAR_GPHY)	+= mxl-gpy.o
++obj-$(CONFIG_MAXLINEAR_8611X_PHY)	+= mxl-8611x.o
+ obj-$(CONFIG_MEDIATEK_GE_PHY)	+= mediatek-ge.o
+ obj-$(CONFIG_MEDIATEK_GE_SOC_PHY)	+= mediatek-ge-soc.o
+ obj-$(CONFIG_MESON_GXL_PHY)	+= meson-gxl.o
+diff --git a/drivers/net/phy/mxl-8611x.c b/drivers/net/phy/mxl-8611x.c
+new file mode 100644
+index 000000000000..c033cfa502ad
+--- /dev/null
++++ b/drivers/net/phy/mxl-8611x.c
+@@ -0,0 +1,2093 @@
++// SPDX-License-Identifier: GPL-2.0+
++/*
++ * PHY driver for MXL86110 and MXL86111
++ *
++ * V1.0.0
++ *
++ * Copyright 2023 MaxLinear Inc.
++ *
++ * This program is free software; you can redistribute it and/or
++ * modify it under the terms of the GNU General Public License
++ * as published by the Free Software Foundation; either version 2
++ * of the License, or (at your option) any later version.
++ *
++ * This program is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ * GNU General Public License for more details.
++ *
++ * You should have received a copy of the GNU General Public License
++ * along with this program; if not, write to the Free Software
++ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
++ *
++ */
++
++#include <linux/kernel.h>
++#include <linux/etherdevice.h>
++#include <linux/of.h>
++#include <linux/phy.h>
++#include <linux/module.h>
++#include <linux/bitfield.h>
++
++#ifndef LINUX_VERSION_CODE
++#include <linux/version.h>
++#else
++#define KERNEL_VERSION(a, b, c) (((a) << 16) + ((b) << 8) + (c))
++#endif
++
++#define MXL8611x_DRIVER_DESC	"MXL86111 and MXL86110 PHY driver"
++#define MXL8611x_DRIVER_VER		"1.0.0"
++
++/* PHY IDs */
++#define PHY_ID_MXL86110		0xC1335580
++#define PHY_ID_MXL86111		0xC1335588
++
++/* required to access extended registers */
++#define MXL8611X_EXTD_REG_ADDR_OFFSET	0x1E
++#define MXL8611X_EXTD_REG_ADDR_DATA		0x1F
++#define PHY_IRQ_ENABLE_REG				0x12
++#define PHY_IRQ_ENABLE_REG_WOL			BIT(6)
++
++/* only 1 page for MXL86110 */
++#define MXL86110_DEFAULT_PAGE	0
++
++/* different pages for EXTD access for MXL86111*/
++/* SerDes/PHY Control Access Register - COM_EXT_SMI_SDS_PHY */
++#define MXL86111_EXT_SMI_SDS_PHY_REG				0xA000
++#define MXL86111_EXT_SMI_SDS_PHYSPACE_MASK			BIT(1)
++#define MXL86111_EXT_SMI_SDS_PHYFIBER_SPACE			(0x1 << 1)
++#define MXL86111_EXT_SMI_SDS_PHYUTP_SPACE			(0x0 << 1)
++#define MXL86111_EXT_SMI_SDS_PHY_AUTO	(0xFF)
++
++/* SyncE Configuration Register - COM_EXT SYNCE_CFG */
++#define MXL8611X_EXT_SYNCE_CFG_REG						0xA012
++#define MXL8611X_EXT_SYNCE_CFG_CLK_FRE_SEL				BIT(4)
++#define MXL8611X_EXT_SYNCE_CFG_EN_SYNC_E_DURING_LNKDN	BIT(5)
++#define MXL8611X_EXT_SYNCE_CFG_EN_SYNC_E				BIT(6)
++#define MXL8611X_EXT_SYNCE_CFG_CLK_SRC_SEL_MASK			GENMASK(3, 1)
++#define MXL8611X_EXT_SYNCE_CFG_CLK_SRC_SEL_125M_PLL		0
++#define MXL8611X_EXT_SYNCE_CFG_CLK_SRC_SEL_25M			4
++
++/* WOL registers */
++#define MXL86110_WOL_MAC_ADDR_HIGH_EXTD_REG		0xA007 /* high-> FF:FF                   */
++#define MXL86110_WOL_MAC_ADDR_MIDDLE_EXTD_REG	0xA008 /*    middle-> :FF:FF <-middle    */
++#define MXL86110_WOL_MAC_ADDR_LOW_EXTD_REG		0xA009 /*                   :FF:FF <-low */
++
++#define MXL8611X_EXT_WOL_CFG_REG				0xA00A
++#define MXL8611X_EXT_WOL_CFG_WOLE_MASK			BIT(3)
++#define MXL8611X_EXT_WOL_CFG_WOLE_DISABLE		0
++#define MXL8611X_EXT_WOL_CFG_WOLE_ENABLE		BIT(3)
++
++/* RGMII register */
++#define MXL8611X_EXT_RGMII_CFG1_REG							0xA003
++/* delay can be adjusted in steps of about 150ps */
++#define MXL8611X_EXT_RGMII_CFG1_NO_DELAY					0
++#define MXL8611X_EXT_RGMII_CFG1_RX_DELAY_MAX				(0xF << 10)
++#define MXL8611X_EXT_RGMII_CFG1_RX_DELAY_MIN				(0x1 << 10)
++#define MXL8611X_EXT_RGMII_CFG1_RX_DELAY_DEFAULT			(0xF << 10)
++
++#define MXL8611X_EXT_RGMII_CFG1_RX_DELAY_MASK				GENMASK(13, 10)
++#define MXL8611X_EXT_RGMII_CFG1_TX_1G_DELAY_MAX				(0xF << 0)
++#define MXL8611X_EXT_RGMII_CFG1_TX_1G_DELAY_MIN				(0x1 << 0)
++#define MXL8611X_EXT_RGMII_CFG1_TX_1G_DELAY_MASK			GENMASK(3, 0)
++#define MXL8611X_EXT_RGMII_CFG1_TX_1G_DELAY_DEFAULT			(0x1 << 0)
++
++#define MXL8611X_EXT_RGMII_CFG1_TX_10MB_100MB_DELAY_MAX		(0xF << 4)
++#define MXL8611X_EXT_RGMII_CFG1_TX_10MB_100MB_DELAY_MIN		(0x1 << 4)
++#define MXL8611X_EXT_RGMII_CFG1_TX_10MB_100MB_DEFAULT		(0xF << 4)
++#define MXL8611X_EXT_RGMII_CFG1_TX_10MB_100MB_DELAY_MASK	GENMASK(7, 4)
++
++#define MXL8611X_EXT_RGMII_CFG1_FULL_MASK \
++			((MXL8611X_EXT_RGMII_CFG1_RX_DELAY_MASK) | \
++			(MXL8611X_EXT_RGMII_CFG1_TX_1G_DELAY_MASK) | \
++			(MXL8611X_EXT_RGMII_CFG1_TX_10MB_100MB_DELAY_MASK))
++
++/* EXT Sleep Control register */
++#define MXL8611x_UTP_EXT_SLEEP_CTRL_REG					0x27
++#define MXL8611x_UTP_EXT_SLEEP_CTRL_EN_SLEEP_SW_OFF		0
++#define MXL8611x_UTP_EXT_SLEEP_CTRL_EN_SLEEP_SW_MASK	BIT(15)
++
++/* RGMII In-Band Status and MDIO Configuration Register */
++#define MXL8611X_EXT_RGMII_MDIO_CFG				0xA005
++#define MXL8611X_EXT_RGMII_MDIO_CFG_EPA0_MASK			GENMASK(6, 6)
++#define MXL8611X_EXT_RGMII_MDIO_CFG_EBA_MASK			GENMASK(5, 5)
++#define MXL8611X_EXT_RGMII_MDIO_CFG_BA_MASK			GENMASK(4, 0)
++
++/* LED registers and defines */
++#define MXL8611X_LED0_CFG_REG 0xA00C
++#define MXL8611X_LED1_CFG_REG 0xA00D
++#define MXL8611X_LED2_CFG_REG 0xA00E
++
++#define MXL8611X_LEDX_CFG_TRAFFIC_ACT_BLINK_IND		BIT(13)
++#define MXL8611X_LEDX_CFG_LINK_UP_FULL_DUPLEX_ON	BIT(12)
++#define MXL8611X_LEDX_CFG_LINK_UP_HALF_DUPLEX_ON	BIT(11)
++#define MXL8611X_LEDX_CFG_LINK_UP_TX_ACT_ON			BIT(10)	/* LED 0,1,2 default */
++#define MXL8611X_LEDX_CFG_LINK_UP_RX_ACT_ON			BIT(9)	/* LED 0,1,2 default */
++#define MXL8611X_LEDX_CFG_LINK_UP_TX_ON				BIT(8)
++#define MXL8611X_LEDX_CFG_LINK_UP_RX_ON				BIT(7)
++#define MXL8611X_LEDX_CFG_LINK_UP_1GB_ON			BIT(6) /* LED 2 default */
++#define MXL8611X_LEDX_CFG_LINK_UP_100MB_ON			BIT(5) /* LED 1 default */
++#define MXL8611X_LEDX_CFG_LINK_UP_10MB_ON			BIT(4) /* LED 0 default */
++#define MXL8611X_LEDX_CFG_LINK_UP_COLLISION			BIT(3)
++#define MXL8611X_LEDX_CFG_LINK_UP_1GB_BLINK			BIT(2)
++#define MXL8611X_LEDX_CFG_LINK_UP_100MB_BLINK		BIT(1)
++#define MXL8611X_LEDX_CFG_LINK_UP_10MB_BLINK		BIT(0)
++
++#define MXL8611X_LED_BLINK_CFG_REG						0xA00F
++#define MXL8611X_LED_BLINK_CFG_FREQ_MODE1_2HZ			0
++#define MXL8611X_LED_BLINK_CFG_FREQ_MODE1_4HZ			BIT(0)
++#define MXL8611X_LED_BLINK_CFG_FREQ_MODE1_8HZ			BIT(1)
++#define MXL8611X_LED_BLINK_CFG_FREQ_MODE1_16HZ			(BIT(1) | BIT(0))
++#define MXL8611X_LED_BLINK_CFG_FREQ_MODE2_2HZ			0
++#define MXL8611X_LED_BLINK_CFG_FREQ_MODE2_4HZ			BIT(2)
++#define MXL8611X_LED_BLINK_CFG_FREQ_MODE2_8HZ			BIT(3)
++#define MXL8611X_LED_BLINK_CFG_FREQ_MODE2_16HZ			(BIT(3) | BIT(2))
++#define MXL8611X_LED_BLINK_CFG_DUTY_CYCLE_50_PERC_ON	0
++#define MXL8611X_LED_BLINK_CFG_DUTY_CYCLE_67_PERC_ON	(BIT(4))
++#define MXL8611X_LED_BLINK_CFG_DUTY_CYCLE_75_PERC_ON	(BIT(5))
++#define MXL8611X_LED_BLINK_CFG_DUTY_CYCLE_83_PERC_ON	(BIT(5) | BIT(4))
++#define MXL8611X_LED_BLINK_CFG_DUTY_CYCLE_50_PERC_OFF	(BIT(6))
++#define MXL8611X_LED_BLINK_CFG_DUTY_CYCLE_33_PERC_ON	(BIT(6) | BIT(4))
++#define MXL8611X_LED_BLINK_CFG_DUTY_CYCLE_25_PERC_ON	(BIT(6) | BIT(5))
++#define MXL8611X_LED_BLINK_CFG_DUTY_CYCLE_17_PERC_ON	(BIT(6) | BIT(5) | BIT(4))
++
++/* Specific Status Register - PHY_STAT */
++#define MXL86111_PHY_STAT_REG				0x11
++#define MXL86111_PHY_STAT_SPEED_MASK		GENMASK(15, 14)
++#define MXL86111_PHY_STAT_SPEED_OFFSET		14
++#define MXL86111_PHY_STAT_SPEED_10M			0x0
++#define MXL86111_PHY_STAT_SPEED_100M		0x1
++#define MXL86111_PHY_STAT_SPEED_1000M		0x2
++#define MXL86111_PHY_STAT_DPX_OFFSET		13
++#define MXL86111_PHY_STAT_DPX				BIT(13)
++#define MXL86111_PHY_STAT_LSRT				BIT(10)
++
++/* 3 phy reg page modes,auto mode combines utp and fiber mode*/
++#define MXL86111_MODE_FIBER					0x1
++#define MXL86111_MODE_UTP					0x2
++#define MXL86111_MODE_AUTO					0x3
++
++/* FIBER Auto-Negotiation link partner ability - SDS_AN_LPA */
++#define MXL86111_SDS_AN_LPA_PAUSE			(0x3 << 7)
++#define MXL86111_SDS_AN_LPA_ASYM_PAUSE		(0x2 << 7)
++
++/* Chip Configuration Register - COM_EXT_CHIP_CFG */
++#define MXL86111_EXT_CHIP_CFG_REG			0xA001
++#define MXL86111_EXT_CHIP_CFG_RXDLY_ENABLE	BIT(8)
++#define MXL86111_EXT_CHIP_CFG_SW_RST_N_MODE	BIT(15)
++
++#define MXL86111_EXT_CHIP_CFG_MODE_SEL_MASK				GENMASK(2, 0)
++#define MXL86111_EXT_CHIP_CFG_MODE_UTP_TO_RGMII			0
++#define MXL86111_EXT_CHIP_CFG_MODE_FIBER_TO_RGMII		1
++#define MXL86111_EXT_CHIP_CFG_MODE_UTP_FIBER_TO_RGMII	2
++#define MXL86111_EXT_CHIP_CFG_MODE_UTP_TO_SGMII			3
++#define MXL86111_EXT_CHIP_CFG_MODE_SGPHY_TO_RGMAC		4
++#define MXL86111_EXT_CHIP_CFG_MODE_SGMAC_TO_RGPHY		5
++#define MXL86111_EXT_CHIP_CFG_MODE_UTP_TO_FIBER_AUTO	6
++#define MXL86111_EXT_CHIP_CFG_MODE_UTP_TO_FIBER_FORCE	7
++
++/* Miscellaneous Control Register - COM_EXT _MISC_CFG */
++#define MXL86111_EXT_MISC_CONFIG_REG					0xA006
++#define MXL86111_EXT_MISC_CONFIG_FIB_SPEED_SEL			BIT(0)
++#define MXL86111_EXT_MISC_CONFIG_FIB_SPEED_SEL_1000BX	(0x1 << 0)
++#define MXL86111_EXT_MISC_CONFIG_FIB_SPEED_SEL_100BX	(0x0 << 0)
++
++/* Phy fiber Link timer cfg2 Register - EXT_SDS_LINK_TIMER_CFG2 */
++#define MXL86111_EXT_SDS_LINK_TIMER_CFG2_REG			0xA5
++#define MXL86111_EXT_SDS_LINK_TIMER_CFG2_EN_AUTOSEN		BIT(15)
++
++/* default values of PHY register, required for Dual Media mode */
++#define MII_BMSR_DEFAULT_VAL			0x7949
++#define MII_ESTATUS_DEFAULT_VAL			0x2000
++
++/* Timeout in ms for PHY SW reset check in STD_CTRL/SDS_CTRL */
++#define BMCR_RESET_TIMEOUT		500
++
++/* ******************************************************** */
++/* Customer specific configuration START					*/
++/* Adapt here if other than default values are required!	*/
++/* ******************************************************** */
++
++/* disable auto sleep feature */
++#define MXL8611x_UTP_DISABLE_AUTO_SLEEP_FEATURE_CUSTOM		0
++
++/* SYNCE/clkout feature */
++#define MXL8611X_CLOCK_DISABLE							0
++#define MXL8611X_CLOCK_FREQ_25M							1
++#define MXL8611X_CLOCK_FREQ_125M						2
++#define MXL8611X_CLOCK_DEFAULT							3
++
++#define MXL8611X_EXT_SYNCE_CFG_CLOCK_FREQ_CUSTOM	MXL8611X_CLOCK_DEFAULT
++
++/* Adjust RGMII timing based on min/max range defined above */
++#define MXL8611X_EXT_RGMII_CFG1_RX_DELAY_CUSTOM \
++			MXL8611X_EXT_RGMII_CFG1_RX_DELAY_DEFAULT
++#define MXL8611X_EXT_RGMII_CFG1_TX_1G_DELAY_CUSTOM	\
++			MXL8611X_EXT_RGMII_CFG1_TX_1G_DELAY_DEFAULT
++#define MXL8611X_EXT_RGMII_CFG1_TX_10MB_100MB_CUSTOM \
++			MXL8611X_EXT_RGMII_CFG1_TX_10MB_100MB_DEFAULT
++
++/* ******************************************************** */
++/* Customer specific configuration END						*/
++/* ******************************************************** */
++
++/**
++ * mxlphy_write_extended_reg() - write to a PHY's extended register
++ * @phydev: pointer to a &struct phy_device
++ * @regnum: register number to write
++ * @val: value to write to @regnum
++ *
++ * NOTE:The calling function must have taken the MDIO bus lock.
++ *
++ * returns 0 or negative error code
++ */
++static int mxlphy_write_extended_reg(struct phy_device *phydev, u16 regnum, u16 val)
++{
++	int ret;
++
++	ret = __phy_write(phydev, MXL8611X_EXTD_REG_ADDR_OFFSET, regnum);
++	if (ret < 0)
++		return ret;
++
++	return __phy_write(phydev, MXL8611X_EXTD_REG_ADDR_DATA, val);
++}
++
++/**
++ * mxlphy_locked_write_extended_reg() - write to a PHY's extended register
++ * @phydev: pointer to a &struct phy_device
++ * @regnum: register number to write
++ * @val: value to write to @regnum
++ *
++ * returns 0 or negative error code
++ */
++static int mxlphy_locked_write_extended_reg(struct phy_device *phydev, u16 regnum,
++				     u16 val)
++{
++	int ret;
++
++	phy_lock_mdio_bus(phydev);
++	ret = mxlphy_write_extended_reg(phydev, regnum, val);
++	phy_unlock_mdio_bus(phydev);
++
++	return ret;
++}
++
++/**
++ * mxlphy_read_extended_reg() - write to a PHY's extended register
++ * @phydev: pointer to a &struct phy_device
++ * @regnum: register number to write
++ * @val: value to write to @regnum
++ *
++ * NOTE:The calling function must have taken the MDIO bus lock.
++ *
++ * returns the value of regnum reg or negative error code
++ */
++static int mxlphy_read_extended_reg(struct phy_device *phydev, u16 regnum)
++{
++	int ret;
++
++	ret = __phy_write(phydev, MXL8611X_EXTD_REG_ADDR_OFFSET, regnum);
++	if (ret < 0)
++		return ret;
++	return __phy_read(phydev, MXL8611X_EXTD_REG_ADDR_DATA);
++}
++
++/**
++ * mxlphy_read_extended_reg() - write to a PHY's extended register
++ * @phydev: pointer to a &struct phy_device
++ * @regnum: register number to write
++ * @val: value to write to @regnum
++ *
++ * returns the value of regnum reg or negative error code
++ */
++static int mxlphy_locked_read_extended_reg(struct phy_device *phydev, u16 regnum)
++{
++	int ret;
++
++	phy_lock_mdio_bus(phydev);
++	ret = mxlphy_read_extended_reg(phydev, regnum);
++	phy_unlock_mdio_bus(phydev);
++
++	return ret;
++}
++
++/**
++ * mxlphy_modify_extended_reg() - modify bits of a PHY's extended register
++ * @phydev: pointer to the phy_device
++ * @regnum: register number to write
++ * @mask: bit mask of bits to clear
++ * @set: bit mask of bits to set
++ *
++ * NOTE: register value = (old register value & ~mask) | set.
++ * The caller must have taken the MDIO bus lock.
++ *
++ * returns 0 or negative error code
++ */
++static int mxlphy_modify_extended_reg(struct phy_device *phydev, u16 regnum, u16 mask,
++			    u16 set)
++{
++	int ret;
++
++	ret = __phy_write(phydev, MXL8611X_EXTD_REG_ADDR_OFFSET, regnum);
++	if (ret < 0)
++		return ret;
++
++	return __phy_modify(phydev, MXL8611X_EXTD_REG_ADDR_DATA, mask, set);
++}
++
++/**
++ * mxlphy_locked_modify_extended_reg() - modify bits of a PHY's extended register
++ * @phydev: pointer to the phy_device
++ * @regnum: register number to write
++ * @mask: bit mask of bits to clear
++ * @set: bit mask of bits to set
++ *
++ * NOTE: register value = (old register value & ~mask) | set.
++ *
++ * returns 0 or negative error code
++ */
++static int mxlphy_locked_modify_extended_reg(struct phy_device *phydev, u16 regnum,
++				      u16 mask, u16 set)
++{
++	int ret;
++
++	phy_lock_mdio_bus(phydev);
++	ret = mxlphy_modify_extended_reg(phydev, regnum, mask, set);
++	phy_unlock_mdio_bus(phydev);
++
++	return ret;
++}
++
++/**
++ * mxlphy_get_wol() - report if wake-on-lan is enabled
++ * @phydev: pointer to the phy_device
++ * @wol: a pointer to a &struct ethtool_wolinfo
++ */
++static void mxlphy_get_wol(struct phy_device *phydev, struct ethtool_wolinfo *wol)
++{
++	int value;
++
++	wol->supported = WAKE_MAGIC;
++	wol->wolopts = 0;
++	value = mxlphy_locked_read_extended_reg(phydev, MXL8611X_EXT_WOL_CFG_REG);
++	if ((value >= 0) && (value & MXL8611X_EXT_WOL_CFG_WOLE_MASK))
++		wol->wolopts |= WAKE_MAGIC;
++}
++
++/**
++ * mxlphy_set_wol() - enable/disable wake-on-lan
++ * @phydev: pointer to the phy_device
++ * @wol: a pointer to a &struct ethtool_wolinfo
++ *
++ * Configures the WOL Magic Packet MAC
++ * returns 0 or negative errno code
++ */
++static int mxlphy_set_wol(struct phy_device *phydev, struct ethtool_wolinfo *wol)
++{
++	struct net_device *netdev;
++	int page_to_restore;
++	const u8 *mac;
++	int ret = 0;
++
++	if (wol->wolopts & WAKE_MAGIC) {
++		netdev = phydev->attached_dev;
++		if (!netdev)
++			return -ENODEV;
++
++		mac = (const u8 *)netdev->dev_addr;
++		if (!is_valid_ether_addr(mac))
++			return -EINVAL;
++
++		page_to_restore = phy_select_page(phydev, MXL86110_DEFAULT_PAGE);
++		if (page_to_restore < 0)
++			goto error;
++
++		/* Configure the MAC address of the WOL magic packet */
++		ret = mxlphy_write_extended_reg(phydev, MXL86110_WOL_MAC_ADDR_HIGH_EXTD_REG,
++										((mac[0] << 8) | mac[1]));
++		if (ret < 0)
++			goto error;
++		ret = mxlphy_write_extended_reg(phydev, MXL86110_WOL_MAC_ADDR_MIDDLE_EXTD_REG,
++										((mac[2] << 8) | mac[3]));
++		if (ret < 0)
++			goto error;
++		ret = mxlphy_write_extended_reg(phydev, MXL86110_WOL_MAC_ADDR_LOW_EXTD_REG,
++										((mac[4] << 8) | mac[5]));
++		if (ret < 0)
++			goto error;
++
++		ret = mxlphy_modify_extended_reg(phydev, MXL8611X_EXT_WOL_CFG_REG, MXL8611X_EXT_WOL_CFG_WOLE_MASK,
++				 MXL8611X_EXT_WOL_CFG_WOLE_ENABLE);
++		if (ret < 0)
++			goto error;
++
++		ret = __phy_modify(phydev, PHY_IRQ_ENABLE_REG, 0,
++				   PHY_IRQ_ENABLE_REG_WOL);
++		if (ret < 0)
++			goto error;
++
++		phydev_info(phydev, "%s, WOL Magic packet MAC: %02X:%02X:%02X:%02X:%02X:%02X\n",
++				__func__, mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
++
++	} else {
++		page_to_restore = phy_select_page(phydev, MXL86110_DEFAULT_PAGE);
++		if (page_to_restore < 0)
++			goto error;
++
++		ret = mxlphy_modify_extended_reg(phydev, MXL8611X_EXT_WOL_CFG_REG, MXL8611X_EXT_WOL_CFG_WOLE_MASK,
++				MXL8611X_EXT_WOL_CFG_WOLE_DISABLE);
++
++		ret = __phy_modify(phydev, PHY_IRQ_ENABLE_REG,
++				   PHY_IRQ_ENABLE_REG_WOL, 0);
++		if (ret < 0)
++			goto error;
++	}
++
++error:
++	return phy_restore_page(phydev, page_to_restore, ret);
++}
++
++/**
++ * mxl86110_read_page() - read reg page
++ * @phydev: pointer to the phy_device
++ *
++ * returns current reg space of MxL86110
++ * (only MXL86111_EXT_SMI_SDS_PHYUTP_SPACE supported) or negative errno code
++ */
++static int mxl86110_read_page(struct phy_device *phydev)
++{
++	return __phy_read(phydev, MXL8611X_EXTD_REG_ADDR_OFFSET);
++};
++
++/**
++ * mxl86110_write_page() - write reg page
++ * @phydev: pointer to the phy_device
++ * @page: The reg page to write
++ *
++ * returns current reg space of MxL86110
++ * (only MXL86111_EXT_SMI_SDS_PHYUTP_SPACE supported) or negative errno code
++ */
++static int mxl86110_write_page(struct phy_device *phydev, int page)
++{
++	return __phy_write(phydev, MXL8611X_EXTD_REG_ADDR_OFFSET, page);
++};
++
++/**
++ * mxl8611x_led_cfg() - applies LED configuration from device tree
++ * @phydev: pointer to the phy_device
++ *
++ * returns 0 or negative errno code
++ */
++static int mxl8611x_led_cfg(struct phy_device *phydev)
++{
++	int ret = 0;
++	int i;
++	char propname[25];
++	struct device_node *node = phydev->mdio.dev.of_node;
++	u32 val;
++
++	/* Loop through three the LED registers */
++	for (i = 0; i < 3; i++) {
++		/* Read property from device tree */
++		snprintf(propname, 25, "mxl-8611x,led%d_cfg", i);
++		if (of_property_read_u32(node, propname, &val))
++			continue;
++
++		/* Update PHY LED register */
++		ret = mxlphy_write_extended_reg(phydev, MXL8611X_LED0_CFG_REG + i, val);
++		if (ret < 0)
++			return ret;
++	}
++
++	return 0;
++}
++
++/**
++ * mxl8611x_broadcast_cfg() - applies broadcast configuration
++ * @phydev: pointer to the phy_device
++ *
++ * configures the broadcast setting for the PHY based on the device tree
++ * if the "mxl-8611x,broadcast-enabled" property is present the PHY broadcasts
++ * address 0 on the MDIO bus. This feature enables PHY to always respond to MDIO access
++ * returns 0 or negative errno code
++ */
++static int mxl8611x_broadcast_cfg(struct phy_device *phydev)
++{
++	int ret = 0;
++	struct device_node *node;
++	u32 val;
++
++	if (!phydev) {
++		pr_err("%s, Invalid phy_device pointer\n", __func__);
++		return -EINVAL;
++	}
++
++	node = phydev->mdio.dev.of_node;
++	if (!node) {
++		phydev_err(phydev, "%s, Invalid device tree node\n", __func__);
++		return -EINVAL;
++	}
++
++	val = mxlphy_read_extended_reg(phydev, MXL8611X_EXT_RGMII_MDIO_CFG);
++
++	if (of_property_read_bool(node, "mxl-8611x,broadcast-enabled"))
++		val |= MXL8611X_EXT_RGMII_MDIO_CFG_EPA0_MASK;
++	else
++		val &= ~MXL8611X_EXT_RGMII_MDIO_CFG_EPA0_MASK;
++
++	ret = mxlphy_write_extended_reg(phydev, MXL8611X_EXT_RGMII_MDIO_CFG, val);
++	if (ret) {
++		phydev_err(phydev, "%s, failed to write 0x%x to RGMII MDIO CFG register (0x%x): ret = %d\n",
++			   __func__, val, MXL8611X_EXT_RGMII_MDIO_CFG, ret);
++		return ret;
++	}
++
++	return 0;
++}
++
++/**
++ * mxl8611x_synce_clk_cfg() - applies syncE/clk output configuration
++ * @phydev: pointer to the phy_device
++ *
++ * Custom settings can be defined in custom config section of the driver
++ * returns 0 or negative errno code
++ */
++static int mxl8611x_synce_clk_cfg(struct phy_device *phydev)
++{
++	u16 mask = 0, value = 0;
++	int ret;
++
++	switch (MXL8611X_EXT_SYNCE_CFG_CLOCK_FREQ_CUSTOM) {
++	case MXL8611X_CLOCK_DISABLE:
++		mask = MXL8611X_EXT_SYNCE_CFG_EN_SYNC_E;
++		value = 0;
++		break;
++	case MXL8611X_CLOCK_FREQ_25M:
++		value = MXL8611X_EXT_SYNCE_CFG_EN_SYNC_E |
++				FIELD_PREP(MXL8611X_EXT_SYNCE_CFG_CLK_SRC_SEL_MASK,
++				MXL8611X_EXT_SYNCE_CFG_CLK_SRC_SEL_25M);
++		mask = MXL8611X_EXT_SYNCE_CFG_EN_SYNC_E |
++		       MXL8611X_EXT_SYNCE_CFG_CLK_SRC_SEL_MASK |
++		       MXL8611X_EXT_SYNCE_CFG_CLK_FRE_SEL;
++		break;
++	case MXL8611X_CLOCK_FREQ_125M:
++		value = MXL8611X_EXT_SYNCE_CFG_EN_SYNC_E |
++				MXL8611X_EXT_SYNCE_CFG_CLK_FRE_SEL |
++				FIELD_PREP(MXL8611X_EXT_SYNCE_CFG_CLK_SRC_SEL_MASK,
++				MXL8611X_EXT_SYNCE_CFG_CLK_SRC_SEL_125M_PLL);
++		mask = MXL8611X_EXT_SYNCE_CFG_EN_SYNC_E |
++		       MXL8611X_EXT_SYNCE_CFG_CLK_SRC_SEL_MASK |
++		       MXL8611X_EXT_SYNCE_CFG_CLK_FRE_SEL;
++		break;
++	case MXL8611X_CLOCK_DEFAULT:
++		phydev_info(phydev, "%s, default clock cfg\n", __func__);
++		return 0;
++	default:
++		phydev_info(phydev, "%s, invalid clock cfg: %d\n", __func__, MXL8611X_EXT_SYNCE_CFG_CLOCK_FREQ_CUSTOM);
++		return -EINVAL;
++	}
++
++	phydev_info(phydev, "%s, clock cfg mask:%d, value: %d\n", __func__, mask, value);
++
++	/* Write clock output configuration */
++	ret = mxlphy_locked_modify_extended_reg(phydev, MXL8611X_EXT_SYNCE_CFG_REG,
++					 mask, value);
++	if (ret < 0)
++		return ret;
++
++	return 0;
++}
++
++/**
++ * mxl86110_config_init() - initialize the PHY
++ * @phydev: pointer to the phy_device
++ *
++ * returns 0 or negative errno code
++ */
++static int mxl86110_config_init(struct phy_device *phydev)
++{
++	int page_to_restore, ret = 0;
++	unsigned int val = 0;
++	bool disable_rxdly = false;
++
++	page_to_restore = phy_select_page(phydev, MXL86110_DEFAULT_PAGE);
++	if (page_to_restore < 0)
++		goto error;
++
++	switch (phydev->interface) {
++	case PHY_INTERFACE_MODE_RGMII:
++		/* no delay, will write 0 */
++		val = MXL8611X_EXT_RGMII_CFG1_NO_DELAY;
++		disable_rxdly = true;
++		break;
++	case PHY_INTERFACE_MODE_RGMII_RXID:
++		val = MXL8611X_EXT_RGMII_CFG1_RX_DELAY_CUSTOM;
++		break;
++	case PHY_INTERFACE_MODE_RGMII_TXID:
++		val = MXL8611X_EXT_RGMII_CFG1_TX_1G_DELAY_CUSTOM |
++				MXL8611X_EXT_RGMII_CFG1_TX_10MB_100MB_CUSTOM;
++		disable_rxdly = true;
++		break;
++	case PHY_INTERFACE_MODE_RGMII_ID:
++		val = MXL8611X_EXT_RGMII_CFG1_TX_1G_DELAY_CUSTOM |
++				MXL8611X_EXT_RGMII_CFG1_TX_10MB_100MB_CUSTOM;
++		val |= MXL8611X_EXT_RGMII_CFG1_RX_DELAY_CUSTOM;
++		break;
++	default:
++		ret = -EINVAL;
++		goto error;
++	}
++	ret = mxlphy_modify_extended_reg(phydev, MXL8611X_EXT_RGMII_CFG1_REG,
++					MXL8611X_EXT_RGMII_CFG1_FULL_MASK, val);
++	if (ret < 0)
++		goto error;
++
++	if (ret < 0)
++		goto error;
++
++	if (MXL8611x_UTP_DISABLE_AUTO_SLEEP_FEATURE_CUSTOM == 1) {
++		/* disable auto sleep */
++		ret = mxlphy_modify_extended_reg(phydev, MXL8611x_UTP_EXT_SLEEP_CTRL_REG,
++					MXL8611x_UTP_EXT_SLEEP_CTRL_EN_SLEEP_SW_MASK,
++					MXL8611x_UTP_EXT_SLEEP_CTRL_EN_SLEEP_SW_OFF);
++		if (ret < 0)
++			goto error;
++	}
++
++	/* Disable RXDLY (RGMII Rx Clock Delay) */
++	if (disable_rxdly)
++	{
++		ret = mxlphy_modify_extended_reg(phydev, MXL86111_EXT_CHIP_CFG_REG,
++						 MXL86111_EXT_CHIP_CFG_RXDLY_ENABLE, 0);
++		if (ret < 0)
++			goto error;
++	}
++
++	ret = mxl8611x_led_cfg(phydev);
++	if (ret < 0)
++		goto error;
++
++	ret = mxl8611x_broadcast_cfg(phydev);
++	if (ret < 0)
++		goto error;
++
++error:
++	return phy_restore_page(phydev, page_to_restore, ret);
++}
++
++struct mxl86111_priv {
++	/* dual_media_advertising used for Dual Media mode (MXL86111_EXT_SMI_SDS_PHY_AUTO) */
++	__ETHTOOL_DECLARE_LINK_MODE_MASK(dual_media_advertising);
++
++	/* MXL86111_MODE_FIBER / MXL86111_MODE_UTP / MXL86111_MODE_AUTO*/
++	u8 reg_page_mode;
++	u8 strap_mode; /* 8 working modes  */
++	/* current reg page of mxl86111 phy:
++	 * MXL86111_EXT_SMI_SDS_PHYUTP_SPACE
++	 * MXL86111_EXT_SMI_SDS_PHYFIBER_SPACE
++	 * MXL86111_EXT_SMI_SDS_PHY_AUTO
++	 */
++	u8 reg_page;
++};
++
++/**
++ * mxl86111_read_page() - read reg page
++ * @phydev: pointer to the phy_device
++ *
++ * returns current reg space of mxl86111 (MXL86111_EXT_SMI_SDS_PHYFIBER_SPACE/
++ * MXL86111_EXT_SMI_SDS_PHYUTP_SPACE) or negative errno code
++ */
++static int mxl86111_read_page(struct phy_device *phydev)
++{
++	int old_page;
++
++	old_page = mxlphy_read_extended_reg(phydev, MXL86111_EXT_SMI_SDS_PHY_REG);
++	if (old_page < 0)
++		return old_page;
++
++	if ((old_page & MXL86111_EXT_SMI_SDS_PHYSPACE_MASK) == MXL86111_EXT_SMI_SDS_PHYFIBER_SPACE)
++		return MXL86111_EXT_SMI_SDS_PHYFIBER_SPACE;
++
++	return MXL86111_EXT_SMI_SDS_PHYUTP_SPACE;
++};
++
++/**
++ * mxl86111_locked_read_page() - read reg page
++ * @phydev: pointer to the phy_device
++ *
++ * returns current reg space of mxl86111 (MXL86111_EXT_SMI_SDS_PHYFIBER_SPACE/
++ * MXL86111_EXT_SMI_SDS_PHYUTP_SPACE) or negative errno code
++ */
++static int mxl86111_locked_read_page(struct phy_device *phydev)
++{
++	int old_page;
++
++	phy_lock_mdio_bus(phydev);
++	old_page = mxl86111_read_page(phydev);
++	phy_unlock_mdio_bus(phydev);
++
++	return old_page;
++};
++
++/**
++ * mxl86111_write_page() - Set reg page
++ * @phydev: pointer to the phy_device
++ * @page: The reg page to set (MXL86111_EXT_SMI_SDS_PHYFIBER_SPACE/MXL86111_EXT_SMI_SDS_PHYUTP_SPACE)
++ *
++ * returns 0 or negative errno code
++ */
++static int mxl86111_write_page(struct phy_device *phydev, int page)
++{
++	int mask = MXL86111_EXT_SMI_SDS_PHYSPACE_MASK;
++	int set;
++
++	if ((page & MXL86111_EXT_SMI_SDS_PHYSPACE_MASK) == MXL86111_EXT_SMI_SDS_PHYFIBER_SPACE)
++		set = MXL86111_EXT_SMI_SDS_PHYFIBER_SPACE;
++	else
++		set = MXL86111_EXT_SMI_SDS_PHYUTP_SPACE;
++
++	return mxlphy_modify_extended_reg(phydev, MXL86111_EXT_SMI_SDS_PHY_REG, mask, set);
++};
++
++/**
++ * mxl86111_modify_bmcr_paged - modify bits of the PHY's BMCR register of a given page
++ * @phydev: pointer to the phy_device
++ * @page: The reg page to operate (MXL86111_EXT_SMI_SDS_PHYFIBER_SPACE/MXL86111_EXT_SMI_SDS_PHYUTP_SPACE)
++ * @mask: bit mask of bits to clear
++ * @set: bit mask of bits to set
++ *
++ * NOTE: new register value = (old register value & ~mask) | set.
++ * MxL86111 has 2 register spaces (utp/fiber) and 3 modes (utp/fiber/auto).
++ * Each space has its MII_BMCR.
++ *
++ * returns 0 or negative errno code
++ */
++static int mxl86111_modify_bmcr_paged(struct phy_device *phydev, int page,
++				    u16 mask, u16 set)
++{
++	int bmcr_timeout = BMCR_RESET_TIMEOUT;
++	int page_to_restore;
++	int ret = 0;
++
++	page_to_restore = phy_select_page(phydev, page & MXL86111_EXT_SMI_SDS_PHYSPACE_MASK);
++	if (page_to_restore < 0)
++		goto err_restore_page;
++
++	ret = __phy_modify(phydev, MII_BMCR, mask, set);
++	if (ret < 0)
++		goto err_restore_page;
++
++	/* In case of BMCR_RESET, check until reset bit is cleared */
++	if (set == BMCR_RESET) {
++		while (bmcr_timeout--) {
++			usleep_range(1000, 1050);
++			ret = __phy_read(phydev, MII_BMCR);
++			if (ret < 0)
++				goto err_restore_page;
++
++			if (!(ret & BMCR_RESET))
++				return phy_restore_page(phydev, page_to_restore, 0);
++		}
++		phydev_warn(phydev, "%s, BMCR reset not completed until timeout", __func__);
++		ret = -EBUSY;
++	}
++
++err_restore_page:
++	return phy_restore_page(phydev, page_to_restore, ret);
++}
++
++/**
++ * mxl86111_modify_bmcr - modify bits of a PHY's BMCR register
++ * @phydev: pointer to the phy_device
++ * @mask: bit mask of bits to clear
++ * @set: bit mask of bits to set
++ *
++ * NOTE: new register value = (old register value & ~mask) | set.
++ * MxL86111 has 2 register spaces (utp/fiber) and 3 mode (utp/fiber/poll)
++ * each space has its MII_BMCR. poll mode combines utp and fiber.
++ *
++ * returns 0 or negative errno code
++ */
++static int mxl86111_modify_bmcr(struct phy_device *phydev, u16 mask, u16 set)
++{
++	struct mxl86111_priv *priv = phydev->priv;
++	int ret = 0;
++
++	if (priv->reg_page != MXL86111_EXT_SMI_SDS_PHY_AUTO) {
++		ret = mxl86111_modify_bmcr_paged(phydev, priv->reg_page, mask, set);
++		if (ret < 0)
++			return ret;
++	} else {
++		ret = mxl86111_modify_bmcr_paged(phydev, ret, mask, set);
++		if (ret < 0)
++			return ret;
++	}
++	return 0;
++}
++
++/**
++ * mxl86111_set_fiber_features() -  setup fiber mode features.
++ * @phydev: pointer to the phy_device
++ * @dst: a pointer to store fiber mode features
++ */
++static void mxl86111_set_fiber_features(struct phy_device *phydev,
++					  unsigned long *dst)
++{
++	linkmode_set_bit(ETHTOOL_LINK_MODE_100baseFX_Full_BIT, dst);
++	linkmode_set_bit(ETHTOOL_LINK_MODE_1000baseX_Full_BIT, dst);
++	linkmode_set_bit(ETHTOOL_LINK_MODE_Autoneg_BIT, dst);
++	linkmode_set_bit(ETHTOOL_LINK_MODE_FIBRE_BIT, dst);
++}
++
++/**
++ * mxlphy_utp_read_abilities - read PHY abilities from Clause 22 registers
++ * @phydev: pointer to the phy_device
++ *
++ * NOTE: Read the PHY abilities and set phydev->supported.
++ * The caller must have taken the MDIO bus lock.
++ *
++ * returns 0 or negative errno code
++ */
++static int mxlphy_utp_read_abilities(struct phy_device *phydev)
++{
++	struct mxl86111_priv *priv = phydev->priv;
++	int val, page;
++
++	linkmode_set_bit_array(phy_basic_ports_array,
++			       ARRAY_SIZE(phy_basic_ports_array),
++			       phydev->supported);
++
++	val = __phy_read(phydev, MII_BMSR);
++	if (val < 0)
++		return val;
++
++	/* In case of dual mode media, we might not have access to the utp page.
++	 * Therefore we use the default register setting of the device to
++	 * 'extract' supported modes.
++	 */
++	page = mxl86111_read_page(phydev);
++	if (page < 0)
++		return page;
++
++	if ((priv->reg_page == MXL86111_EXT_SMI_SDS_PHY_AUTO) && (page == MXL86111_EXT_SMI_SDS_PHYFIBER_SPACE))
++		val = MII_BMSR_DEFAULT_VAL;
++
++	phydev_info(phydev, "%s, MII_BMSR: 0x%04X\n", __func__, val);
++
++	linkmode_mod_bit(ETHTOOL_LINK_MODE_Autoneg_BIT, phydev->supported,
++			 val & BMSR_ANEGCAPABLE);
++
++	linkmode_mod_bit(ETHTOOL_LINK_MODE_10baseT_Full_BIT, phydev->supported,
++			 val & BMSR_10FULL);
++	linkmode_mod_bit(ETHTOOL_LINK_MODE_10baseT_Half_BIT, phydev->supported,
++			 val & BMSR_10HALF);
++	linkmode_mod_bit(ETHTOOL_LINK_MODE_100baseT_Full_BIT, phydev->supported,
++			 val & BMSR_100FULL);
++	linkmode_mod_bit(ETHTOOL_LINK_MODE_100baseT_Half_BIT, phydev->supported,
++			 val & BMSR_100HALF);
++
++	if (val & BMSR_ESTATEN) {
++		val = __phy_read(phydev, MII_ESTATUS);
++		if (val < 0)
++			return val;
++
++	if ((priv->reg_page == MXL86111_EXT_SMI_SDS_PHY_AUTO) && (page == MXL86111_EXT_SMI_SDS_PHYFIBER_SPACE))
++		val = MII_ESTATUS_DEFAULT_VAL;
++
++	phydev_info(phydev, "%s, MII_ESTATUS: 0x%04X\n", __func__, val);
++
++	linkmode_mod_bit(ETHTOOL_LINK_MODE_1000baseT_Full_BIT,
++				 phydev->supported, val & ESTATUS_1000_TFULL);
++	linkmode_mod_bit(ETHTOOL_LINK_MODE_1000baseT_Half_BIT,
++				 phydev->supported, val & ESTATUS_1000_THALF);
++	linkmode_mod_bit(ETHTOOL_LINK_MODE_1000baseX_Full_BIT,
++			 phydev->supported, val & ESTATUS_1000_XFULL);
++	}
++
++	return 0;
++}
++
++/**
++ * mxl86111_get_features_paged() -  read supported link modes for a given page
++ * @phydev: pointer to the phy_device
++ * @page: The reg page to operate (MXL86111_EXT_SMI_SDS_PHYFIBER_SPACE/MXL86111_EXT_SMI_SDS_PHYUTP_SPACE)
++ *
++ * returns 0 or negative errno code
++ */
++static int mxl86111_get_features_paged(struct phy_device *phydev, int page)
++{
++	struct mxl86111_priv *priv = phydev->priv;
++	int page_to_restore;
++	int ret = 0;
++
++	page &= MXL86111_EXT_SMI_SDS_PHYSPACE_MASK;
++	page_to_restore = phy_select_page(phydev, page);
++	if (page_to_restore < 0)
++		goto err_restore_page;
++
++	if ((page == MXL86111_EXT_SMI_SDS_PHYFIBER_SPACE) && (priv->reg_page != MXL86111_EXT_SMI_SDS_PHY_AUTO)) {
++		linkmode_zero(phydev->supported);
++		mxl86111_set_fiber_features(phydev, phydev->supported);
++	} else {
++		ret = mxlphy_utp_read_abilities(phydev);
++		if (ret < 0)
++			goto err_restore_page;
++	}
++
++err_restore_page:
++	return phy_restore_page(phydev, page_to_restore, ret);
++}
++
++/**
++ * mxl86111_get_features - select the reg space then call mxl86111_get_features_paged
++ * @phydev: pointer to the phy_device
++ *
++ * returns 0 or negative errno code
++ */
++static int mxl86111_get_features(struct phy_device *phydev)
++{
++	struct mxl86111_priv *priv = phydev->priv;
++	int ret;
++
++	if (priv->reg_page != MXL86111_EXT_SMI_SDS_PHY_AUTO) {
++		ret = mxl86111_get_features_paged(phydev, priv->reg_page);
++	} else {
++		/* read current page in Dual Media mode, since PHY HW is controlling the page select */
++		ret = mxl86111_locked_read_page(phydev);
++		if (ret < 0)
++			return ret;
++
++		ret = mxl86111_get_features_paged(phydev, ret);
++		if (ret < 0)
++			return ret;
++
++		/* add fiber mode features to phydev->supported */
++		mxl86111_set_fiber_features(phydev, phydev->supported);
++	}
++	return ret;
++}
++
++/**
++ * mxl86110_probe() - read chip config then set suitable reg_page_mode
++ * @phydev: pointer to the phy_device
++ *
++ * returns 0 or negative errno code
++ */
++static int mxl86110_probe(struct phy_device *phydev)
++{
++	int ret;
++
++	/* configure syncE / clk output */
++	ret = mxl8611x_synce_clk_cfg(phydev);
++	if (ret < 0)
++		return ret;
++
++	return 0;
++}
++
++/**
++ * mxl86111_probe() - read chip config then set reg_page_mode, port and page
++ * @phydev: pointer to the phy_device
++ *
++ * returns 0 or negative errno code
++ */
++static int mxl86111_probe(struct phy_device *phydev)
++{
++	struct device *dev = &phydev->mdio.dev;
++	struct mxl86111_priv *priv;
++	int chip_config;
++	int ret;
++
++	priv = devm_kzalloc(dev, sizeof(*priv), GFP_KERNEL);
++	if (!priv)
++		return -ENOMEM;
++
++	phydev->priv = priv;
++
++	// TM: Debugging of pinstrap mode
++	ret = mxlphy_locked_modify_extended_reg(phydev, MXL86111_EXT_CHIP_CFG_REG,
++					 MXL86111_EXT_CHIP_CFG_MODE_SEL_MASK, MXL86111_EXT_CHIP_CFG_MODE_UTP_TO_RGMII);
++	if (ret < 0)
++		return ret;
++	// TM: Debugging of pinstrap mode
++	ret = mxlphy_locked_modify_extended_reg(phydev, MXL86111_EXT_CHIP_CFG_REG,
++				MXL86111_EXT_CHIP_CFG_SW_RST_N_MODE, 0);
++	if (ret < 0)
++		return ret;
++
++	chip_config = mxlphy_locked_read_extended_reg(phydev, MXL86111_EXT_CHIP_CFG_REG);
++	if (chip_config < 0)
++		return chip_config;
++
++	priv->strap_mode = chip_config & MXL86111_EXT_CHIP_CFG_MODE_SEL_MASK;
++	switch (priv->strap_mode) {
++	case MXL86111_EXT_CHIP_CFG_MODE_UTP_TO_SGMII:
++	case MXL86111_EXT_CHIP_CFG_MODE_UTP_TO_RGMII:
++		phydev->port = PORT_TP;
++		priv->reg_page = MXL86111_EXT_SMI_SDS_PHYUTP_SPACE;
++		priv->reg_page_mode = MXL86111_MODE_UTP;
++		break;
++	case MXL86111_EXT_CHIP_CFG_MODE_FIBER_TO_RGMII:
++	case MXL86111_EXT_CHIP_CFG_MODE_SGPHY_TO_RGMAC:
++	case MXL86111_EXT_CHIP_CFG_MODE_SGMAC_TO_RGPHY:
++		phydev->port = PORT_FIBRE;
++		priv->reg_page = MXL86111_EXT_SMI_SDS_PHYFIBER_SPACE;
++		priv->reg_page_mode = MXL86111_MODE_FIBER;
++		break;
++	case MXL86111_EXT_CHIP_CFG_MODE_UTP_FIBER_TO_RGMII:
++	case MXL86111_EXT_CHIP_CFG_MODE_UTP_TO_FIBER_AUTO:
++	case MXL86111_EXT_CHIP_CFG_MODE_UTP_TO_FIBER_FORCE:
++		phydev->port = PORT_NONE;
++		priv->reg_page = MXL86111_EXT_SMI_SDS_PHY_AUTO;
++		priv->reg_page_mode = MXL86111_MODE_AUTO;
++		break;
++
++	}
++	/* set default reg space when it is not Dual Media mode */
++	if (priv->reg_page != MXL86111_EXT_SMI_SDS_PHY_AUTO) {
++		ret = mxlphy_locked_write_extended_reg(phydev,
++						MXL86111_EXT_SMI_SDS_PHY_REG,
++						priv->reg_page);
++		if (ret < 0)
++			return ret;
++	}
++
++	phydev_info(phydev, "%s, pinstrap mode: %d\n", __func__, priv->strap_mode);
++
++	/* configure syncE / clk output - can be defined in custom config section */
++	ret = mxl8611x_synce_clk_cfg(phydev);
++	if (ret < 0)
++		return ret;
++
++	return 0;
++}
++
++/**
++ * mxlphy_check_and_restart_aneg - Enable and restart auto-negotiation
++ * @phydev: pointer to the phy_device
++ * @restart: bool if aneg restart is requested
++ *
++ * NOTE: The caller must have taken the MDIO bus lock.
++ *
++ * identical to genphy_check_and_restart_aneg, but phy_read without mdio lock
++ *
++ * returns 0 or negative errno code
++ */
++static int mxlphy_check_and_restart_aneg(struct phy_device *phydev, bool restart)
++{
++	int ret;
++
++	if (!restart) {
++		ret = __phy_read(phydev, MII_BMCR);
++		if (ret < 0)
++			return ret;
++
++		/* Advertisement did not change, but aneg maybe was never to begin with
++		 * or phy was in isolation state
++		 */
++		if (!(ret & BMCR_ANENABLE) || (ret & BMCR_ISOLATE))
++			restart = true;
++	}
++	/* Enable and restart Autonegotiation */
++	if (restart)
++		return __phy_modify(phydev, MII_BMCR, BMCR_ISOLATE,
++				    BMCR_ANENABLE | BMCR_ANRESTART);
++
++	return 0;
++}
++
++/**
++ * mxlphy_config_advert - sanitize and advertise auto-negotiation parameters
++ * @phydev: pointer to the phy_device
++ *
++ * NOTE: Writes MII_ADVERTISE with the appropriate values,
++ * Returns < 0 on error, 0 if the PHY's advertisement hasn't changed,
++ * and > 0 if it has changed.
++ *
++ * identical to genphy_config_advert, but phy_read without mdio lock
++ *
++ * NOTE: The caller must have taken the MDIO bus lock.
++ *
++ * returns 0 or negative errno code
++ */
++static int mxlphy_config_advert(struct phy_device *phydev)
++{
++	int err, bmsr, changed = 0;
++	u32 adv;
++
++	/* Only allow advertising what this PHY supports */
++	linkmode_and(phydev->advertising, phydev->advertising,
++		     phydev->supported);
++
++	adv = linkmode_adv_to_mii_adv_t(phydev->advertising);
++
++	/* Setup standard advertisement */
++	err = __phy_modify_changed(phydev, MII_ADVERTISE,
++				   ADVERTISE_ALL | ADVERTISE_100BASE4 |
++				   ADVERTISE_PAUSE_CAP | ADVERTISE_PAUSE_ASYM,
++				   adv);
++	if (err < 0)
++		return err;
++	if (err > 0)
++		changed = 1;
++
++	bmsr = __phy_read(phydev, MII_BMSR);
++	if (bmsr < 0)
++		return bmsr;
++
++	/* Per 802.3-2008, Section 22.2.4.2.16 Extended status all
++	 * 1000Mbits/sec capable PHYs shall have the BMSR_ESTATEN bit set to a
++	 * logical 1.
++	 */
++	if (!(bmsr & BMSR_ESTATEN))
++		return changed;
++
++	adv = linkmode_adv_to_mii_ctrl1000_t(phydev->advertising);
++
++	err = __phy_modify_changed(phydev, MII_CTRL1000,
++				   ADVERTISE_1000FULL | ADVERTISE_1000HALF,
++				   adv);
++	if (err < 0)
++		return err;
++	if (err > 0)
++		changed = 1;
++
++	return changed;
++}
++
++#if (LINUX_VERSION_CODE < KERNEL_VERSION(6, 0, 0))
++/**
++ * mii_bmcr_encode_fixed - encode fixed speed/duplex settings to a BMCR value
++ * @speed: a SPEED_* value
++ * @duplex: a DUPLEX_* value
++ *
++ * Encode the speed and duplex to a BMCR value. 2500, 1000, 100 and 10 Mbps are
++ * supported. 2500Mbps is encoded to 1000Mbps. Other speeds are encoded as 10
++ * Mbps. Unknown duplex values are encoded to half-duplex.
++ *
++ * NOTE: this function is only needed for kernel versions < 6.0.0, since it is
++ * defined in new kernel versions anyway.
++ */
++static inline u16 mii_bmcr_encode_fixed(int speed, int duplex)
++{
++	u16 bmcr;
++
++	switch (speed) {
++	case SPEED_2500:
++	case SPEED_1000:
++		bmcr = BMCR_SPEED1000;
++		break;
++
++	case SPEED_100:
++		bmcr = BMCR_SPEED100;
++		break;
++
++	case SPEED_10:
++	default:
++		bmcr = BMCR_SPEED10;
++		break;
++	}
++
++	if (duplex == DUPLEX_FULL)
++		bmcr |= BMCR_FULLDPLX;
++
++	return bmcr;
++}
++#endif
++
++/**
++ * mxlphy_setup_master_slave - set master/slave capabilities
++ * @phydev: pointer to the phy_device
++ *
++ * NOTE: The caller must have taken the MDIO bus lock.
++ *
++ * identical to genphy_setup_master_slave, but phy_read without mdio lock
++ *
++ * returns 0 or negative errno code
++ */
++static int mxlphy_setup_master_slave(struct phy_device *phydev)
++{
++	u16 ctl = 0;
++
++	if (!phydev->is_gigabit_capable)
++
++		return 0;
++
++	switch (phydev->master_slave_set) {
++	case MASTER_SLAVE_CFG_MASTER_PREFERRED:
++		ctl |= CTL1000_PREFER_MASTER;
++		break;
++	case MASTER_SLAVE_CFG_SLAVE_PREFERRED:
++		break;
++	case MASTER_SLAVE_CFG_MASTER_FORCE:
++		ctl |= CTL1000_AS_MASTER;
++		fallthrough;
++	case MASTER_SLAVE_CFG_SLAVE_FORCE:
++		ctl |= CTL1000_ENABLE_MASTER;
++		break;
++	case MASTER_SLAVE_CFG_UNKNOWN:
++	case MASTER_SLAVE_CFG_UNSUPPORTED:
++		return 0;
++	default:
++		phydev_warn(phydev, "Unsupported Master/Slave mode\n");
++		return -EOPNOTSUPP;
++	}
++
++	return __phy_modify_changed(phydev, MII_CTRL1000,
++				    (CTL1000_ENABLE_MASTER | CTL1000_AS_MASTER |
++				    CTL1000_PREFER_MASTER), ctl);
++}
++
++/**
++ * mxlphy_config_eee_advert - disable unwanted eee mode advertisement
++ * @phydev: pointer to the phy_device
++ *
++ * NOTE: The caller must have taken the MDIO bus lock.
++ *
++ * identical to genphy_config_eee_advert, but __phy_modify_mmd_changed without mdio lock
++ *
++ * Writes MDIO_AN_EEE_ADV after disabling unsupported energy
++ * efficent ethernet modes. Returns 0 if the PHY's advertisement hasn't
++ * changed, and 1 if it has changed.
++ */
++int mxlphy_config_eee_advert(struct phy_device *phydev)
++{
++	int err;
++
++	/* Nothing to disable */
++	if (!phydev->eee_broken_modes)
++		return 0;
++
++	err = __phy_modify_mmd_changed(phydev, MDIO_MMD_AN, MDIO_AN_EEE_ADV,
++				     phydev->eee_broken_modes, 0);
++	/* If the call failed, we assume that EEE is not supported */
++	return err < 0 ? 0 : err;
++}
++
++/**
++ * mxlphy_config_aneg_utp - restart auto-negotiation or write BMCR
++ * @phydev: pointer to the phy_device
++ * @changed: bool if autoneg is requested
++ *
++ * If auto-negotiation is enabled, advertising will be configure,
++ * and then auto-negotiation will be restarted. Otherwise write the BMCR.
++ *
++ * NOTE: The caller must have taken the MDIO bus lock.
++ *
++ * returns 0 or negative errno code
++ */
++static int mxlphy_config_aneg_utp(struct phy_device *phydev, bool changed)
++{
++	struct mxl86111_priv *priv = phydev->priv;
++	int err;
++	u16 ctl;
++
++	/* identical to genphy_config_eee_advert, but __phy_modify_mmd_changed without mdio lock */
++	if (mxlphy_config_eee_advert(phydev))
++		changed = true;
++
++	/* identical to genphy_setup_master_slave, but phy_read without mdio lock */
++	err = mxlphy_setup_master_slave(phydev);
++	if (err < 0)
++		return err;
++	else if (err)
++		changed = true;
++
++	if (phydev->autoneg != AUTONEG_ENABLE) {
++		/* configures/forces speed/duplex, empty rate selection would result in 10M */
++		ctl = mii_bmcr_encode_fixed(phydev->speed, phydev->duplex);
++		/* In dual media mode prevent 1000BASE-T half duplex due to risk of permanent blocking*/
++		if (priv->reg_page_mode == MXL86111_MODE_AUTO) {
++			if (ctl & BMCR_SPEED1000) {
++				phydev_err(phydev, "%s, Error: no supported fixed UTP rate configured - setting ignored\n", __func__);
++				return -EINVAL;
++			}
++		}
++
++		return __phy_modify(phydev, MII_BMCR, ~(BMCR_LOOPBACK |
++				    BMCR_ISOLATE | BMCR_PDOWN), ctl);
++	}
++
++	/* At least one valid rate must be advertised in Dual Media mode, since it could
++	 * lead to permanent blocking of the UTP path otherwise. The PHY HW is controlling
++	 * the page select autonomously in this mode.
++	 * If mode switches to Fiber reg page when a link partner is connected, while UTP
++	 * link is down, it can never switch back to UTP if the link cannot be established
++	 * anymore due to invalid configuration. A HW reset would be required to re-enable
++	 * UTP mode. Therefore prevent this situation and ignore invalid speed configuration.
++	 * Returning a negative return code (e.g. EINVAL) results in stack trace dumps from
++	 * some PAL functions.
++	 */
++	if (priv->reg_page_mode == MXL86111_MODE_AUTO) {
++		ctl = 0;
++		if (linkmode_test_bit(ETHTOOL_LINK_MODE_10baseT_Half_BIT, phydev->advertising))
++			ctl |= ADVERTISE_10HALF;
++		if (linkmode_test_bit(ETHTOOL_LINK_MODE_10baseT_Full_BIT, phydev->advertising))
++			ctl |= ADVERTISE_10FULL;
++		if (linkmode_test_bit(ETHTOOL_LINK_MODE_100baseT_Half_BIT, phydev->advertising))
++			ctl |= ADVERTISE_100HALF;
++		if (linkmode_test_bit(ETHTOOL_LINK_MODE_100baseT_Full_BIT, phydev->advertising))
++			ctl |= ADVERTISE_100FULL;
++		if (linkmode_test_bit(ETHTOOL_LINK_MODE_1000baseT_Full_BIT, phydev->advertising))
++			ctl |= ADVERTISE_1000FULL;
++
++		if (ctl == 0) {
++			phydev_err(phydev, "%s, Error: no supported UTP rate configured - setting ignored\n", __func__);
++			return -EINVAL;
++		}
++	}
++
++	/* identical to genphy_config_advert, but phy_read without mdio lock */
++	err = mxlphy_config_advert(phydev);
++	if (err < 0)
++		return err;
++	else if (err)
++		changed = true;
++
++	return mxlphy_check_and_restart_aneg(phydev, changed);
++}
++
++/**
++ * mxl86111_fiber_setup_forced - configures/forces speed for fiber mode
++ * @phydev: pointer to the phy_device
++ *
++ * NOTE: The caller must have taken the MDIO bus lock.
++ *
++ * returns 0 or negative errno code
++ */
++static int mxl86111_fiber_setup_forced(struct phy_device *phydev)
++{
++	u16 val;
++	int ret;
++
++	if (phydev->speed == SPEED_1000)
++		val = MXL86111_EXT_MISC_CONFIG_FIB_SPEED_SEL_1000BX;
++	else if (phydev->speed == SPEED_100)
++		val = MXL86111_EXT_MISC_CONFIG_FIB_SPEED_SEL_100BX;
++	else
++		return -EINVAL;
++
++	ret =  __phy_modify(phydev, MII_BMCR, BMCR_ANENABLE, 0);
++	if (ret < 0)
++		return ret;
++
++	ret =  mxlphy_modify_extended_reg(phydev, MXL86111_EXT_MISC_CONFIG_REG,
++				MXL86111_EXT_MISC_CONFIG_FIB_SPEED_SEL, val);
++	if (ret < 0)
++		return ret;
++
++	ret =  mxlphy_modify_extended_reg(phydev, MXL86111_EXT_SDS_LINK_TIMER_CFG2_REG,
++				MXL86111_EXT_SDS_LINK_TIMER_CFG2_EN_AUTOSEN, 0);
++	if (ret < 0)
++		return ret;
++
++	return mxlphy_modify_extended_reg(phydev, MXL86111_EXT_CHIP_CFG_REG,
++				MXL86111_EXT_CHIP_CFG_SW_RST_N_MODE, 0);
++}
++
++/**
++ * mxl86111_fiber_config_aneg - restart auto-negotiation or write
++ * MXL86111_EXT_MISC_CONFIG_REG.
++ * @phydev: pointer to the phy_device
++ *
++ * NOTE: The caller must have taken the MDIO bus lock.
++ *
++ * returns 0 or negative errno code
++ */
++static int mxl86111_fiber_config_aneg(struct phy_device *phydev)
++{
++	int ret, bmcr;
++	u16 adv;
++	bool changed = false;
++
++	if (phydev->autoneg != AUTONEG_ENABLE)
++		return mxl86111_fiber_setup_forced(phydev);
++
++	/* enable fiber auto sensing */
++	ret =  mxlphy_modify_extended_reg(phydev, MXL86111_EXT_SDS_LINK_TIMER_CFG2_REG,
++				0, MXL86111_EXT_SDS_LINK_TIMER_CFG2_EN_AUTOSEN);
++	if (ret < 0)
++		return ret;
++
++	ret =  mxlphy_modify_extended_reg(phydev, MXL86111_EXT_CHIP_CFG_REG,
++				MXL86111_EXT_CHIP_CFG_SW_RST_N_MODE, 0);
++	if (ret < 0)
++		return ret;
++
++	bmcr = __phy_read(phydev, MII_BMCR);
++	if (bmcr < 0)
++		return bmcr;
++
++	/* For fiber forced mode, power down/up to re-aneg */
++	if (!(bmcr & BMCR_ANENABLE)) {
++		__phy_modify(phydev, MII_BMCR, 0, BMCR_PDOWN);
++		usleep_range(1000, 1050);
++		__phy_modify(phydev, MII_BMCR, BMCR_PDOWN, 0);
++	}
++
++	adv = linkmode_adv_to_mii_adv_x(phydev->advertising,
++					ETHTOOL_LINK_MODE_1000baseX_Full_BIT);
++
++	/* Setup fiber advertisement */
++	ret = __phy_modify_changed(phydev, MII_ADVERTISE,
++				   ADVERTISE_1000XHALF | ADVERTISE_1000XFULL |
++				   ADVERTISE_1000XPAUSE |
++				   ADVERTISE_1000XPSE_ASYM,
++				   adv);
++	if (ret < 0)
++		return ret;
++
++	if (ret > 0)
++		changed = true;
++
++	/* identical to genphy_check_and_restart_aneg, but phy_read without mdio lock */
++	return mxlphy_check_and_restart_aneg(phydev, changed);
++}
++
++/**
++ * mxl86111_config_aneg_paged() - configure advertising for a givenpage
++ * @phydev: pointer to the phy_device
++ * @page: The reg page to operate (MXL86111_EXT_SMI_SDS_PHYFIBER_SPACE/MXL86111_EXT_SMI_SDS_PHYUTP_SPACE)
++ *
++ * returns 0 or negative errno code
++ */
++static int mxl86111_config_aneg_paged(struct phy_device *phydev, int page)
++{
++	__ETHTOOL_DECLARE_LINK_MODE_MASK(fiber_supported);
++	struct mxl86111_priv *priv = phydev->priv;
++	int page_to_restore;
++	int ret = 0;
++
++	page &= MXL86111_EXT_SMI_SDS_PHYSPACE_MASK;
++
++	page_to_restore = phy_select_page(phydev, page);
++	if (page_to_restore < 0)
++		goto err_restore_page;
++
++	/* In case of Dual Media mode (MXL86111_EXT_SMI_SDS_PHY_AUTO),
++	 * update phydev->advertising.
++	 */
++	if (priv->reg_page == MXL86111_EXT_SMI_SDS_PHY_AUTO) {
++		/* prepare the general fiber supported modes */
++		linkmode_zero(fiber_supported);
++		mxl86111_set_fiber_features(phydev, fiber_supported);
++
++		/* configure fiber_supported, then prepare advertising */
++		if (page == MXL86111_EXT_SMI_SDS_PHYFIBER_SPACE) {
++			linkmode_set_bit(ETHTOOL_LINK_MODE_Pause_BIT,
++					 fiber_supported);
++			linkmode_set_bit(ETHTOOL_LINK_MODE_Asym_Pause_BIT,
++					 fiber_supported);
++			linkmode_and(phydev->advertising,
++				     priv->dual_media_advertising, fiber_supported);
++		} else {
++			/* ETHTOOL_LINK_MODE_Autoneg_BIT is also used in UTP mode */
++			linkmode_clear_bit(ETHTOOL_LINK_MODE_Autoneg_BIT,
++					   fiber_supported);
++			linkmode_andnot(phydev->advertising,
++					priv->dual_media_advertising,
++					fiber_supported);
++		}
++	}
++
++	if (priv->reg_page_mode == MXL86111_MODE_AUTO) {
++		/* read current page in Dual Media mode as late as possible,
++		 * since PHY HW is controlling the page select
++		 */
++		ret = mxl86111_read_page(phydev);
++		if (ret < 0)
++			return ret;
++		if (ret != page)
++			phydev_warn(phydev, "%s, Warning: Dual Media mode - page changed during configuration: page: %d, new: %d, reg_page: %d\n", __func__, page, ret, priv->reg_page);
++	}
++
++	if (page == MXL86111_EXT_SMI_SDS_PHYFIBER_SPACE)
++		ret = mxl86111_fiber_config_aneg(phydev);
++	else
++		ret = mxlphy_config_aneg_utp(phydev, false);
++
++err_restore_page:
++	return phy_restore_page(phydev, page_to_restore, ret);
++}
++
++/**
++ * mxl86111_config_aneg() - set reg page and then call mxl86111_config_aneg_paged
++ * @phydev: pointer to the phy_device
++ *
++ * returns 0 or negative errno code
++ */
++static int mxl86111_config_aneg(struct phy_device *phydev)
++{
++	struct mxl86111_priv *priv = phydev->priv;
++	int ret;
++
++	if (priv->reg_page != MXL86111_EXT_SMI_SDS_PHY_AUTO) {
++		ret = mxl86111_config_aneg_paged(phydev, priv->reg_page);
++		if (ret < 0)
++			return ret;
++	} else {
++		/* In Dual Media mode (MXL86111_EXT_SMI_SDS_PHY_AUTO)
++		 * phydev->advertising need to be saved at first run, since it contains the
++		 * advertising which supported by both mac and mxl86111(utp and fiber).
++		 */
++		if (linkmode_empty(priv->dual_media_advertising)) {
++			linkmode_copy(priv->dual_media_advertising,
++				      phydev->advertising);
++		}
++		/* read current page in Dual Media mode, since PHY HW is controlling the page select */
++		ret = mxl86111_locked_read_page(phydev);
++		if (ret < 0)
++			return ret;
++		ret = mxl86111_config_aneg_paged(phydev, ret);
++		if (ret < 0)
++			return ret;
++
++		/* we don't known which mode will link, so restore
++		 * phydev->advertising as default value.
++		 */
++		linkmode_copy(phydev->advertising, priv->dual_media_advertising);
++	}
++	return 0;
++}
++
++/**
++ * mxl86111_aneg_done_paged() - determines the auto negotiation result of a given page.
++ * @phydev: pointer to the phy_device
++ * @page: The reg page to operate (MXL86111_EXT_SMI_SDS_PHYFIBER_SPACE/MXL86111_EXT_SMI_SDS_PHYUTP_SPACE)
++ *
++ * returns 0 (no link) or 1 (fiber or utp link) or negative errno code
++ */
++static int mxl86111_aneg_done_paged(struct phy_device *phydev, int page)
++{
++	int page_to_restore;
++	int ret = 0;
++	int link;
++
++	page_to_restore = phy_select_page(phydev, page & MXL86111_EXT_SMI_SDS_PHYSPACE_MASK);
++	if (page_to_restore < 0)
++		goto err_restore_page;
++
++	ret = __phy_read(phydev, MXL86111_PHY_STAT_REG);
++	if (ret < 0)
++		goto err_restore_page;
++
++	link = !!(ret & MXL86111_PHY_STAT_LSRT);
++	ret = link;
++
++err_restore_page:
++	return phy_restore_page(phydev, page_to_restore, ret);
++}
++
++/**
++ * mxl86111_aneg_done() - determines the auto negotiation result
++ * @phydev: pointer to the phy_device
++ *
++ * returns 0 (no link) or 1 (fiber or utp link) or negative errno code
++ */
++static int mxl86111_aneg_done(struct phy_device *phydev)
++{
++	struct mxl86111_priv *priv = phydev->priv;
++
++	int link;
++	int ret;
++
++	if (priv->reg_page != MXL86111_EXT_SMI_SDS_PHY_AUTO) {
++		link = mxl86111_aneg_done_paged(phydev, priv->reg_page);
++	} else {
++		/* read current page in Dual Media mode, since PHY HW is controlling the page select */
++		ret = mxl86111_locked_read_page(phydev);
++		if (ret < 0)
++			return ret;
++		link = mxl86111_aneg_done_paged(phydev, ret);
++	}
++
++	return link;
++}
++
++/**
++ * mxl86111_config_init() - initialize the PHY
++ * @phydev: pointer to the phy_device
++ *
++ * returns 0 or negative errno code
++ */
++static int mxl86111_config_init(struct phy_device *phydev)
++{
++	int page_to_restore, ret = 0;
++	unsigned int val = 0;
++	bool disable_rxdly = false;
++
++	page_to_restore = phy_select_page(phydev, MXL86111_EXT_SMI_SDS_PHYUTP_SPACE);
++	if (page_to_restore < 0)
++		goto err_restore_page;
++
++	switch (phydev->interface) {
++	case PHY_INTERFACE_MODE_RGMII:
++		/* no delay, will write 0 */
++		val = MXL8611X_EXT_RGMII_CFG1_NO_DELAY;
++		disable_rxdly = true;
++		break;
++	case PHY_INTERFACE_MODE_RGMII_RXID:
++		val = MXL8611X_EXT_RGMII_CFG1_RX_DELAY_CUSTOM;
++		break;
++	case PHY_INTERFACE_MODE_RGMII_TXID:
++		val = MXL8611X_EXT_RGMII_CFG1_TX_1G_DELAY_CUSTOM |
++				MXL8611X_EXT_RGMII_CFG1_TX_10MB_100MB_CUSTOM;
++		disable_rxdly = true;
++		break;
++	case PHY_INTERFACE_MODE_RGMII_ID:
++		val = MXL8611X_EXT_RGMII_CFG1_TX_1G_DELAY_CUSTOM |
++				MXL8611X_EXT_RGMII_CFG1_TX_10MB_100MB_CUSTOM;
++		val |= MXL8611X_EXT_RGMII_CFG1_RX_DELAY_CUSTOM;
++		break;
++	case PHY_INTERFACE_MODE_SGMII:
++		break;
++	default:
++		ret = -EOPNOTSUPP;
++		goto err_restore_page;
++	}
++
++	/* configure rgmii delay mode */
++	if (phydev->interface != PHY_INTERFACE_MODE_SGMII) {
++		ret = mxlphy_modify_extended_reg(phydev, MXL8611X_EXT_RGMII_CFG1_REG,
++				       MXL8611X_EXT_RGMII_CFG1_FULL_MASK, val);
++		if (ret < 0)
++			goto err_restore_page;
++
++		/* Configure RXDLY (RGMII Rx Clock Delay) */
++		if (disable_rxdly)
++		{
++			ret = mxlphy_modify_extended_reg(phydev, MXL86111_EXT_CHIP_CFG_REG,
++							 MXL86111_EXT_CHIP_CFG_RXDLY_ENABLE, 0);
++
++			if (ret < 0)
++				goto err_restore_page;
++		}
++	}
++
++	if (MXL8611x_UTP_DISABLE_AUTO_SLEEP_FEATURE_CUSTOM == 1) {
++		/* disable auto sleep */
++		ret = mxlphy_modify_extended_reg(phydev, MXL8611x_UTP_EXT_SLEEP_CTRL_REG,
++					MXL8611x_UTP_EXT_SLEEP_CTRL_EN_SLEEP_SW_MASK,
++					MXL8611x_UTP_EXT_SLEEP_CTRL_EN_SLEEP_SW_OFF);
++		if (ret < 0)
++			goto err_restore_page;
++	}
++
++	ret = mxl8611x_led_cfg(phydev);
++	if (ret < 0)
++		goto err_restore_page;
++
++	ret = mxl8611x_broadcast_cfg(phydev);
++	if (ret < 0)
++		goto err_restore_page;
++
++err_restore_page:
++	return phy_restore_page(phydev, page_to_restore, ret);
++}
++
++
++/**
++ * mxlphy_read_lpa() - read LPA and setup lp_advertising for UTP mode
++ * @phydev: pointer to the phy_device
++ *
++ * NOTE: The caller must have taken the MDIO bus lock.
++ *
++ * identical to genphy_check_read_lpa, but phy_read without mdio lock
++ *
++ * returns 0 or negative errno code
++ */
++static int mxlphy_read_lpa(struct phy_device *phydev)
++{
++	int lpa, lpagb;
++
++	if (phydev->autoneg == AUTONEG_ENABLE) {
++		if (!phydev->autoneg_complete) {
++			mii_stat1000_mod_linkmode_lpa_t(phydev->lp_advertising,
++							0);
++			mii_lpa_mod_linkmode_lpa_t(phydev->lp_advertising, 0);
++			return 0;
++		}
++
++		if (phydev->is_gigabit_capable) {
++			lpagb = __phy_read(phydev, MII_STAT1000);
++			if (lpagb < 0)
++				return lpagb;
++
++			if (lpagb & LPA_1000MSFAIL) {
++				int adv = __phy_read(phydev, MII_CTRL1000);
++
++				if (adv < 0)
++					return adv;
++
++				if (adv & CTL1000_ENABLE_MASTER)
++					phydev_err(phydev, "Master/Slave resolution failed, maybe conflicting manual settings?\n");
++				else
++					phydev_err(phydev, "Master/Slave resolution failed\n");
++				return -ENOLINK;
++			}
++
++			mii_stat1000_mod_linkmode_lpa_t(phydev->lp_advertising,
++							lpagb);
++		}
++
++		lpa = __phy_read(phydev, MII_LPA);
++		if (lpa < 0)
++			return lpa;
++
++		mii_lpa_mod_linkmode_lpa_t(phydev->lp_advertising, lpa);
++	} else {
++		linkmode_zero(phydev->lp_advertising);
++	}
++
++	return 0;
++}
++
++
++/**
++ * mxl86111_adjust_status() - update speed and duplex to phydev. when in fiber
++ * mode, adjust speed and duplex.
++ * @phydev: pointer to the phy_device
++ * @status: mxl86111 status read from MXL86111_PHY_STAT_REG
++ * @is_utp: false(mxl86111 work in fiber mode) or true(mxl86111 work in utp mode)
++ *
++ * NOTE: The caller must have taken the MDIO bus lock.
++ *
++ * returns 0
++ */
++static int mxl86111_adjust_status(struct phy_device *phydev, int status, bool is_utp)
++{
++	int speed_mode, duplex;
++	int speed;
++	int err;
++	int lpa;
++
++	if (is_utp)
++		duplex = (status & MXL86111_PHY_STAT_DPX) >> MXL86111_PHY_STAT_DPX_OFFSET;
++	else
++		duplex = DUPLEX_FULL;	/* FIBER is always DUPLEX_FULL */
++
++	speed_mode = (status & MXL86111_PHY_STAT_SPEED_MASK) >>
++		     MXL86111_PHY_STAT_SPEED_OFFSET;
++
++	switch (speed_mode) {
++	case MXL86111_PHY_STAT_SPEED_10M:
++		if (is_utp)
++			speed = SPEED_10;
++		else
++			/* not supported for FIBER mode */
++			speed = SPEED_UNKNOWN;
++		break;
++	case MXL86111_PHY_STAT_SPEED_100M:
++		speed = SPEED_100;
++		break;
++	case MXL86111_PHY_STAT_SPEED_1000M:
++		speed = SPEED_1000;
++		break;
++	default:
++		speed = SPEED_UNKNOWN;
++		break;
++	}
++
++	phydev->speed = speed;
++	phydev->duplex = duplex;
++
++	if (is_utp) {
++		err = mxlphy_read_lpa(phydev);
++		if (err < 0)
++			return err;
++
++		phy_resolve_aneg_pause(phydev);
++	} else {
++		lpa = __phy_read(phydev, MII_LPA);
++		if (lpa < 0)
++			return lpa;
++		/* only support 1000baseX Full Duplex in Fiber mode */
++		linkmode_mod_bit(ETHTOOL_LINK_MODE_1000baseX_Full_BIT,
++				 phydev->lp_advertising, lpa & LPA_1000XFULL);
++		if (!(lpa & MXL86111_SDS_AN_LPA_PAUSE)) {
++			/* disable pause */
++			phydev->pause = 0;
++			phydev->asym_pause = 0;
++		} else if ((lpa & MXL86111_SDS_AN_LPA_ASYM_PAUSE)) {
++			/* asymmetric pause */
++			phydev->pause = 1;
++			phydev->asym_pause = 1;
++		} else {
++			/* symmetric pause */
++			phydev->pause = 1;
++			phydev->asym_pause = 0;
++		}
++	}
++
++	return 0;
++}
++
++/**
++ * mxl86111_read_status_paged() -  determines the speed and duplex of one page
++ * @phydev: pointer to the phy_device
++ * @page: The reg page to operate (MXL86111_EXT_SMI_SDS_PHYFIBER_SPACE/MXL86111_EXT_SMI_SDS_PHYUTP_SPACE)
++ *
++ * returns 1 (utp or fiber link), 0 (no link) or negative errno code
++ */
++static int mxl86111_read_status_paged(struct phy_device *phydev, int page)
++{
++	int sds_stat_stored, sds_stat_curr;
++	int page_to_restore;
++	int ret = 0;
++	int status;
++	int link;
++
++	linkmode_zero(phydev->lp_advertising);
++	phydev->duplex = DUPLEX_UNKNOWN;
++	phydev->speed = SPEED_UNKNOWN;
++	phydev->asym_pause = 0;
++	phydev->pause = 0;
++
++	/* MxL86111 uses two reg spaces (utp/fiber). In Dual Media mode,
++	 * the PHY HW will do the switching autonomously upon link status.
++	 * By default, utp has priority. In this mode the HW controlled
++	 * reg page selection bit is read-only and can only be read.
++	 * The reg space should be properly set before reading
++	 * MXL86111_PHY_STAT_REG.
++	 */
++
++	page &= MXL86111_EXT_SMI_SDS_PHYSPACE_MASK;
++	page_to_restore = phy_select_page(phydev, page);
++	if (page_to_restore < 0)
++		goto err_restore_page;
++
++	/* Read MXL86111_PHY_STAT_REG, which reports the actual speed
++	 * and duplex.
++	 */
++	ret = __phy_read(phydev, MXL86111_PHY_STAT_REG);
++	if (ret < 0)
++		goto err_restore_page;
++
++	status = ret;
++	link = !!(status & MXL86111_PHY_STAT_LSRT);
++
++	/* In fiber mode there is no link down from MXL86111_PHY_STAT_REG
++	 * when speed switches from 1000 Mbps to 100Mbps.
++	 * It is required to check MII_BMSR to identify such a situation.
++	 */
++	if (page == MXL86111_EXT_SMI_SDS_PHYFIBER_SPACE) {
++		ret = __phy_read(phydev, MII_BMSR);
++		if (ret < 0)
++			goto err_restore_page;
++		sds_stat_stored = ret;
++
++		ret = __phy_read(phydev, MII_BMSR);
++		if (ret < 0)
++			goto err_restore_page;
++		sds_stat_curr = ret;
++
++		if (link && sds_stat_stored != sds_stat_curr) {
++			link = 0;
++			phydev_info(phydev,
++				    "%s, fiber link down detected by SDS_STAT change from %04x to %04x\n",
++				    __func__, sds_stat_stored, sds_stat_curr);
++		}
++	} else {
++		/* Read autonegotiation status */
++		ret = __phy_read(phydev, MII_BMSR);
++		if (ret < 0)
++			goto err_restore_page;
++
++		phydev->autoneg_complete = ret & BMSR_ANEGCOMPLETE ? 1 : 0;
++	}
++
++	if (link) {
++		if (page == MXL86111_EXT_SMI_SDS_PHYUTP_SPACE)
++			mxl86111_adjust_status(phydev, status, true);
++		else
++			mxl86111_adjust_status(phydev, status, false);
++	}
++	return phy_restore_page(phydev, page_to_restore, link);
++
++err_restore_page:
++	return phy_restore_page(phydev, page_to_restore, ret);
++}
++
++/**
++ * mxl86111_read_status() -  determines the negotiated speed and duplex
++ * @phydev: pointer to the phy_device
++ *
++ * returns 0 or negative errno code
++ */
++static int mxl86111_read_status(struct phy_device *phydev)
++{
++	struct mxl86111_priv *priv = phydev->priv;
++	int link;
++	int page;
++
++	page = mxl86111_locked_read_page(phydev);
++	if (page < 0)
++		return page;
++
++	if (priv->reg_page != MXL86111_EXT_SMI_SDS_PHY_AUTO) {
++		link = mxl86111_read_status_paged(phydev, priv->reg_page);
++		if (link < 0)
++			return link;
++	} else {
++		link = mxl86111_read_status_paged(phydev, page);
++	}
++
++	if (link) {
++		if (phydev->link == 0) {
++			/* set port type in Dual Media mode based on active page select (controlled by PHY HW). */
++			if (priv->reg_page_mode == MXL86111_MODE_AUTO &&
++			    priv->reg_page == MXL86111_EXT_SMI_SDS_PHY_AUTO) {
++				priv->reg_page = page;
++
++				phydev->port = (page == MXL86111_EXT_SMI_SDS_PHYFIBER_SPACE) ? PORT_FIBRE : PORT_TP;
++
++				phydev_info(phydev, "%s, link up, media: %s\n", __func__,
++					    (phydev->port == PORT_TP) ? "UTP" : "Fiber");
++			}
++			phydev->link = 1;
++		} else {
++			if (priv->reg_page != page) {
++				/* PHY HW detected UTP port active in parallel to FIBER port.
++				 * Since UTP has priority, the page will be hard switched from FIBER
++				 * to UTP. This needs to be detected and FIBER link reported as down.
++				 */
++				phydev_info(phydev, "%s, link down, media: %s\n",
++					    __func__, (phydev->port == PORT_TP) ? "UTP" : "Fiber");
++
++				/* When in MXL86111_MODE_AUTO mode, prepare to detect the next activation mode
++				 * to support Dual Media mode
++				 */
++				if (priv->reg_page_mode == MXL86111_MODE_AUTO) {
++					priv->reg_page = MXL86111_EXT_SMI_SDS_PHY_AUTO;
++					phydev->port = PORT_NONE;
++				}
++				phydev->link = 0;
++			}
++		}
++	} else {
++		if (phydev->link == 1) {
++			phydev_info(phydev, "%s, link down, media: %s\n",
++				    __func__, (phydev->port == PORT_TP) ? "UTP" : "Fiber");
++
++			/* When in MXL86111_MODE_AUTO mode, arbitration will be prepare
++			 * to support Dual Media mode
++			 */
++			if (priv->reg_page_mode == MXL86111_MODE_AUTO) {
++				priv->reg_page = MXL86111_EXT_SMI_SDS_PHY_AUTO;
++				phydev->port = PORT_NONE;
++			}
++		}
++
++		phydev->link = 0;
++	}
++
++	return 0;
++}
++
++/**
++ * mxl86111_soft_reset() - issue a PHY software reset
++ * @phydev: pointer to the phy_device
++ *
++ * returns 0 or negative errno code
++ */
++static int mxl86111_soft_reset(struct phy_device *phydev)
++{
++	return mxl86111_modify_bmcr(phydev, 0, BMCR_RESET);
++}
++
++/**
++ * mxl86111_suspend() - suspend the PHY hardware
++ * @phydev: pointer to the phy_device
++ *
++ * returns 0 or negative errno code
++ */
++static int mxl86111_suspend(struct phy_device *phydev)
++{
++	struct mxl86111_priv *priv = phydev->priv;
++	int wol_config;
++
++	wol_config = mxlphy_locked_read_extended_reg(phydev, MXL8611X_EXT_WOL_CFG_REG);
++	if (wol_config < 0)
++		return wol_config;
++
++	/* if wake-on-lan is enabled, do nothing */
++	if (wol_config & MXL8611X_EXT_WOL_CFG_WOLE_MASK)
++		return 0;
++
++	/* do not power down in Dual Media mode, since page is controlled by HW
++	 * and the mode might not 'wake up' anymore later on when the other mode is active
++	 */
++	if (priv->reg_page_mode == MXL86111_MODE_AUTO)
++		return 0;
++
++	return mxl86111_modify_bmcr(phydev, 0, BMCR_PDOWN);
++}
++
++/**
++ * mxl86111_resume() - resume the PHY hardware
++ * @phydev: pointer to the phy_device
++ *
++ * returns 0 or negative errno code
++ */
++static int mxl86111_resume(struct phy_device *phydev)
++{
++	int wol_config;
++
++	wol_config = mxlphy_locked_read_extended_reg(phydev, MXL8611X_EXT_WOL_CFG_REG);
++	if (wol_config < 0)
++		return wol_config;
++
++	/* if wake-on-lan is enabled, do nothing */
++	if (wol_config & MXL8611X_EXT_WOL_CFG_WOLE_MASK)
++		return 0;
++
++	return mxl86111_modify_bmcr(phydev, BMCR_PDOWN, 0);
++}
++
++static struct phy_driver mxl_phy_drvs[] = {
++	{
++		PHY_ID_MATCH_EXACT(PHY_ID_MXL86110),
++		.name			= "MXL86110 Gigabit Ethernet",
++		.probe			= mxl86110_probe,
++		.config_init	= mxl86110_config_init,
++		.config_aneg	= genphy_config_aneg,
++		.read_page		= mxl86110_read_page,
++		.write_page		= mxl86110_write_page,
++		.read_status	= genphy_read_status,
++		.get_wol		= mxlphy_get_wol,
++		.set_wol		= mxlphy_set_wol,
++		.suspend		= genphy_suspend,
++		.resume			= genphy_resume,
++	},
++	{
++		PHY_ID_MATCH_EXACT(PHY_ID_MXL86111),
++		.name			= "MXL86111 Gigabit Ethernet",
++		.get_features	= mxl86111_get_features,
++		.probe			= mxl86111_probe,
++		.config_init	= mxl86111_config_init,
++		.config_aneg	= mxl86111_config_aneg,
++		.aneg_done		= mxl86111_aneg_done,
++		.read_status	= mxl86111_read_status,
++		.read_page		= mxl86111_read_page,
++		.write_page		= mxl86111_write_page,
++		.get_wol		= mxlphy_get_wol,
++		.set_wol		= mxlphy_set_wol,
++		.suspend		= mxl86111_suspend,
++		.resume			= mxl86111_resume,
++		.soft_reset		= mxl86111_soft_reset,
++	},
++};
++
++module_phy_driver(mxl_phy_drvs);
++
++MODULE_DESCRIPTION(MXL8611x_DRIVER_DESC);
++MODULE_VERSION(MXL8611x_DRIVER_DESC);
++MODULE_LICENSE("GPL");
++
++static const struct mdio_device_id __maybe_unused mxl_tbl[] = {
++	{ PHY_ID_MATCH_EXACT(PHY_ID_MXL86110) },
++	{ PHY_ID_MATCH_EXACT(PHY_ID_MXL86111) },
++	{  }
++};
++
++MODULE_DEVICE_TABLE(mdio, mxl_tbl);
+diff --git a/include/dt-bindings/net/mxl-8611x.h b/include/dt-bindings/net/mxl-8611x.h
+new file mode 100644
+index 000000000000..4b43d0459ddb
+--- /dev/null
++++ b/include/dt-bindings/net/mxl-8611x.h
+@@ -0,0 +1,27 @@
++/* SPDX-License-Identifier: (GPL-2.0+ OR MIT) */
++/*
++ * Device Tree constants for MaxLinear MXL8611x PHYs
++ *
++ * Copyright 2023 Variscite Ltd.
++ * Copyright 2023 MaxLinear Inc.
++ */
++
++#ifndef _DT_BINDINGS_MXL_8611X_H
++#define _DT_BINDINGS_MXL_8611X_H
++
++#define MXL8611X_LEDX_CFG_TRAFFIC_ACT_BLINK_IND		(1 << 13)
++#define MXL8611X_LEDX_CFG_LINK_UP_FULL_DUPLEX_ON	(1 << 12)
++#define MXL8611X_LEDX_CFG_LINK_UP_HALF_DUPLEX_ON	(1 << 11)
++#define MXL8611X_LEDX_CFG_LINK_UP_TX_ACT_ON		(1 << 10)
++#define MXL8611X_LEDX_CFG_LINK_UP_RX_ACT_ON		(1 << 9)
++#define MXL8611X_LEDX_CFG_LINK_UP_TX_ON			(1 << 8)
++#define MXL8611X_LEDX_CFG_LINK_UP_RX_ON			(1 << 7)
++#define MXL8611X_LEDX_CFG_LINK_UP_1GB_ON		(1 << 6)
++#define MXL8611X_LEDX_CFG_LINK_UP_100MB_ON		(1 << 5)
++#define MXL8611X_LEDX_CFG_LINK_UP_10MB_ON		(1 << 4)
++#define MXL8611X_LEDX_CFG_LINK_UP_COLLISION		(1 << 3)
++#define MXL8611X_LEDX_CFG_LINK_UP_1GB_BLINK		(1 << 2)
++#define MXL8611X_LEDX_CFG_LINK_UP_100MB_BLINK		(1 << 1)
++#define MXL8611X_LEDX_CFG_LINK_UP_10MB_BLINK		(1 << 0)
++
++#endif
+\ No newline at end of file
+-- 
+2.43.0
+

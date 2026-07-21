@@ -1,0 +1,23 @@
+#setenv mtdids 'nand0=gpmi-nand'
+#setenv mtdparts 'mtdparts=gpmi-nand:64m(nandboot),32m(nandkernel),16m(nanddtb),-(nandrootfs)'
+setenv filesize '0x0ad2a000'
+
+#uImage
+tftp ${loadaddr} zImage
+nand erase 0x04000000 0x02000000
+nand write ${loadaddr} 0x04000000 0x02000000
+
+#DTB:
+tftp ${loadaddr} imx6ull-microgea-loco5.dtb
+nand erase 0x06000000 0x00100000
+nand write ${loadaddr} 0x06000000 0x00100000
+
+#FS:
+nand erase.part nandrootfs
+tftp ${loadaddr} rootfs.ubifs
+ubi part nandrootfs
+ubi create rootfs
+ubi write ${loadaddr} rootfs ${filesize}
+ubifsmount ubi0:rootfs
+ubifsls
+

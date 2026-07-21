@@ -1,0 +1,26 @@
+From 72653b2a52aa911d9cadc8102b8d4ef29dc8116f Mon Sep 17 00:00:00 2001
+From: engicam <support@engicam.com>
+Date: Thu, 9 Jul 2026 14:56:24 +0200
+Subject: [PATCH] drivers: net: phy: add MXL8611X ethernet phy driver
+Upstream-Status: Inappropriate [for engicam use only]
+
+---
+ drivers/net/phy/Kconfig | 5 +++++
+ 1 file changed, 5 insertions(+)
+
+diff --git a/drivers/net/phy/Kconfig b/drivers/net/phy/Kconfig
+index 8c469c11829..7b81ec45ae9 100644
+--- a/drivers/net/phy/Kconfig
++++ b/drivers/net/phy/Kconfig
+@@ -291,6 +291,11 @@ config PHY_MOTORCOMM
+ 	  Enables support for Motorcomm network PHYs.
+ 	  Currently supports the YT8511 and YT8531 Gigabit Ethernet PHYs.
+ 
++config PHY_MXL8611X
++	bool "MaxLinear MXL8611X Ethernet PHYs"
++	help
++	  Add support for configuring MaxLinear MXL8611X Ethernet PHYs.
++
+ config PHY_MSCC
+ 	bool "Microsemi Corp Ethernet PHYs support"
+ 

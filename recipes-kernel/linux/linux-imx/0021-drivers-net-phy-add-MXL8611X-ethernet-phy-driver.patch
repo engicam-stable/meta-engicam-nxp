@@ -1,0 +1,26 @@
+From f5c907a4b611ac55479f91878fb8589e47bbc3dc Mon Sep 17 00:00:00 2001
+From: engicam <support@engicam.com>
+Date: Thu, 9 Jul 2026 17:22:36 +0200
+Subject: [PATCH] drivers: net: phy: add MXL8611X ethernet phy driver
+Upstream-Status: Inappropriate [For engicam use only]
+
+---
+ drivers/net/phy/Kconfig | 5 +++++
+ 1 file changed, 5 insertions(+)
+
+diff --git a/drivers/net/phy/Kconfig b/drivers/net/phy/Kconfig
+index f268d8a54a1f..ac9603cfdf02 100644
+--- a/drivers/net/phy/Kconfig
++++ b/drivers/net/phy/Kconfig
+@@ -267,6 +267,11 @@ config MAXLINEAR_GPHY
+ 	  Support for the Maxlinear GPY115, GPY211, GPY212, GPY215,
+ 	  GPY241, GPY245 PHYs.
+ 
++config MAXLINEAR_8611X_PHY
++	tristate "MaxLinear MXL86110 and MXL86111 PHYs"
++	help
++	  Supports the MXL86110 and MXL86111 PHYs.
++
+ config MEDIATEK_GE_PHY
+ 	tristate "MediaTek Gigabit Ethernet PHYs"
+ 	help
