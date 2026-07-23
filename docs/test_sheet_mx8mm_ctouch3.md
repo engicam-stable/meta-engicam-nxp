@@ -1,8 +1,6 @@
 ---
 board: ctouch3
-board_label: C.TOUCH 3.1
 module: mx8mm
-module_label: i.Core MX8M Mini
 ---
 
 # Test sheet i.Core MX8M Mini C.TOUCH 3.1

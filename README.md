@@ -20,12 +20,13 @@ mkdir imx-yocto-bsp
 cd imx-yocto-bsp
 repo init -u https://github.com/nxp-imx/imx-manifest -b imx-linux-walnascar -m imx-6.12.49-2.2.0.xml
 repo sync
+cd sources/
+git clone https://github.com/engicam-stable/meta-engicam-nxp.git -b walnascar
 ```
 
 For iMX95 Smarcore and iMX95 I-core clone the meta-summit-radio:
 
 ```bash
-cd sources/
 git clone https://github.com/Ezurio/meta-summit-radio.git -b lrd-13.98.12.x
 ```
 
@@ -70,7 +71,7 @@ Boards supported
 |   imx8ulp-microgea   |[microdev-rev2](docs/test_sheet_mx8ulp_ugea_microdev.md)  |
 |                      |[microdev-rev3](docs/test_sheet_mx8ulp_ugea_microdev.md)  |
 |                      |[loco5](docs/test_sheet_mx8ulp_ugea_loco5.md)             |
-|    imx91-microgea    |[evb](docs/test_sheet_mx91_ugea_evb.md)                   |
+|    imx91-microgea    |[microgea_evb](docs/test_sheet_mx91_ugea_evb.md)          |
 |                      |[loco5](docs/test_sheet_mx91_ugea_loco5.md)               |
 |                      |[microdev-rev2](docs/test_sheet_mx91_ugea_microdev.md)    |
 |                      |[microdev-rev3](docs/test_sheet_mx91_ugea_microdev.md)    |
@@ -78,7 +79,7 @@ Boards supported
 |     imx93-icore      |[ctouch2](docs/test_sheet_mx93_ctouch2.md)                |
 |                      |[ctouch3](docs/test_sheet_mx93_ctouch3.md)                |
 |                      |[starterkit-v2](docs/test_sheet_mx93_starterkit.md)       |
-|    imx95-smarcore    |[evb](docs/test_sheet_mx95_smarcore_evb.md)               |
+|    imx95-smarcore    |[smarcore_evb](docs/test_sheet_mx95_smarcore_evb.md)      |
 |     imx95-icore      |[starterkit-v2](docs/test_sheet_mx95_icore_starterkit.md) |
 
 

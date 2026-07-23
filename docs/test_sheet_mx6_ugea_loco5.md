@@ -1,11 +1,9 @@
 ---
 board: loco5
-board_label: Loco 5
 module: mx6_ugea
-module_label: MicroGea MX6Ull
 ---
 
-# Test sheet MicroGea MX6Ull Loco 5
+# Test sheet MicroGea MX6ULL Loco 5
 
 ## Test sheet
 

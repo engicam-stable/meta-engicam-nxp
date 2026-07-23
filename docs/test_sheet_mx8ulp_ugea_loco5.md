@@ -1,8 +1,6 @@
 ---
 board: loco5
-board_label: Loco 5
 module: mx8ulp_ugea
-module_label: MicroGea MX8Ulp
 ---
 
 # Test sheet MicroGea MX8Ulp Loco 5

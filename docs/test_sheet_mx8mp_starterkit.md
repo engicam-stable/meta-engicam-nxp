@@ -1,8 +1,6 @@
 ---
 board: starterkit
-board_label: Starter Kit
 module: mx8mp
-module_label: i.Core MX8M Plus
 ---
 
 # Test sheet i.Core MX8M Plus Starter Kit

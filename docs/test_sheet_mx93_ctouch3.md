@@ -1,8 +1,6 @@
 ---
 board: ctouch3
-board_label: C.TOUCH 3.1
 module: mx93
-module_label: i.Core MX93
 ---
 
 # Test sheet i.Core MX93 Plus C.TOUCH 3.1

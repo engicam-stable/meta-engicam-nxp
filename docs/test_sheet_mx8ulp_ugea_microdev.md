@@ -1,8 +1,6 @@
 ---
 board: microdev
-board_label: MicroDev
 module: mx8ulp_ugea
-module_label: MicroGea MX8Ulp
 ---
 
 # Test sheet MicroGea MX8Ulp

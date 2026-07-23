@@ -1,11 +1,9 @@
 ---
 board: microdev
-board_label: MicroDev
 module: mx6_ugea
-module_label: MicroGea MX6Ull
 ---
 
-# Test sheet MicroGea MX6Ull
+# Test sheet MicroGea MX6ULL
 
 ## Test sheet
 

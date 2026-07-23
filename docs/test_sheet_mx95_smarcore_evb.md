@@ -1,8 +1,6 @@
 ---
-board: evb
-board_label: Evaluation Board
+board: smarcore_evb
 module: mx95_smarcore
-module_label: SmarCore MX95
 ---
 
 # Test sheet SmarCore MX95 Evaluation Board

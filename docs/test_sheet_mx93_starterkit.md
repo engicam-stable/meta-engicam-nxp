@@ -1,8 +1,6 @@
 ---
 board: starterkit
-board_label: Starter Kit
 module: mx93
-module_label: i.Core MX93
 ---
 
 # Test sheet i.Core MX93 Plus Starter Kit

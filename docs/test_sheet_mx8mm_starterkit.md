@@ -1,8 +1,6 @@
 ---
 board: starterkit
-board_label: Starter Kit
 module: mx8mm
-module_label: i.Core MX8M Mini
 ---
 
 # Test sheet i.Core MX8M Mini Starter Kit

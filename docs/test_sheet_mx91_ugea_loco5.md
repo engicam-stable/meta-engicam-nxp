@@ -1,8 +1,6 @@
 ---
 board: loco5
-board_label: Loco 5
 module: mx91_ugea
-module_label: MicroGea MX91
 ---
 
 # Test sheet MicroGea MX91 Loco 5

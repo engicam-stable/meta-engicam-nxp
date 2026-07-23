@@ -1,8 +1,6 @@
 ---
 board: starterkit
-board_label: Starter Kit
 module: mx91
-module_label: MicroGEA MX91
 ---
 
 # Test sheet MicroGEA MX91 + EDIMM Adapter Starter Kit

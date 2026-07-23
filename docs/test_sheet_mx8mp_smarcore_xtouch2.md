@@ -1,8 +1,6 @@
 ---
 board: xtouch2
-board_label: X.TOUCH 2.0
 module: mx8mp_smarcore
-module_label: SmarCore MX8M Plus
 ---
 
 # Test sheet SmarCore MX8M Plus XTOUCH 2.0

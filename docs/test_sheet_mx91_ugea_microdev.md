@@ -1,8 +1,6 @@
 ---
 board: microdev
-board_label: MicroDev
 module: mx91_ugea
-module_label: MicroGea MX91
 ---
 
 # Test sheet MicroGea MX91

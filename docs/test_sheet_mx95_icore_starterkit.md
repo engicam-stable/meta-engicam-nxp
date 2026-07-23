@@ -1,8 +1,6 @@
 ---
 board: starterkit
-board_label: Starter Kit
 module: mx95_icore
-module_label: i.CoreMX95
 ---
 
 # Test Sheet i.CoreMX95 Starterkit

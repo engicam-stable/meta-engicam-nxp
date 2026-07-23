@@ -1,8 +1,6 @@
 ---
-board: evb
-board_label: Evaluation Board
+board: microgea_evb
 module: mx91_ugea
-module_label: MicroGEA MX91
 ---
 
 # Test sheet MicroGEA MX91 + MicroGEA Evaluation Board

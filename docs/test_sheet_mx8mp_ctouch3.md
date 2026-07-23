@@ -1,8 +1,6 @@
 ---
 board: ctouch3
-board_label: C.TOUCH 3.1
 module: mx8mp
-module_label: i.Core MX8M Plus
 ---
 
 # Test sheet i.Core MX8M Plus C.TOUCH 3.1
