@@ -1,0 +1,41 @@
+From a5b30b3ed1ba2be97a26d81f133fd0b60d352628 Mon Sep 17 00:00:00 2001
+From: engicam <support@engicam.com>
+Date: Thu, 6 Aug 2026 16:44:03 +0200
+Subject: [PATCH] imx8mp: Fixed dram init
+Upstream-Status: Inappropriate [for engicam use only]
+
+---
+ board/engicam/imx8mp_icore/spl.c    | 4 +++-
+ board/engicam/imx8mp_smarcore/spl.c | 4 +++-
+ 2 files changed, 6 insertions(+), 2 deletions(-)
+
+diff --git a/board/engicam/imx8mp_icore/spl.c b/board/engicam/imx8mp_icore/spl.c
+index f043b2f5b6b..50745881989 100644
+--- a/board/engicam/imx8mp_icore/spl.c
++++ b/board/engicam/imx8mp_icore/spl.c
+@@ -77,7 +77,9 @@ void spl_dram_init(void)
+ 		printf("LPDDR4: new variant detected (MR8=0x%02x), re-init\n", mr8);
+ 		ddr_init(&dram_timing);
+ 	}
+-	#endif
++#else
++	ddr_init(&dram_timing);
++#endif
+ }
+ 
+ void spl_board_init(void)
+diff --git a/board/engicam/imx8mp_smarcore/spl.c b/board/engicam/imx8mp_smarcore/spl.c
+index f043b2f5b6b..50745881989 100644
+--- a/board/engicam/imx8mp_smarcore/spl.c
++++ b/board/engicam/imx8mp_smarcore/spl.c
+@@ -77,7 +77,9 @@ void spl_dram_init(void)
+ 		printf("LPDDR4: new variant detected (MR8=0x%02x), re-init\n", mr8);
+ 		ddr_init(&dram_timing);
+ 	}
+-	#endif
++#else
++	ddr_init(&dram_timing);
++#endif
+ }
+ 
+ void spl_board_init(void)

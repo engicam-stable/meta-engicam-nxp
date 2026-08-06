@@ -20,5 +20,6 @@ SRC_URI += "file://0001-added-mxl-8611x-PHY-driver.patch \
             file://0018-imx93-icore-port-i.Core-MX93-boards.patch \
             file://0019-imx91-microgea-port-MicroGEA-MX91-boards.patch \
             file://0020-4GB-DDR-selection-for-iMX8MP-2e-and-Smarcore.patch \
+            file://0021-imx8mp-Fixed-dram-init.patch \
             "
             
