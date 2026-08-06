@@ -13,7 +13,7 @@ SRC_URI = "${UBOOT_SRC};branch=${SRCBRANCH}"
 UBOOT_SRC = "git://github.com/engicam-stable/u-boot-imx-engicam.git;protocol=https"
 SRCBRANCH = "eng_v2022.04"
 
-SRCREV = "78f29fca3922bdf391ad73215102d992246f44ca"
+SRCREV = "eac4fbac97579f71dc227cce4af88fe3007df9ce"
 PV = "${SRCBRANCH}+git${SRCPV}"
 LOCALVERSION = "-${SRCBRANCH}"
 
