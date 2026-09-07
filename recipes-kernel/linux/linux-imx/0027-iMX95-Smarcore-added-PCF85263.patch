@@ -1,0 +1,81 @@
+From 5a6fce313d8aac4c919a1c8e1f5eaafcfb1904eb Mon Sep 17 00:00:00 2001
+From: Matteo Pasqualetti <matteo.pasqualetti@engicam.com>
+Date: Mon, 7 Sep 2026 15:33:25 +0200
+Subject: [PATCH] iMX95 Smarcore: added PCF85263
+
+---
+ .../boot/dts/engicam/imx95-smarcore-multimedia-4k.dts  |  5 +++++
+ .../boot/dts/engicam/imx95-smarcore-pico-board.dts     | 10 ++++++++++
+ .../boot/dts/engicam/imx95-smarcore-smarcore-evb.dts   |  5 +++++
+ arch/arm64/boot/dts/engicam/imx95-smarcore-xtouch2.dts |  5 +++++
+ 4 files changed, 25 insertions(+)
+
+diff --git a/arch/arm64/boot/dts/engicam/imx95-smarcore-multimedia-4k.dts b/arch/arm64/boot/dts/engicam/imx95-smarcore-multimedia-4k.dts
+index c888012c1948..6dba3d926468 100755
+--- a/arch/arm64/boot/dts/engicam/imx95-smarcore-multimedia-4k.dts
++++ b/arch/arm64/boot/dts/engicam/imx95-smarcore-multimedia-4k.dts
+@@ -572,6 +572,11 @@ pcf8523: rtc@68 {
+ 		compatible = "nxp,pcf8523";
+ 		reg = <0x68>;
+ 	};
++
++	pcf85263: rtc@51 {
++		compatible = "nxp,pcf85263";
++		reg = <0x51>;
++	};
+ };
+ 
+ &lpuart1 {
+diff --git a/arch/arm64/boot/dts/engicam/imx95-smarcore-pico-board.dts b/arch/arm64/boot/dts/engicam/imx95-smarcore-pico-board.dts
+index 3cd0ef193122..68b6c4e01e90 100755
+--- a/arch/arm64/boot/dts/engicam/imx95-smarcore-pico-board.dts
++++ b/arch/arm64/boot/dts/engicam/imx95-smarcore-pico-board.dts
+@@ -516,6 +516,16 @@ pin_lcd_vdd_en {
+ 			output-high;
+ 		};
+ 	};
++
++	pcf8523: rtc@68 {
++		compatible = "nxp,pcf8523";
++		reg = <0x68>;
++	};
++
++	pcf85263: rtc@51 {
++		compatible = "nxp,pcf85263";
++		reg = <0x51>;
++	};
+ };
+ 
+ &lpuart1 {
+diff --git a/arch/arm64/boot/dts/engicam/imx95-smarcore-smarcore-evb.dts b/arch/arm64/boot/dts/engicam/imx95-smarcore-smarcore-evb.dts
+index a25b45465c27..ac733ddf76c2 100644
+--- a/arch/arm64/boot/dts/engicam/imx95-smarcore-smarcore-evb.dts
++++ b/arch/arm64/boot/dts/engicam/imx95-smarcore-smarcore-evb.dts
+@@ -617,6 +617,11 @@ pcf8523: rtc@68 {
+ 		compatible = "nxp,pcf8523";
+ 		reg = <0x68>;
+ 	};
++
++	pcf85263: rtc@51 {
++		compatible = "nxp,pcf85263";
++		reg = <0x51>;
++	};
+ };
+ 
+ &lpuart1 {
+diff --git a/arch/arm64/boot/dts/engicam/imx95-smarcore-xtouch2.dts b/arch/arm64/boot/dts/engicam/imx95-smarcore-xtouch2.dts
+index effd352f0554..29cac8a227a3 100644
+--- a/arch/arm64/boot/dts/engicam/imx95-smarcore-xtouch2.dts
++++ b/arch/arm64/boot/dts/engicam/imx95-smarcore-xtouch2.dts
+@@ -495,6 +495,11 @@ pcf8523: rtc@68 {
+ 		compatible = "nxp,pcf8523";
+ 		reg = <0x68>;
+ 	};
++
++	pcf85263: rtc@51 {
++		compatible = "nxp,pcf85263";
++		reg = <0x51>;
++	};
+ };
+ 
+ &lpuart1 {

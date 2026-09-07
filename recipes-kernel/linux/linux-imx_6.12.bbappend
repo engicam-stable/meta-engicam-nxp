@@ -28,6 +28,7 @@ SRC_URI += " \
     file://0024-imx91-microgea-port-MicroGEA-MX91-boards.patch \
     file://0025-arch-arm64-boot-dts-engicam-imx91-microgea-starterki.patch \
     file://0026-added-support-imx95-smarcore-pico-board.patch \
+    file://0027-iMX95-Smarcore-added-PCF85263.patch \
     "
 SRC_URI += " \
     file://kernel-config/config.cfg \
