@@ -86,8 +86,8 @@ Images available
 - engicam-evaluation-image-mx6
 - engicam-evaluation-image-mx6ull
 - engicam-evaluation-image-mx8
-- engicam-evaluation-image-mx93
 - engicam-evaluation-image-mx91
+- engicam-evaluation-image-mx93
 - engicam-evaluation-image-mx95
 
 First build
