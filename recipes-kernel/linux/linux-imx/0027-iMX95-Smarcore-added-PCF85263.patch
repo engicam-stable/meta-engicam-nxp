@@ -2,7 +2,7 @@ From 5a6fce313d8aac4c919a1c8e1f5eaafcfb1904eb Mon Sep 17 00:00:00 2001
 From: Matteo Pasqualetti <matteo.pasqualetti@engicam.com>
 Date: Mon, 7 Sep 2026 15:33:25 +0200
 Subject: [PATCH] iMX95 Smarcore: added PCF85263
-
+Upstream-Status: Inappropriate [For engicam use only]
 ---
  .../boot/dts/engicam/imx95-smarcore-multimedia-4k.dts  |  5 +++++
  .../boot/dts/engicam/imx95-smarcore-pico-board.dts     | 10 ++++++++++
