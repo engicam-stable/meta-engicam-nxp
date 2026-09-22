@@ -29,10 +29,13 @@ SRC_URI += " \
     file://0025-arch-arm64-boot-dts-engicam-imx91-microgea-starterki.patch \
     file://0026-added-support-imx95-smarcore-pico-board.patch \
     file://0027-iMX95-Smarcore-added-PCF85263.patch \
+    file://0028-mx91-microgea-Added-support-for-microgea-EVB-revB.patch \
     "
 SRC_URI += " \
     file://kernel-config/config.cfg \
 "
 
-SRC_URI:append:mx95-icore = " file://kernel-config/mx95_icore_fragment.cfg"
-SRC_URI:append:mx95-smarcore = " file://kernel-config/mx95_smarcore_fragment.cfg"
+SRC_URI:append:imx91-microgea = " file://kernel-config/imx91_microgea_fragment.cfg"
+
+SRC_URI:append:imx95-icore = " file://kernel-config/imx95_icore_fragment.cfg"
+SRC_URI:append:imx95-smarcore = " file://kernel-config/imx95_smarcore_fragment.cfg"

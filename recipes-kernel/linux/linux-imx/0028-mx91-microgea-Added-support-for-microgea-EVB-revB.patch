@@ -1,0 +1,119 @@
+From 2fd8e2896ca8ac69e486dae1317eca0fe97f8de8 Mon Sep 17 00:00:00 2001
+From: engicam <support@engicam.com>
+Date: Mon, 21 Sep 2026 15:53:35 +0200
+Subject: [PATCH] mx91 microgea - Added support for microgea-EVB revB
+Upstream-Status: Inappropriate [For engicam use only]
+---
+ .../boot/dts/engicam/imx91-microgea-evb.dts   | 39 ++++++++++++++-----
+ 1 file changed, 29 insertions(+), 10 deletions(-)
+
+diff --git a/arch/arm64/boot/dts/engicam/imx91-microgea-evb.dts b/arch/arm64/boot/dts/engicam/imx91-microgea-evb.dts
+index 88867901ef0f..1f7fb09b8cca 100644
+--- a/arch/arm64/boot/dts/engicam/imx91-microgea-evb.dts
++++ b/arch/arm64/boot/dts/engicam/imx91-microgea-evb.dts
+@@ -14,7 +14,7 @@ &ele_fw2 {
+ };
+ 
+ / {
+-	model = "MicroGEA MX91 (613A) Microgea Evaluation board";
++	model = "NXP i.MX91 Microgea EValuation Board AJEJE revB\n";
+ 	compatible = "engi,imx91-microgea", "fsl,imx91";
+ 
+ 	chosen {
+@@ -120,8 +120,8 @@ reg_3v3_lcd: reg-3v3-lcd {
+ 		regulator-name = "3v3_lcd";
+ 		regulator-min-microvolt = <3300000>;
+ 		regulator-max-microvolt = <3300000>;
+-		gpio = <&pcal6416 3 GPIO_ACTIVE_HIGH>;
+-		enable-active-high;
++		//gpio = <&pcal6416 3 GPIO_ACTIVE_HIGH>;
++		//enable-active-high;
+ 	};
+ 
+ 	backlight: backlight {
+@@ -133,9 +133,8 @@ backlight: backlight {
+ 		default-brightness-level = <80>;
+ 	};
+ 
+-	lvds_panel {
++		lvds_panel {
+ 		compatible = "yes-optoelectronics,ytc700tlag-05-201c";
+-		power-supply = <&reg_3v3_lcd>;
+ 		backlight = <&backlight>;
+ 
+ 		port {
+@@ -147,7 +146,7 @@ panel_in_lvds: endpoint {
+ 
+ 	lvds-encoder {
+ 		compatible = "ti,ds90c385", "lvds-encoder";
+-		powerdown-gpios = <&gpio4 14 GPIO_ACTIVE_LOW>;
++		//powerdown-gpios = <&pcal6416 0 GPIO_ACTIVE_LOW>; /* Removed for revision B - moved to gpio-hog on pcal6416 */
+ 
+ 		ports {
+ 			#address-cells = <1>;
+@@ -343,6 +342,19 @@ pcal6416: gpio@20 {
+ 			"EXPIO_1_0", "EXPIO_1_1", "EXPIO_1_2", "EXPIO_1_3",
+ 			"EXPIO_1_4", "EXPIO_1_5", "EXPIO_1_6", "EXPIO_1_7";
+ 
++		EXPIO_0_0 {
++                gpio-hog;
++                gpios = <0 GPIO_ACTIVE_HIGH>;
++                output-high; 
++                line-name = "DISP0_PWD";
++        };
++
++		ENABLE_3V3_LCD {
++			gpio-hog;
++			gpios = <3 GPIO_ACTIVE_HIGH>;
++			output-high;
++		};
++
+ 		LCD_GPIO_RIS {
+ 			gpio-hog;
+ 			gpios = <6 GPIO_ACTIVE_HIGH>;
+@@ -376,8 +388,9 @@ polytouch: edt-ft5x26@38 {
+ 		compatible = "edt,edt-ft5x26";
+ 		reg = <0x38>;
+ 		pinctrl-names = "default";
+-		interrupt-parent = <&pcal6416>;
+-		interrupts = <0 IRQ_TYPE_EDGE_FALLING>;
++		pinctrl-0 = <&pinctrl_touch_int>;
++		interrupt-parent = <&gpio4>;
++		interrupts = <14 IRQ_TYPE_EDGE_FALLING>;
+ 	};
+ 
+ 	pcf8523: rtc@68 {
+@@ -594,7 +607,7 @@ MX91_PAD_GPIO_IO24__MEDIAMIX_DISP_DATA20	0x31e
+ 			MX91_PAD_GPIO_IO25__MEDIAMIX_DISP_DATA21	0x31e
+ 			MX91_PAD_GPIO_IO26__MEDIAMIX_DISP_DATA22	0x31e
+ 			MX91_PAD_GPIO_IO27__MEDIAMIX_DISP_DATA23	0x31e
+-			MX91_PAD_ENET2_MDC__GPIO4_IO14			0x31e /* DISP0_PWD */
++			/*MX91_PAD_ENET2_MDC__GPIO4_IO14			0x31e /* DISP0_PWD this becomes nTOUCH1_INT*/
+ 			MX91_PAD_ENET2_TD2__GPIO4_IO17			0x31e /* DISP0_RST */
+ 		>;
+ 	};
+@@ -622,6 +635,12 @@ MX91_PAD_GPIO_IO29__LPI2C3_SCL		0x40000b9e
+ 		>;
+ 	};
+ 
++	pinctrl_touch_int: touchintgrp {
++		fsl,pins = <
++			MX91_PAD_ENET2_MDC__GPIO4_IO14			0x31e /* nTOUCH1_INT from DISP0_PWD*/
++		>;
++	};
++
+ 	pinctrl_pcal6416: pcal6416grp {
+ 		fsl,pins = <
+ 			MX91_PAD_ENET2_RD3__GPIO4_IO27		0x31e /* INTERRUPT */
+@@ -833,7 +852,7 @@ LSW_EN {
+ &gpio4 {
+ 	gpio-line-names =
+ 		"", "", "", "", "", "", "", "ENB_RFPS",
+-		"", "", "", "", "", "", "", "",
++		"", "", "", "", "", "nTOUCH_INT", "", "",
+ 		"", "DISP0_RST", "", "", "", "", "", "",
+ 		"", "", "", "", "", "", "", "";
+ 
+-- 
+2.43.0
+
