@@ -14,7 +14,7 @@ LIC_FILES_CHKSUM = "file://Licenses/gpl-2.0.txt;md5=b234ee4d69f5fce4486a80fdaf4a
 SRC_URI = "${UBOOT_SRC};branch=${SRCBRANCH};"
 UBOOT_SRC = "git://github.com/engicam-stable/u-boot-engicam-2024.04.git;protocol=https"
 SRCBRANCH = "eng_v2024.04"
-SRCREV = "fee23494da5b353a463af3e4a3a2d25ded84edf6"
+SRCREV = "40f56aa8781a7c51bd2c03f990b4d03a74270afb"
 LOCALVERSION = "-${SRCBRANCH}"
 
 # END: Changes to u-boot-imx-common_${PV}.inc
