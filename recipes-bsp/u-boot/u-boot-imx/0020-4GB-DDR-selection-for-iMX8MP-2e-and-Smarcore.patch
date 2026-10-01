@@ -1,6 +1,6 @@
-From b1d86cc7e4cb1c700d16c65a6d6162671f67d8f2 Mon Sep 17 00:00:00 2001
-From: engicam <support@engicam.com>
-Date: Tue, 4 Aug 2026 15:27:55 +0200
+From 639979b95e024270f8b0e816fdb240738b06b9dc Mon Sep 17 00:00:00 2001
+From: Domenico Acri <support@engicam.com>
+Date: Thu, 1 Oct 2026 12:28:36 +0200
 Subject: [PATCH] 4GB DDR selection for iMX8MP 2e and Smarcore
 Upstream-Status: Inappropriate [for engicam use only]
 
@@ -8,14 +8,14 @@ Upstream-Status: Inappropriate [for engicam use only]
  arch/arm/dts/imx8mp-smarcore.dts              |   17 +-
  board/engicam/imx8mp_icore/Makefile           |    2 +-
  .../lpddr4_4gb_timing_single_ch_die.c         | 1849 ++++++++++++++++
- board/engicam/imx8mp_icore/spl.c              |   21 +-
+ board/engicam/imx8mp_icore/spl.c              |   20 +
  board/engicam/imx8mp_smarcore/Makefile        |    7 +-
  .../imx8mp_smarcore/lpddr4_4gb_timing.c       | 1854 +++++++++++++++++
  .../lpddr4_4gb_timing_single_ch_die.c         | 1849 ++++++++++++++++
- board/engicam/imx8mp_smarcore/spl.c           |   21 +-
+ board/engicam/imx8mp_smarcore/spl.c           |   20 +
  configs/imx8mp_smarcore_4gb_defconfig         |  160 ++
  include/configs/imx8mp_smarcore.h             |   10 +-
- 10 files changed, 5771 insertions(+), 19 deletions(-)
+ 10 files changed, 5771 insertions(+), 17 deletions(-)
  create mode 100644 board/engicam/imx8mp_icore/lpddr4_4gb_timing_single_ch_die.c
  create mode 100644 board/engicam/imx8mp_smarcore/lpddr4_4gb_timing.c
  create mode 100644 board/engicam/imx8mp_smarcore/lpddr4_4gb_timing_single_ch_die.c
@@ -1931,14 +1931,13 @@ index 00000000000..dc442d088b2
 +    .fsp_table = { 4000, 400, 100, },
 +};
 diff --git a/board/engicam/imx8mp_icore/spl.c b/board/engicam/imx8mp_icore/spl.c
-index 178cef0fd6b..f043b2f5b6b 100644
+index 178cef0fd6b..1e038c68d27 100644
 --- a/board/engicam/imx8mp_icore/spl.c
 +++ b/board/engicam/imx8mp_icore/spl.c
-@@ -58,7 +58,26 @@ int spl_board_boot_device(enum boot_device boot_dev_spl)
+@@ -58,7 +58,27 @@ int spl_board_boot_device(enum boot_device boot_dev_spl)
  
  void spl_dram_init(void)
  {
--	ddr_init(&dram_timing);
 +#ifdef CONFIG_IMX8MP_4GB_LPDDR4
 +	/*
 +	 * Two Micron 4GB variants differ only in MR8.
@@ -1955,10 +1954,11 @@ index 178cef0fd6b..f043b2f5b6b 100644
 +	mr8 = lpddr4_mr_read(1, 8);
 +	printf("LPDDR4 MR8=0x%02x\n", mr8);
 +	if (mr8 == MR8_4GB_DUAL_CH_DIE) {
-+		printf("LPDDR4: new variant detected (MR8=0x%02x), re-init\n", mr8);
 +		ddr_init(&dram_timing);
 +	}
-+	#endif
++#else
+ 	ddr_init(&dram_timing);
++#endif
  }
  
  void spl_board_init(void)
@@ -5694,14 +5694,13 @@ index 00000000000..dc442d088b2
 +    .fsp_table = { 4000, 400, 100, },
 +};
 diff --git a/board/engicam/imx8mp_smarcore/spl.c b/board/engicam/imx8mp_smarcore/spl.c
-index 178cef0fd6b..f043b2f5b6b 100644
+index 178cef0fd6b..1e038c68d27 100644
 --- a/board/engicam/imx8mp_smarcore/spl.c
 +++ b/board/engicam/imx8mp_smarcore/spl.c
-@@ -58,7 +58,26 @@ int spl_board_boot_device(enum boot_device boot_dev_spl)
+@@ -58,7 +58,27 @@ int spl_board_boot_device(enum boot_device boot_dev_spl)
  
  void spl_dram_init(void)
  {
--	ddr_init(&dram_timing);
 +#ifdef CONFIG_IMX8MP_4GB_LPDDR4
 +	/*
 +	 * Two Micron 4GB variants differ only in MR8.
@@ -5718,10 +5717,11 @@ index 178cef0fd6b..f043b2f5b6b 100644
 +	mr8 = lpddr4_mr_read(1, 8);
 +	printf("LPDDR4 MR8=0x%02x\n", mr8);
 +	if (mr8 == MR8_4GB_DUAL_CH_DIE) {
-+		printf("LPDDR4: new variant detected (MR8=0x%02x), re-init\n", mr8);
 +		ddr_init(&dram_timing);
 +	}
-+	#endif
++#else
+ 	ddr_init(&dram_timing);
++#endif
  }
  
  void spl_board_init(void)
