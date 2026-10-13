@@ -1,0 +1,38 @@
+From 832ac4c2ed55f01ba803bb654b2d7233a39dcd31 Mon Sep 17 00:00:00 2001
+From: Domenico Acri <support@engicam.com>
+Date: Tue, 13 Oct 2026 10:54:38 +0200
+Subject: [PATCH] iMX95 smarcore xtouch2: fixed enabled pwm for backlight
+
+---
+ arch/arm64/boot/dts/engicam/Makefile                   | 1 +
+ arch/arm64/boot/dts/engicam/imx95-smarcore-xtouch2.dts | 2 +-
+ 2 files changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/arch/arm64/boot/dts/engicam/Makefile b/arch/arm64/boot/dts/engicam/Makefile
+index e622ef4a3fbd..9fb065a7ff82 100644
+--- a/arch/arm64/boot/dts/engicam/Makefile
++++ b/arch/arm64/boot/dts/engicam/Makefile
+@@ -3,6 +3,7 @@
+ dtb-$(CONFIG_ARCH_MXC) += \
+ 			  imx95-smarcore-smarcore-evb.dtb \
+ 			  imx95-smarcore-multimedia-4k.dtb \
++			  imx95-smarcore-xtouch2.dtb \
+ 			  imx95-icore-starterkit.dtb \
+ 			  imx95-smarcore-pico-board.dtb \
+ 			  imx8mp-icore-fasteth-ctouch2.dtb \
+diff --git a/arch/arm64/boot/dts/engicam/imx95-smarcore-xtouch2.dts b/arch/arm64/boot/dts/engicam/imx95-smarcore-xtouch2.dts
+index 29cac8a227a3..2e506f346164 100644
+--- a/arch/arm64/boot/dts/engicam/imx95-smarcore-xtouch2.dts
++++ b/arch/arm64/boot/dts/engicam/imx95-smarcore-xtouch2.dts
+@@ -301,7 +301,7 @@ lvds0_out: endpoint {
+ &tpm6 {
+ 	pinctrl-names = "default";
+ 	pinctrl-0 = <&pinctrl_tpm6>;
+-	status = "disabled";
++	status = "okay";
+ };
+ 
+ &ldb0_phy {
+-- 
+2.43.0
+

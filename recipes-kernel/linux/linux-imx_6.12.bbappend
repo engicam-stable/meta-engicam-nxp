@@ -30,6 +30,7 @@ SRC_URI += " \
     file://0026-added-support-imx95-smarcore-pico-board.patch \
     file://0027-iMX95-Smarcore-added-PCF85263.patch \
     file://0028-mx91-microgea-Added-support-for-microgea-EVB-revB.patch \
+    file://0029-iMX95-smarcore-xtouch2-fixed-enabled-pwm-for-backlig.patch \
     "
 SRC_URI += " \
     file://kernel-config/config.cfg \
