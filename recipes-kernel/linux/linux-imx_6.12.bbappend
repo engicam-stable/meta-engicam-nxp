@@ -36,6 +36,8 @@ SRC_URI += " \
     file://kernel-config/config.cfg \
 "
 
+SRC_URI:append:imx8mp-icore = " file://kernel-config/imx8mp_icore_fragment.cfg"
+
 SRC_URI:append:imx91-microgea = " file://kernel-config/imx91_microgea_fragment.cfg"
 
 SRC_URI:append:imx95-icore = " file://kernel-config/imx95_icore_fragment.cfg"
