@@ -24,7 +24,7 @@ UBOOT_SRC ?= "git://github.com/engicam-stable/u-boot-engicam-nxp.git;protocol=ht
 SRCBRANCH = "2021.04"
 SRC_URI = "${UBOOT_SRC};branch=${SRCBRANCH}"
 
-SRCREV_default = "${AUTOREV}"
+SRCREV="9c5e4ba77085ff326b465ae663fe2676b3613330"
 
 LOCALVERSION ?= "-5.10.35-2.0.0"
 
